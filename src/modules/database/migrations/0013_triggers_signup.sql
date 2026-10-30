@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION public.handle_new_user() RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $func$ BEGIN INSERT INTO public.user_settings (user_id, notifications_enabled) VALUES (NEW.id, true) ON CONFLICT (user_id) DO NOTHING; INSERT INTO public.wallets (user_id, balance_cents, currency, is_test_mode) VALUES (NEW.id, 0, 'USD', true) ON CONFLICT (user_id) DO NOTHING; RETURN NEW; END; $func$;
+DROP TRIGGER IF EXISTS on_profile_created ON public.profiles;
+CREATE TRIGGER on_profile_created AFTER INSERT ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

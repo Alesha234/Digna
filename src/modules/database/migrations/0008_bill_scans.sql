@@ -1,0 +1,10 @@
+CREATE TABLE public.bill_scans (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE, photo_path TEXT NOT NULL CHECK (char_length(photo_path) >= 1 AND char_length(photo_path) <= 1024), extracted_amount_cents BIGINT CHECK (extracted_amount_cents IS NULL OR (extracted_amount_cents > 0 AND extracted_amount_cents <= 100000000)), merchant TEXT CHECK (merchant IS NULL OR char_length(merchant) <= 120), due_date DATE, confidence NUMERIC(4,3) CHECK (confidence IS NULL OR (confidence >= 0 AND confidence <= 1)), status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')), created_card_id UUID REFERENCES public.virtual_cards(id) ON DELETE SET NULL, error TEXT CHECK (error IS NULL OR char_length(error) <= 500), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()); ALTER TABLE public.bill_scans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bill_scans ENABLE ROW LEVEL SECURITY;
+CREATE INDEX bill_scans_user_id_idx ON public.bill_scans (user_id);
+CREATE INDEX bill_scans_status_idx ON public.bill_scans (status);
+CREATE INDEX bill_scans_created_at_idx ON public.bill_scans (created_at DESC);
+CREATE TRIGGER bill_scans_updated_at BEFORE UPDATE ON public.bill_scans FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+CREATE POLICY bill_scans_select_owner ON public.bill_scans FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY bill_scans_insert_owner ON public.bill_scans FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY bill_scans_update_owner ON public.bill_scans FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY bill_scans_delete_owner ON public.bill_scans FOR DELETE TO authenticated USING (auth.uid() = user_id);

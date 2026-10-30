@@ -1,0 +1,59 @@
+{
+  "manifestId": "alerts",
+  "title": "Warnings Before You Hit the Limit",
+  "moduleName": "Alerts",
+  "audience": "Cardholders",
+  "objectives": [
+    "Understand what a near-cap warning means and why it triggers before you reach your limit.",
+    "Recognize what a low-balance warning means and how it helps prevent a declined payment.",
+    "Know what clear, plain-language action to take when you receive an alert."
+  ],
+  "analogy": {
+    "title": "Low-Fuel Light for Your Spending",
+    "text": "Think of alerts like the low-fuel light on your car dashboard or the 20% battery warning on your phone. They don't mean you've stopped - they mean you should plan ahead. A near-cap alert is like seeing you have 50 miles left before empty; you can slow down or refuel soon. A low-balance alert is like your phone warning you to plug in before it shuts off. Both give you time to act calmly - add funds, adjust your cap, or pause spending - so you avoid an unexpected stop."
+  },
+  "pitch30Seconds": "Imagine never being surprised at checkout. Our alerts are calm, early warnings that you are close to your spending cap or your balance is running low. Instead of a sudden decline, you get time to act - add money to your account, adjust your cap, or wait on a purchase. It's about control and confidence. You stay in charge, avoid embarrassment at the register, and keep spending exactly where you want it.",
+  "keyPoints": [
+    "A close-to-cap signal tells you you're approaching your spending limit and a purchase could be declined soon.",
+    "A running-low balance signal tells you funds are getting low and it's time to add money to avoid disruption.",
+    "When you get an alert, check your balance and cap, then add funds, adjust your cap, or pause spending.",
+    "Alerts use a calm, trustworthy tone to help you act early without alarm or confusion."
+  ],
+  "recallQuiz": [
+    {
+      "question": "What does a 'near your cap' alert mean?",
+      "options": [
+        "You have exceeded your cap and your card is blocked",
+        "You are close to your spending limit and should review before your next purchase",
+        "Your balance is zero",
+        "Your account has been closed"
+      ],
+      "correctIndex": 1,
+      "explanation": "A near-cap alert is an early warning that you are approaching your limit, giving you time to adjust your cap or spending before a decline."
+    },
+    {
+      "question": "What does a 'running low' balance alert mean?",
+      "options": [
+        "Your spending cap has increased automatically",
+        "Your available funds are getting low and you may need to add money soon",
+        "You earned a cashback reward",
+        "Your card will never decline"
+      ],
+      "correctIndex": 1,
+      "explanation": "A low-balance alert tells you funds are running low so you can add money before a payment is declined."
+    },
+    {
+      "question": "What is the best next step after you receive an alert?",
+      "options": [
+        "Ignore it and keep spending",
+        "Immediately close your account",
+        "Check your balance and cap, then add funds, adjust your cap, or pause spending",
+        "Share your password with someone to check for you"
+      ],
+      "correctIndex": 2,
+      "explanation": "Checking your balance and cap lets you take a calm, plain-language action — add money, adjust your cap, or wait — to stay in control."
+    }
+  ],
+  "testModeNote": "In test mode, alerts work the same way using sample data so you can practice without affecting real funds.",
+  "nextManifestId": null
+}

@@ -1,0 +1,59 @@
+{
+  "manifestId": "welcome",
+  "title": "Welcome to PayProxy",
+  "moduleName": "Welcome page",
+  "audience": "PayProxy is for Cash App, Chime, and prepaid users who get declined by cloud services, hotels, rentals, and subscriptions.",
+  "objectives": [
+    "Understand who PayProxy helps: people using Cash App, Chime, and other prepaid cards who get declined online.",
+    "Learn what PayProxy does: creates virtual capped cards that are accepted by services that normally reject prepaid cards.",
+    "Remember our test-mode promise: you use sample cards and sample money, and no real money moves until a real provider is connected."
+  ],
+  "analogy": {
+    "title": "The Friendly Front Door",
+    "text": "Think of PayProxy like a friendly front door and translator for your money. Many online services only understand certain types of cards and turn away prepaid cards without explaining why. PayProxy sits in the middle, speaking both languages. You give it a small spending limit, and it creates a virtual card that services like cloud hosts and rental sites recognize and accept. Just like a hotel key card that only opens your room for your stay, it keeps things simple and safe."
+  },
+  "pitch30Seconds": "Ever had your Cash App or Chime card declined when trying to rent a server, book a hotel, or start a subscription? You're not alone — many prepaid cards get rejected by cloud services and travel sites. PayProxy solves this by giving you virtual cards with spending caps that work where your regular card doesn't. Set a limit, pay securely, and stay in control. And right now we're in test mode, so everything uses sample money and no real dollars move at all.",
+  "keyPoints": [
+    "Built for Cash App, Chime, and prepaid users often declined by online services.",
+    "Virtual capped cards work with cloud services, hotels, rentals, and subscriptions that normally reject prepaid cards.",
+    "Practice in test mode with sample cards and sample money to learn how it works.",
+    "No real money moves — nothing is charged until a real payment provider is connected."
+  ],
+  "recallQuiz": [
+    {
+      "question": "Who is PayProxy designed to help?",
+      "options": [
+        "Users with Cash App, Chime, and other prepaid cards who get declined online",
+        "Only business owners with corporate bank accounts",
+        "Only travelers with premium credit cards",
+        "Only developers who build payment processors"
+      ],
+      "correctIndex": 0,
+      "explanation": "PayProxy is built for Cash App, Chime, and prepaid users who are often declined by online services. It gives them a way to pay where their regular cards are not accepted."
+    },
+    {
+      "question": "Where do many prepaid card declines happen?",
+      "options": [
+        "At cloud services, hotels, rentals, and subscriptions",
+        "Only at local grocery stores",
+        "Only when withdrawing cash from an ATM",
+        "Only when sending money to family"
+      ],
+      "correctIndex": 0,
+      "explanation": "Cloud platforms, hotels, rental sites, and subscription services often reject prepaid cards. PayProxy provides virtual cards that are accepted in these places."
+    },
+    {
+      "question": "What does test mode mean in PayProxy right now?",
+      "options": [
+        "You use sample cards and sample money, and no real money moves",
+        "Your real card is charged immediately for every action",
+        "You must mail in cash to activate your account",
+        "You can only view the welcome page and nothing else"
+      ],
+      "correctIndex": 0,
+      "explanation": "While in test mode, everything runs on sample data for practice. No real money is moved or charged until a real provider is connected."
+    }
+  ],
+  "testModeNote": "PayProxy is currently in test mode using sample cards and sample money until a real provider is connected. No real money moves or charges occur during this time.",
+  "nextManifestId": "auth-privacy"
+}

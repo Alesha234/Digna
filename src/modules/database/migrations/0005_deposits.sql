@@ -1,0 +1,11 @@
+CREATE TABLE public.deposits (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE, wallet_id UUID NOT NULL REFERENCES public.wallets(id) ON DELETE CASCADE, amount_cents BIGINT NOT NULL CHECK (amount_cents > 0 AND amount_cents <= 100000000), source TEXT NOT NULL CHECK (source IN ('cash_app', 'chime', 'prepaid', 'other')), status TEXT NOT NULL DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed')), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()); ALTER TABLE public.deposits ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS deposits_user_id_idx ON public.deposits (user_id);
+CREATE INDEX IF NOT EXISTS deposits_wallet_id_idx ON public.deposits (wallet_id);
+CREATE INDEX IF NOT EXISTS deposits_created_at_idx ON public.deposits (created_at DESC);
+CREATE POLICY deposits_select_owner ON public.deposits FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY deposits_insert_owner ON public.deposits FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY deposits_update_owner ON public.deposits FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY deposits_delete_owner ON public.deposits FOR DELETE TO authenticated USING (auth.uid() = user_id);
+CREATE FUNCTION public.is_deposit_owner(p_deposit_id UUID) RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$ BEGIN RETURN EXISTS (SELECT 1 FROM public.deposits WHERE id = p_deposit_id AND user_id = auth.uid()); END; $$;
+REVOKE ALL ON FUNCTION public.is_deposit_owner(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_deposit_owner(UUID) TO authenticated;

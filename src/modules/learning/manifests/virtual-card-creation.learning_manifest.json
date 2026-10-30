@@ -1,0 +1,59 @@
+{
+  "manifestId": "virtual-card-creation",
+  "title": "Create a Capped Virtual Card",
+  "moduleName": "Virtual card creation",
+  "audience": "All users",
+  "objectives": [
+    "Name your virtual card clearly, such as Google Cloud or Hotel Trip, to identify its purpose",
+    "Set a spending cap to limit the total amount that can be charged to the card",
+    "Set an end date so the card expires automatically when it is no longer needed"
+  ],
+  "analogy": {
+    "title": "The Labeled Gift Envelope",
+    "text": "Think of creating a virtual card like preparing a labeled gift envelope with cash inside. You write 'Google Cloud' or 'Hotel Trip' on the front so you instantly know its purpose, just as you would label an envelope for a specific person or occasion. You put only a set amount inside—that's your spending cap—which prevents overspending and surprise charges. Finally, you write an expiry date on the envelope—after this date it can no longer be used. The name organizes, the limit protects your budget, and the end date automatically closes the envelope when you're done."
+  },
+  "pitch30Seconds": "To create a capped virtual card, give it a clear name like Google Cloud or Hotel Trip so you can track its spend. Next, set a spending cap that limits the total amount that can be charged—this prevents overruns. Then choose an end date when the card automatically expires, so you avoid recurring surprise charges after a trial or trip ends. Name, cap, and end date together give you safe, organized spending.",
+  "keyPoints": [
+    "Name your card for its purpose, like Google Cloud or Hotel Trip, to organize and track spend",
+    "Spending cap limits the total amount chargeable and prevents overspending",
+    "End date automatically expires the card to avoid surprise future charges",
+    "Test mode creates sample cards only — no real cards are issued and no real money moves"
+  ],
+  "recallQuiz": [
+    {
+      "question": "Why should you name your virtual card like 'Google Cloud' or 'Hotel Trip'?",
+      "options": [
+        "To identify its purpose and easily track spend",
+        "To increase the spending cap automatically",
+        "To share the card with other users",
+        "To extend the card's expiry date"
+      ],
+      "correctIndex": 0,
+      "explanation": "A clear name helps you organize and track spend by purpose."
+    },
+    {
+      "question": "What does setting a spending cap do?",
+      "options": [
+        "It extends the card's validity forever",
+        "It limits the total amount that can be charged to prevent overruns",
+        "It automatically categorizes transactions for accounting",
+        "It allows unlimited international purchases"
+      ],
+      "correctIndex": 1,
+      "explanation": "The cap sets a maximum total chargeable amount to avoid surprise charges."
+    },
+    {
+      "question": "Why is setting an end date important?",
+      "options": [
+        "It increases the cap before the trial ends",
+        "It automatically expires the card to avoid recurring charges after a trip or trial",
+        "It lets you rename the card later",
+        "It is required to activate test mode"
+      ],
+      "correctIndex": 1,
+      "explanation": "An end date ensures the card expires automatically so you avoid future surprise charges."
+    }
+  ],
+  "testModeNote": "This simulation runs in test mode with sample cards only. No real cards are issued and no real money moves.",
+  "nextManifestId": "card-controls"
+}

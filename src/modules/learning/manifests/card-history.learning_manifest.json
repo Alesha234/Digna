@@ -1,0 +1,59 @@
+{
+  "manifestId": "card-history",
+  "title": "Every Charge and Decline, Explained",
+  "moduleName": "Card history",
+  "audience": "Cardholders and families",
+  "objectives": [
+    "Find and read the store name, amount, date, and result for every transaction in your card history.",
+    "Distinguish between a successful charge and a decline by checking the result field alongside store name, amount, and date.",
+    "Explain how reviewing store name, amount, date, and charge or decline result helps you track spending and fix issues."
+  ],
+  "analogy": {
+    "title": "The Grocery Receipt Tape",
+    "text": "Think of your card history like a long grocery receipt tape. Every time you use your card, the tape adds a new line with where you shopped, how much you spent, when you paid, and whether the payment went through or was declined. Just like a receipt lets you double check what you bought and spot a mistake, your card history lets you review every charge and decline in one trusted place. It keeps you organized, helps you catch problems fast, and proves exactly what happened with your money."
+  },
+  "pitch30Seconds": "Seeing every charge and decline in one place builds trust because nothing is hidden. You can verify each store name, amount, date, and result to know exactly where your money went. If a payment is declined, your full history helps you fix it fast by checking the reason, confirming your balance, and trying again with confidence. Transparency turns confusion into control, so you and your family always know your card is working correctly.",
+  "keyPoints": [
+    "Store name: Each history entry shows the merchant or store where the card was used.",
+    "Amount and date: Every entry lists the exact amount and the date it was charged or attempted.",
+    "Result: The result field clearly marks each entry as a successful charge or a decline.",
+    "Private to owner: Your card history is private and visible only to you as the card owner."
+  ],
+  "recallQuiz": [
+    {
+      "question": "What four pieces of information does each card history entry show?",
+      "options": [
+        "Store name, amount, date, and result",
+        "Card color, store name, balance, and PIN",
+        "Name, address, phone, and email",
+        "Amount, fee, interest, and reward points"
+      ],
+      "correctIndex": 0,
+      "explanation": "Each entry shows store name, amount, date, and whether it was a charge or decline."
+    },
+    {
+      "question": "What does a decline result mean in your card history?",
+      "options": [
+        "The payment did not go through and no money was charged",
+        "The payment was doubled and charged twice",
+        "The store will charge you later automatically",
+        "Your history was deleted"
+      ],
+      "correctIndex": 0,
+      "explanation": "A decline means the transaction was not completed and the merchant did not charge your card."
+    },
+    {
+      "question": "Why should you regularly check your card history?",
+      "options": [
+        "To build trust by verifying spending and quickly find and fix any declines",
+        "To change your card color and design",
+        "To share your history publicly with friends",
+        "To increase your credit limit automatically"
+      ],
+      "correctIndex": 0,
+      "explanation": "Checking history lets you confirm purchases, spot errors, and understand how to resolve declines."
+    }
+  ],
+  "testModeNote": "In test mode, history shows sample charges and declines for learning purposes.",
+  "nextManifestId": "add-money"
+}

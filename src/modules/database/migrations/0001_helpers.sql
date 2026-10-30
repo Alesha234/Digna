@@ -1,0 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+CREATE OR REPLACE FUNCTION public.handle_updated_at() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN NEW.updated_at = NOW(); RETURN NEW; END; $$;
+
+CREATE OR REPLACE FUNCTION public.is_valid_amount_cents(cents BIGINT) RETURNS BOOLEAN LANGUAGE sql IMMUTABLE AS $$ SELECT cents > 0 AND cents <= 100000000; $$;
