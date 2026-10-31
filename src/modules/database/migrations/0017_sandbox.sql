@@ -140,7 +140,7 @@ BEGIN
   END IF;
   INSERT INTO public.sandbox_payments (user_id, merchant_id, merchant, amount_cents, method, card_id, result, reason)
   VALUES (v_uid, p_merchant_id, v_merchant ->> 'name', p_amount_cents, p_method, p_card_id, v_result, v_reason);
-  RETURN jsonb_build_object('result', v_result, 'reason', v_reason, 'merchant', v_merchant ->> 'name');
+  RETURN jsonb_build_object('result', v_result, 'reason', v_reason, 'code', v_code, 'merchant', v_merchant ->> 'name');
 END;
 $$;
 REVOKE ALL ON FUNCTION public.sandbox_pay(TEXT, BIGINT, TEXT, UUID) FROM PUBLIC, anon;
@@ -189,3 +189,33 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.send_feedback(TEXT, TEXT, TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.send_feedback(TEXT, TEXT, TEXT) TO anon, authenticated;
+
+-- 9. Change a card's limit: down at any time (never below what it has already spent), and up only as far as the wallet
+--    really covers. At most $10,000.
+CREATE OR REPLACE FUNCTION public.set_card_limit(p_card_id UUID, p_cap_cents BIGINT) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_card public.virtual_cards%ROWTYPE;
+  v_balance BIGINT;
+BEGIN
+  IF v_uid IS NULL THEN RAISE EXCEPTION 'Sign in first.'; END IF;
+  SELECT balance_cents INTO v_balance FROM public.wallets WHERE user_id = v_uid FOR UPDATE;
+  SELECT * INTO v_card FROM public.virtual_cards WHERE id = p_card_id AND user_id = v_uid FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Pick one of your cards.'; END IF;
+  IF v_card.status = 'closed' THEN RAISE EXCEPTION 'This card is closed. Make a new one instead.'; END IF;
+  IF p_cap_cents IS NULL OR p_cap_cents > 1000000 THEN RAISE EXCEPTION 'A card''s limit can be at most $10,000.'; END IF;
+  IF p_cap_cents < GREATEST(v_card.spent_cents, 1) THEN
+    RAISE EXCEPTION 'The limit can''t be lower than what this card has already spent ($%).', to_char(v_card.spent_cents / 100.0, 'FM999999990.00');
+  END IF;
+  -- A limit can only go up when the money is really there: what's left on the card can't be more than the wallet holds.
+  IF p_cap_cents > v_card.spending_cap_cents AND p_cap_cents - v_card.spent_cents > COALESCE(v_balance, 0) THEN
+    RAISE EXCEPTION 'You have $% in your wallet, so this card''s limit can go up to $%. Add money first to raise it more.',
+      to_char(COALESCE(v_balance, 0) / 100.0, 'FM999999990.00'),
+      to_char(GREATEST(v_card.spending_cap_cents, v_card.spent_cents + COALESCE(v_balance, 0)) / 100.0, 'FM999999990.00');
+  END IF;
+  UPDATE public.virtual_cards SET spending_cap_cents = p_cap_cents WHERE id = p_card_id;
+  RETURN jsonb_build_object('id', p_card_id, 'spending_cap_cents', p_cap_cents, 'spent_cents', v_card.spent_cents);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.set_card_limit(UUID, BIGINT) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.set_card_limit(UUID, BIGINT) TO authenticated;

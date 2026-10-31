@@ -61,7 +61,7 @@ function InnerApp() {
       case "settings":
         return <SettingsScreen onSignOut={() => go("welcome")} onBack={() => go("dashboard")} />;
       case "checkout":
-        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} />;
+        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} />;
       case "alerts":
         return <AlertsScreen />;
       case "demo-data":

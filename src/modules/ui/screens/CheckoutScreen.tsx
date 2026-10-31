@@ -10,8 +10,8 @@ const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
  * The test checkout: pick a sandbox merchant, an amount and a card, and see what a real checkout would say. Outside
  * cards are sample cards checked against the merchant's rule; Digna cards also follow their caps and the wallet.
  */
-export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void }) {
-  const { cards, payments, pay, balance, mode } = usePayProxy();
+export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void; onAddMoney?: () => void }) {
+  const { cards, payments, pay, balance, mode, setCardLimit } = usePayProxy();
   const [merchantId, setMerchantId] = useState(MERCHANTS[0].id);
   const merchant = MERCHANTS.find((m) => m.id === merchantId)!;
   const [amount, setAmount] = useState((merchant.suggestCents / 100).toFixed(2));
@@ -19,7 +19,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
   const [method, setMethod] = useState<string>("chime_debit");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [last, setLast] = useState<{ result: "approved" | "declined"; reason: string | null; merchant: string; amountCents: number; label: string } | null>(null);
+  const [last, setLast] = useState<{ result: "approved" | "declined"; reason: string | null; code: string | null; cardId: string | null; merchant: string; amountCents: number; label: string } | null>(null);
 
   function pickMerchant(id: string): void {
     setMerchantId(id);
@@ -37,9 +37,29 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
     setBusy(true);
     try {
       const out = await pay(merchantId, cents, payMethod, cardId);
-      setLast({ ...out, merchant: merchant.name, amountCents: cents, label: methodLabel(payMethod, cards.find((c) => c.id === cardId)?.name) });
+      setLast({ ...out, cardId, merchant: merchant.name, amountCents: cents, label: methodLabel(payMethod, cards.find((c) => c.id === cardId)?.name) });
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "The payment couldn't be tried. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // When a Digna card is declined for its limit, it can be raised on the spot, but only if the wallet really has the money.
+  const lastCard = last?.cardId ? cards.find((c) => c.id === last.cardId) : undefined;
+  const raiseTo = last && lastCard && last.code === "over_cap" ? lastCard.spentCents + last.amountCents : null;
+  const canRaise = raiseTo !== null && last !== null && raiseTo <= 1_000_000 && last.amountCents <= balance.availableCents;
+
+  async function raiseAndRetry(): Promise<void> {
+    if (!last || !lastCard || raiseTo === null) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await setCardLimit(lastCard.id, raiseTo);
+      const out = await pay(merchantId, last.amountCents, "payproxy", lastCard.id);
+      setLast({ ...last, ...out });
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "The limit couldn't be changed. Try again.");
     } finally {
       setBusy(false);
     }
@@ -113,6 +133,25 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
           <p style={{ margin: 0, lineHeight: 1.6 }}>
             {money(last.amountCents)} at {last.merchant} with your {last.label}. {last.reason ?? "It went through."}
           </p>
+          {last.result === "declined" && canRaise && raiseTo !== null && (
+            <button type="button" onClick={() => void raiseAndRetry()} disabled={busy}
+              style={{ marginTop: 12, marginRight: 10, background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "10px 18px", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
+              Raise this card's limit to {money(raiseTo)} and try again
+            </button>
+          )}
+          {last.result === "declined" && (last.code === "insufficient_balance" || (last.code === "over_cap" && !canRaise)) && props.onAddMoney && (
+            <>
+              {last.code === "over_cap" && (
+                <p style={{ margin: "10px 0 0", fontSize: 14, color: colors.muted }}>
+                  Your wallet has {money(balance.availableCents)}, not enough to cover {money(last.amountCents)}. Add money first, then raise the limit.
+                </p>
+              )}
+              <button type="button" onClick={props.onAddMoney}
+                style={{ marginTop: 12, marginRight: 10, background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "10px 18px", fontWeight: 700, cursor: "pointer" }}>
+                Add money
+              </button>
+            </>
+          )}
           {last.result === "declined" && props.onAskAssistant && (
             <button type="button" onClick={() => props.onAskAssistant?.(`Why was my ${money(last.amountCents)} payment to ${last.merchant} with my ${last.label} declined, and what should I do?`)}
               style={{ marginTop: 12, background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.pill, padding: "10px 18px", fontWeight: 600, cursor: "pointer" }}>

@@ -50,16 +50,16 @@ export function decide(
   method: PayMethod,
   card: { status: string; endDate: string; capCents: number; spentCents: number } | null,
   balanceCents: number,
-): { result: "approved" | "declined"; reason: string | null } {
+): { result: "approved" | "declined"; reason: string | null; code: string | null } {
   if (method === "payproxy") {
-    if (!card) return { result: "declined", reason: "Pick one of your Digna cards." };
-    if (card.status === "frozen") return { result: "declined", reason: "This card is frozen. Unfreeze it to pay." };
-    if (card.status === "closed") return { result: "declined", reason: "This card is closed." };
-    if (new Date(card.endDate).getTime() < Date.now() - 86_400_000) return { result: "declined", reason: "This card has passed its end date." };
-    if (card.spentCents + amountCents > card.capCents) return { result: "declined", reason: `This would go over the card's cap: $${dollars(card.capCents - card.spentCents)} left of $${dollars(card.capCents)}.` };
-    if (balanceCents < amountCents) return { result: "declined", reason: "Not enough sample money in your wallet. Add money first." };
+    if (!card) return { result: "declined", reason: "Pick one of your Digna cards.", code: "other" };
+    if (card.status === "frozen") return { result: "declined", reason: "This card is frozen. Unfreeze it to pay.", code: "frozen" };
+    if (card.status === "closed") return { result: "declined", reason: "This card is closed.", code: "closed" };
+    if (new Date(card.endDate).getTime() < Date.now() - 86_400_000) return { result: "declined", reason: "This card has passed its end date.", code: "expired" };
+    if (card.spentCents + amountCents > card.capCents) return { result: "declined", reason: `This would go over the card's cap: $${dollars(card.capCents - card.spentCents)} left of $${dollars(card.capCents)}.`, code: "over_cap" };
+    if (balanceCents < amountCents) return { result: "declined", reason: "Not enough sample money in your wallet. Add money first.", code: "insufficient_balance" };
   }
   const kind = kindOf(method);
-  if (!merchant.accepts.includes(kind)) return { result: "declined", reason: `${merchant.name} doesn't accept ${kind} cards here. ${merchant.rule}` };
-  return { result: "approved", reason: null };
+  if (!merchant.accepts.includes(kind)) return { result: "declined", reason: `${merchant.name} doesn't accept ${kind} cards here. ${merchant.rule}`, code: "other" };
+  return { result: "approved", reason: null, code: null };
 }

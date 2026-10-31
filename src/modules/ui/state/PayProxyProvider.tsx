@@ -13,6 +13,9 @@ import { MERCHANTS, decide, type PayMethod, type SandboxPayment } from "@/module
  */
 export type Mode = "guest" | "demo" | "live";
 
+/** What a payment try came to; code says which fix fits a decline (over_cap: raise the limit, insufficient_balance: add money). */
+export type PayOutcome = { result: "approved" | "declined"; reason: string | null; code: string | null };
+
 type PayProxyContextValue = {
   mode: Mode;
   ready: boolean;
@@ -39,7 +42,9 @@ type PayProxyContextValue = {
   freezeCard(id: string): Promise<void>;
   unfreezeCard(id: string): Promise<void>;
   closeCard(id: string): Promise<void>;
-  pay(merchantId: string, amountCents: number, method: PayMethod, cardId?: string | null): Promise<{ result: "approved" | "declined"; reason: string | null }>;
+  /** Changes a card's limit: down to what it has spent at the least, and up only as far as the wallet covers. */
+  setCardLimit(id: string, capCents: number): Promise<void>;
+  pay(merchantId: string, amountCents: number, method: PayMethod, cardId?: string | null): Promise<PayOutcome>;
   /** Emails a link to set a new password (Supabase sends it; it reaches people once the project has an email service). */
   requestPasswordReset(email: string): Promise<void>;
   /** Sets a new password for the person who opened that link (or who is signed in). */
@@ -284,10 +289,26 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         if (live) await call("set_card_status", { p_card_id: id, p_new_status: "closed" });
         else demoStatus(id, "closed");
       },
+      async setCardLimit(id, capCents) {
+        if (live) {
+          await call("set_card_limit", { p_card_id: id, p_cap_cents: capCents });
+          return;
+        }
+        const card = cards.find((c) => c.id === id);
+        if (!card) throw new Error("Pick one of your cards.");
+        if (card.status === "closed") throw new Error("This card is closed. Make a new one instead.");
+        if (!Number.isFinite(capCents) || capCents > 1_000_000) throw new Error("A card's limit can be at most $10,000.");
+        const usd = (c: number) => (c / 100).toFixed(2);
+        if (capCents < Math.max(card.spentCents, 1)) throw new Error(`The limit can't be lower than what this card has already spent ($${usd(card.spentCents)}).`);
+        if (capCents > card.capCents && capCents - card.spentCents > balance.availableCents) {
+          throw new Error(`You have $${usd(balance.availableCents)} in your wallet, so this card's limit can go up to $${usd(Math.max(card.capCents, card.spentCents + balance.availableCents))}. Add money first to raise it more.`);
+        }
+        setCards((prev) => prev.map((c) => (c.id === id ? { ...c, capCents } : c)));
+      },
       async pay(merchantId, amountCents, method, cardId = null) {
         if (live) {
           const out = await call("sandbox_pay", { p_merchant_id: merchantId, p_amount_cents: amountCents, p_method: method, p_card_id: method === "payproxy" ? cardId : null });
-          return { result: str(out.result) as "approved" | "declined", reason: out.reason ? str(out.reason) : null };
+          return { result: str(out.result) as "approved" | "declined", reason: out.reason ? str(out.reason) : null, code: out.code ? str(out.code) : null };
         }
         const merchant = MERCHANTS.find((m) => m.id === merchantId);
         if (!merchant) throw new Error("Pick one of the sandbox merchants.");
