@@ -46,7 +46,7 @@ export async function POST(req: Request): Promise<Response> {
   const n = before && before.day === day ? before.n : 0;
   if (n >= DAILY_LIMIT) return fail(429, `You've used today's ${DAILY_LIMIT} AI answers. Try again tomorrow.`);
   if (site.day !== day) Object.assign(site, { day, n: 0 });
-  if (site.n >= SITE_DAILY_LIMIT) return fail(429, "PayProxy's AI is resting for today: lots of people asked. Try again tomorrow.");
+  if (site.n >= SITE_DAILY_LIMIT) return fail(429, "Digna's AI is resting for today: lots of people asked. Try again tomorrow.");
   used.set(data.user.id, { day, n: n + 1 });
   site.n += 1;
   const res = await fetch("https://api.meta.ai/v1/chat/completions", {

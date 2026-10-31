@@ -197,7 +197,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
 
   return (
     <div style={{ backgroundColor: colors.page, color: colors.ink, fontFamily: typography.body, minHeight: "100vh" }}>
-      <style>{".pp-section{max-width:560px;margin:0 auto;padding:" + spacing.lg + " " + spacing.md + "}.pp-card{background:" + colors.surface + ";border:1px solid " + colors.line + ";border-radius:" + radii.card + "px;box-shadow:" + shadows.soft + ";padding:" + spacing.lg + "}.pp-lift{transition:transform .18s ease,box-shadow .18s ease}.pp-lift:hover{transform:translateY(-2px)}.pp-btn-mint{display:inline-flex;align-items:center;justify-content:center;background:" + colors.mint + ";color:#06332A;border:none;border-radius:999px;padding:12px 18px;font-weight:700;cursor:pointer;width:100%}.pp-btn-mint:hover{background:" + colors.mintDark + ";color:#fff}.pp-btn-ghost{display:inline-flex;align-items:center;justify-content:center;background:transparent;color:" + colors.ink + ";border:1px solid " + colors.line + ";border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer;width:100%}.pp-reveal{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}.pp-reveal.is-visible{opacity:1;transform:none}@media(prefers-reduced-motion:reduce){.pp-reveal{opacity:1;transform:none;transition:none}.pp-lift{transition:none}}"}</style>
+      <style>{".pp-section{max-width:560px;margin:0 auto;padding:" + spacing.lg + " " + spacing.md + "}.pp-card{background:" + colors.surface + ";border:1px solid " + colors.line + ";border-radius:" + radii.card + "px;box-shadow:" + shadows.soft + ";padding:" + spacing.lg + "}.pp-lift{transition:transform .18s ease,box-shadow .18s ease}.pp-lift:hover{transform:translateY(-2px)}.pp-btn-mint{display:inline-flex;align-items:center;justify-content:center;background:" + colors.mint + ";color:#0E1726;border:none;border-radius:999px;padding:12px 18px;font-weight:700;cursor:pointer;width:100%}.pp-btn-mint:hover{background:" + colors.mintDark + ";color:#fff}.pp-btn-ghost{display:inline-flex;align-items:center;justify-content:center;background:transparent;color:" + colors.ink + ";border:1px solid " + colors.line + ";border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer;width:100%}.pp-reveal{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}.pp-reveal.is-visible{opacity:1;transform:none}@media(prefers-reduced-motion:reduce){.pp-reveal{opacity:1;transform:none;transition:none}.pp-lift{transition:none}}"}</style>
       <RevealOnScroll>
         <section aria-labelledby="snap-title" className="pp-section">
           <h2 id="snap-title" style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 26, lineHeight: 1.2 }}>
@@ -225,7 +225,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
               borderRadius: 999,
               border: "none",
               backgroundColor: !file || isBusy ? colors.line : colors.mint,
-              color: !file || isBusy ? colors.muted : "#06332A",
+              color: !file || isBusy ? colors.muted : "#0E1726",
               fontFamily: typography.body,
               fontWeight: 700,
               cursor: !file || isBusy ? "not-allowed" : "pointer",

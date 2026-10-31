@@ -27,6 +27,6 @@ export function plainError(e: unknown): string {
   if (/Email not confirmed/i.test(msg)) return "Confirm your email first: open the link Supabase sent you, then sign in.";
   if (/Password should be at least/i.test(msg)) return "Use a password of at least 6 characters.";
   if (/rate limit/i.test(msg)) return "Too many tries just now. Wait a minute and try again.";
-  if (/Failed to fetch|NetworkError/i.test(msg)) return "Couldn't reach PayProxy's server. Check your connection and try again.";
+  if (/Failed to fetch|NetworkError/i.test(msg)) return "Couldn't reach Digna's server. Check your connection and try again.";
   return msg.length > 0 && msg.length < 200 ? msg : "Something went wrong. Try again.";
 }

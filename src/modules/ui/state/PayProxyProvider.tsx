@@ -6,7 +6,7 @@ import { supabase, plainError } from "@/modules/ui/lib/supabase";
 import { MERCHANTS, decide, type PayMethod, type SandboxPayment } from "@/modules/ui/lib/sandbox";
 
 /**
- * PayProxy's data: a real account in the app's own Supabase project ("live"), or the sample walk-through with no
+ * Digna's data: a real account in the app's own Supabase project ("live"), or the sample walk-through with no
  * account ("demo"). Both use sample money only. In live mode every change goes through the database's own functions
  * (add_money, create_virtual_card, set_card_status, sandbox_pay), which check who is asking; the screens then read
  * the result back, so what they show is what the database holds.
@@ -185,7 +185,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
     const sb = supabase();
     /** Runs one database function, then reads everything back; a refusal becomes a plain notice and is thrown. */
     async function call(fn: string, args: Record<string, unknown>): Promise<Row> {
-      if (!sb) throw new Error("PayProxy's database isn't set up on this site yet.");
+      if (!sb) throw new Error("Digna's database isn't set up on this site yet.");
       const { data, error } = await sb.rpc(fn, args);
       if (error) {
         const msg = plainError(error);

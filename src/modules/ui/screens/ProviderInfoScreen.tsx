@@ -124,7 +124,7 @@ export function ProviderInfoScreen() {
           <span className="pp-eyebrow">Test mode</span>
           <h1 id="provider-title">Provider</h1>
           <p>
-            The provider holds the PayProxy balance and issues capped virtual cards in test mode with no
+            The provider holds the Digna balance and issues capped virtual cards in test mode with no
             real money moves.
           </p>
         </RevealOnScroll>
@@ -136,7 +136,7 @@ export function ProviderInfoScreen() {
           <div className="pp-grid">
             <article className="pp-card pp-lift" tabIndex={0} aria-label="Holds balance">
               <h3>Holds balance</h3>
-              <p>See the PayProxy balance at a glance. Test-mode sample money only.</p>
+              <p>See the Digna balance at a glance. Test-mode sample money only.</p>
             </article>
           </div>
         </RevealOnScroll>

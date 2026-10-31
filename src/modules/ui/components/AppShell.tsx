@@ -8,7 +8,7 @@ void theme;
 
 type NavEntry = { value: AppScreen | string; label: string };
 
-// The pages a visitor uses. The home page is the PayProxy name at the top left.
+// The pages a visitor uses. The home page is the Digna name at the top left.
 const navEntries: NavEntry[] = [
   { value: "dashboard", label: "Dashboard" },
   { value: "checkout", label: "Test checkout" },
@@ -76,7 +76,7 @@ export function AppShell(props: {
                 setOpen(false);
                 onNavigate("welcome");
               }}
-              aria-label="PayProxy home"
+              aria-label="Digna home"
               style={{ background: "transparent", border: 0, padding: 0, cursor: "pointer", display: "inline-flex" }}
             >
               <Logo size={30} />
@@ -218,7 +218,7 @@ export function AppShell(props: {
               Test mode
             </h2>
             <p style={{ fontFamily: typography.body, fontSize: "14px", lineHeight: 1.6, margin: 0, opacity: 0.9 }}>
-              PayProxy is in test mode. No real money moves here — cards, balances and bills are demos only.
+              Digna is in test mode. No real money moves here — cards, balances and bills are demos only.
             </p>
             <button type="button" onClick={(): void => onNavigate("demo-data")} style={footerLinkStyle}>
               Explore demo data
@@ -262,7 +262,7 @@ export function AppShell(props: {
             opacity: 0.8,
           }}
         >
-          <span>© PayProxy · Sample money only · Not a bank · Not affiliated with Chime, Cash App or any merchant shown</span>
+          <span>© Digna · Sample money only · Not a bank · Not affiliated with Chime, Cash App or any merchant shown</span>
         </div>
       </footer>
     </div>

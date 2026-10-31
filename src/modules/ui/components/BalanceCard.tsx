@@ -13,7 +13,7 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
   return (
     <section
       className="pp-card"
-      aria-label="PayProxy balance"
+      aria-label="Digna balance"
       style={{
         width: "100%",
         maxWidth: "100%",
@@ -38,7 +38,7 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
           textTransform: "uppercase",
         }}
       >
-        PayProxy balance
+        Digna balance
       </div>
       <div
         style={{
@@ -73,7 +73,7 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
           justifyContent: "center",
           width: "100%",
           backgroundColor: colors.mint,
-          color: "#06332A",
+          color: "#0E1726",
           border: `1px solid ${colors.mint}`,
           borderRadius: 999,
           padding: `${spacing.md} ${spacing.lg}`,

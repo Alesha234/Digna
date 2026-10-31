@@ -209,7 +209,7 @@ export function CardForm(props: CardFormProps) {
           className="pp-btn-mint"
           style={{
             backgroundColor: busy ? colors.mintDark : colors.mint,
-            color: "#06332A",
+            color: "#0E1726",
             border: "none",
             borderRadius: radii.card,
             padding: `${spacing.sm} ${spacing.md}`,

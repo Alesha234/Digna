@@ -11,7 +11,7 @@ function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: strin
     setMounted(true);
   }, []);
   return (
-    <div style={{ aspectRatio: ratio, borderRadius: 18, overflow: "hidden", background: "linear-gradient(135deg, #E3F7F1, #D6E8F0)" }}>
+    <div style={{ aspectRatio: ratio, borderRadius: 18, overflow: "hidden", background: "linear-gradient(135deg, #FFF3D6, #D6E8F0)" }}>
       {mounted && (
         <img src={`/api/picture/${name}`} alt={alt} loading="lazy" onLoad={() => setLoaded(true)} onError={() => setLoaded(false)}
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: loaded ? 1 : 0, transition: "opacity .4s ease", color: "transparent" }} />
@@ -25,7 +25,7 @@ function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent
   return (
     <div className="pp-vcard" style={{ background: bg, position: "relative", left: "auto", top: "auto", margin: 0, ...style }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontFamily: typography.heading, fontWeight: 700 }}>PayProxy</span>
+        <span style={{ fontFamily: typography.heading, fontWeight: 700 }}>Digna</span>
         <span style={{ fontSize: 12, opacity: 0.85 }}>Virtual · Sample</span>
       </div>
       <div className="pp-vcard-chip" />
@@ -44,14 +44,14 @@ function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent
 }
 
 const STORIES = [
-  { picture: "cloud", alt: "A developer setting up hosting on a laptop", title: "Cloud bills", text: "Hosting and cloud billing pages often take credit cards only. Make a capped PayProxy card just for that bill, so it goes through and never runs over." },
+  { picture: "cloud", alt: "A developer setting up hosting on a laptop", title: "Cloud bills", text: "Hosting and cloud billing pages often take credit cards only. Make a capped Digna card just for that bill, so it goes through and never runs over." },
   { picture: "hotel", alt: "A traveler checking in at a hotel desk", title: "Hotel check-in", text: "Hotels hold a deposit at check-in and many turn away prepaid cards. Give the hotel its own card with a cap that covers the stay and nothing more." },
-  { picture: "rental", alt: "Friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters ask for a credit card for the security deposit. A PayProxy card covers the deposit and freezes in one tap when you return the car." },
+  { picture: "rental", alt: "Friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters ask for a credit card for the security deposit. A Digna card covers the deposit and freezes in one tap when you return the car." },
 ];
 
 const FAQS = [
-  { q: "Is this real money?", a: "No. PayProxy is a working sandbox: your account, wallet, cards and payments are real records, but every dollar is sample money. No real card, bank or merchant is ever contacted." },
-  { q: "What can I try?", a: "Create an account and you start with $250 of sample money. Make capped virtual cards, freeze or close them, and use the test checkout to pay sample merchants with your everyday cards or your PayProxy cards and see what each would say." },
+  { q: "Is this real money?", a: "No. Digna is a working sandbox: your account, wallet, cards and payments are real records, but every dollar is sample money. No real card, bank or merchant is ever contacted." },
+  { q: "What can I try?", a: "Create an account and you start with $250 of sample money. Make capped virtual cards, freeze or close them, and use the test checkout to pay sample merchants with your everyday cards or your Digna cards and see what each would say." },
   { q: "Why do some checkouts decline Cash App, Chime or prepaid cards?", a: "Some merchants, like many cloud billing pages and rental counters, only take credit cards for billing or deposits. The test checkout's sample merchants follow rules like these so you can see the difference a capped card makes." },
   { q: "What does the money assistant use?", a: "Meta's Muse Spark model. It reads your cards and recent tries and explains a decline in plain words, with what to do next. It also reads photos of bills in Snap a bill." },
   { q: "Who drew the pictures on this page?", a: "Meta's Muse Image model. The people in them are invented." },
@@ -73,10 +73,10 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         <RevealOnScroll delayMs={0}>
           <div className="pp-hero-grid">
             <div>
-              <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#E3F7F1", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Capped virtual cards · Free to try with sample money</p>
-              <h1 className="pp-hero-title">Pay where your card gets declined.</h1>
+              <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Capped virtual cards · Free to try with sample money</p>
+              <h1 className="pp-hero-title">Dignity at every checkout.</h1>
               <p style={{ ...lead, fontSize: 18 }}>
-                Cloud billing, hotels and car rentals often turn away Cash App, Chime and prepaid cards. PayProxy gives you a virtual card for each one, with its own spending cap, so you pay with confidence and never overspend.
+                Cloud billing, hotels and car rentals often turn away Cash App, Chime and prepaid cards. Digna gives you a virtual card for each one, paid from your own money, with a cap you set. No credit check, no debt, no declines at the counter.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
                 <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
@@ -91,7 +91,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <div style={{ position: "relative", maxWidth: 480, width: "100%", margin: "0 auto" }}>
               <Picture name="hero" alt="A person smiling at their phone after a payment went through" ratio="1 / 1" />
               <div className="pp-hero-float">
-                <SampleCard name="Cloud hosting" spent={32} cap={50} last="4242" bg="linear-gradient(135deg, #0C1F2E, #17405C)" />
+                <SampleCard name="Cloud hosting" spent={32} cap={50} last="4242" bg="linear-gradient(135deg, #0E1726, #17405C)" />
               </div>
             </div>
           </div>
@@ -99,12 +99,12 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       </section>
 
       {/* What it is */}
-      <section aria-label="PayProxy in 30 seconds" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
+      <section aria-label="Digna in 30 seconds" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
         <div style={{ ...inner, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md }}>
           {[
             { t: "The problem", b: "Cash App, Chime, debit and prepaid cards get turned away by many cloud bills, hotels and car rentals that want a credit card." },
-            { t: "What PayProxy does", b: "Gives you a virtual card for each of those services. It runs like a credit card, pays from your PayProxy wallet, and can never spend past the cap you set." },
-            { t: "What you can do today", b: "Make an account, get $250 of sample money, create capped cards, and see what real-style checkouts say to your everyday card versus a PayProxy card." },
+            { t: "What Digna does", b: "Gives you a virtual card for each of those services. It runs like a credit card, pays from your Digna wallet, and can never spend past the cap you set." },
+            { t: "What you can do today", b: "Make an account, get $250 of sample money, create capped cards, and see what real-style checkouts say to your everyday card versus a Digna card." },
           ].map((f) => (
             <article key={f.t} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg }}>
               <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 8px", color: colors.ink }}>{f.t}</h2>
@@ -114,12 +114,36 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </div>
       </section>
 
+      {/* Dignity by design */}
+      <section aria-label="Dignity by design" className="pp-section" style={{ ...section, background: colors.midnight, color: "#FFFFFF" }}>
+        <div style={inner}>
+          <p style={{ margin: "0 0 10px", color: "#FFC94D", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: 13 }}>Dignity by design</p>
+          <h2 style={{ ...h2, color: "#FFFFFF" }}>A declined card isn't just a failed payment.</h2>
+          <p style={{ ...lead, color: "#C9CFDB" }}>It's being told, in public, that your money doesn't count. Digna is built so that never happens to you, and every feature keeps that promise.</p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+            {[
+              { t: "No public declines", b: "Know before you pay. The test checkout and the money assistant tell you whether a card will work, so you're never caught out at the counter." },
+              { t: "No credit check, no judgment", b: "Sign up with an email. Your history doesn't decide your access." },
+              { t: "Your money, not a loan", b: "Every card spends only your own money. No debt, no interest, no traps." },
+              { t: "Caps that protect you", b: "No service can take more than you allowed, so a surprise charge never costs you rent." },
+              { t: "Plain words", b: "Banks speak in codes. Digna's assistant, built on Meta's Muse Spark, speaks like a person and tells you what to do next." },
+              { t: "Private by default", b: "We keep only what's needed, never sell your data, and you can delete everything in one tap." },
+            ].map((f) => (
+              <article key={f.t} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: radii.card, padding: spacing.lg }}>
+                <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18, color: "#FFFFFF" }}>{f.t}</h3>
+                <p style={{ margin: 0, color: "#C9CFDB", lineHeight: 1.6 }}>{f.b}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Stories */}
       <section className="pp-section" style={{ ...section, background: colors.surface, borderTop: "1px solid " + colors.line, borderBottom: "1px solid " + colors.line }}>
         <RevealOnScroll delayMs={60}>
           <div style={inner}>
             <h2 style={h2}>Made for the moments your card gets turned away</h2>
-            <p style={lead}>One card per service, each with its own cap. Paid from your PayProxy wallet, accepted like a credit card.</p>
+            <p style={lead}>One card per service, each with its own cap. Paid from your Digna wallet, accepted like a credit card.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
               {STORIES.map((s) => (
                 <article key={s.title}>
@@ -162,7 +186,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <div>
               <h2 style={h2}>Try it before you need it</h2>
               <p style={lead}>
-                The test checkout has sample merchants with real-world rules: a cloud host that takes credit cards only, a hotel that turns away prepaid cards, a rental counter, a streaming service. Pay with a sample Chime debit card, a Cash App Card or a prepaid card, then with a PayProxy card, and see exactly what each checkout says.
+                The test checkout has sample merchants with real-world rules: a cloud host that takes credit cards only, a hotel that turns away prepaid cards, a rental counter, a streaming service. Pay with a sample Chime debit card, a Cash App Card or a prepaid card, then with a Digna card, and see exactly what each checkout says.
               </p>
               <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Open the test checkout</button>
             </div>
@@ -170,11 +194,11 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               {[
                 { who: "Chime debit card (sample)", at: "Nimbus Cloud · $32.00", out: "Declined: credit cards only", ok: false },
                 { who: "Prepaid card (sample)", at: "Harborview Hotel · $150.00", out: "Declined: no prepaid cards", ok: false },
-                { who: "PayProxy card: Cloud hosting", at: "Nimbus Cloud · $32.00", out: "Approved · $18.00 left of cap", ok: true },
+                { who: "Digna card: Cloud hosting", at: "Nimbus Cloud · $32.00", out: "Approved · $18.00 left of cap", ok: true },
               ].map((r) => (
-                <div key={r.who} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "14px 16px", borderRadius: 12, background: r.ok ? "#F0FBF7" : "#FFF5F4", border: `1px solid ${r.ok ? colors.mint : "#F4B4AE"}` }}>
+                <div key={r.who} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "14px 16px", borderRadius: 12, background: r.ok ? "#F0FBF7" : "#FFF5F4", border: `1px solid ${r.ok ? "#12B76A" : "#F4B4AE"}` }}>
                   <span><strong>{r.who}</strong><span style={{ display: "block", fontSize: 13, color: colors.muted }}>{r.at}</span></span>
-                  <strong style={{ color: r.ok ? colors.mintDark : "#B42318", textAlign: "right" }}>{r.out}</strong>
+                  <strong style={{ color: r.ok ? "#067647" : "#B42318", textAlign: "right" }}>{r.out}</strong>
                 </div>
               ))}
             </div>
@@ -218,7 +242,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
 
       {/* CTA */}
       <section className="pp-ledger-band" style={{ background: colors.midnight, color: colors.midnightInk, padding: spacing.xxl + " " + spacing.lg, textAlign: "center" }}>
-        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Stop getting declined. Start with a capped card.</h2>
+        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Your money is good here. Everywhere.</h2>
         <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
       </section>
     </div>

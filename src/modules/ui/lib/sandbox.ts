@@ -16,7 +16,7 @@ export const MERCHANTS: Merchant[] = [
 
 export type PayMethod = "payproxy" | "chime_debit" | "cash_app_card" | "prepaid_card" | "chime_credit_builder";
 
-/** The cards you can try: your sample everyday cards, and your PayProxy capped cards (which run as credit cards). */
+/** The cards you can try: your sample everyday cards, and your Digna capped cards (which run as credit cards). */
 export const OUTSIDE_METHODS: { id: Exclude<PayMethod, "payproxy">; label: string; kind: CardKind }[] = [
   { id: "chime_debit", label: "Chime debit card (sample)", kind: "debit" },
   { id: "cash_app_card", label: "Cash App Card (sample)", kind: "debit" },
@@ -27,7 +27,7 @@ export const OUTSIDE_METHODS: { id: Exclude<PayMethod, "payproxy">; label: strin
 export const kindOf = (method: PayMethod): CardKind => (method === "payproxy" ? "credit" : OUTSIDE_METHODS.find((m) => m.id === method)!.kind);
 
 export const methodLabel = (method: PayMethod, cardName?: string) =>
-  method === "payproxy" ? `PayProxy card${cardName ? `: ${cardName}` : ""}` : OUTSIDE_METHODS.find((m) => m.id === method)?.label ?? method;
+  method === "payproxy" ? `Digna card${cardName ? `: ${cardName}` : ""}` : OUTSIDE_METHODS.find((m) => m.id === method)?.label ?? method;
 
 export type SandboxPayment = {
   id: string;
@@ -43,7 +43,7 @@ export type SandboxPayment = {
 
 const dollars = (cents: number) => (cents / 100).toFixed(2);
 
-/** The demo's own copy of sandbox_pay's rules, for people trying PayProxy without an account. */
+/** The demo's own copy of sandbox_pay's rules, for people trying Digna without an account. */
 export function decide(
   merchant: Merchant,
   amountCents: number,
@@ -52,7 +52,7 @@ export function decide(
   balanceCents: number,
 ): { result: "approved" | "declined"; reason: string | null } {
   if (method === "payproxy") {
-    if (!card) return { result: "declined", reason: "Pick one of your PayProxy cards." };
+    if (!card) return { result: "declined", reason: "Pick one of your Digna cards." };
     if (card.status === "frozen") return { result: "declined", reason: "This card is frozen. Unfreeze it to pay." };
     if (card.status === "closed") return { result: "declined", reason: "This card is closed." };
     if (new Date(card.endDate).getTime() < Date.now() - 86_400_000) return { result: "declined", reason: "This card has passed its end date." };

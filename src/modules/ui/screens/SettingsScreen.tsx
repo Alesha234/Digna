@@ -80,7 +80,7 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
   const [deleting, setDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   async function handleDelete(): Promise<void> {
-    if (!window.confirm("Delete your PayProxy account? Your sign-in, wallet, cards and history are removed for good.")) return;
+    if (!window.confirm("Delete your Digna account? Your sign-in, wallet, cards and history are removed for good.")) return;
     setDeleting(true);
     setDeleteError(null);
     try {
@@ -244,10 +244,10 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
         </RevealOnScroll>
 
         <RevealOnScroll delayMs={240} className="pp-section-wrap">
-          <section aria-label="About PayProxy" className="pp-section">
-            <h2 style={h2}>About PayProxy</h2>
+          <section aria-label="About Digna" className="pp-section">
+            <h2 style={h2}>About Digna</h2>
             <div style={card} className="pp-card pp-lift">
-              <p style={body}>PayProxy gives each service that turns your card away its own capped virtual card, paid from your PayProxy wallet.</p>
+              <p style={body}>Digna gives each service that turns your card away its own capped virtual card, paid from your Digna wallet.</p>
               <p style={{ ...sub, marginTop: spacing.md }}>
                 Each person sees only their own cards. A sandbox with sample money: not a bank, and not affiliated with Chime, Cash App or any merchant shown.
               </p>

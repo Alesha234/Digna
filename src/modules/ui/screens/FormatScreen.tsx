@@ -30,7 +30,7 @@ export function FormatScreen() {
       <style>{`
         .pp-hero{background:${colors.surface};border-bottom:1px solid ${colors.line};padding:${spacing.xl} ${spacing.md};}
         .pp-hero-inner{max-width:960px;margin:0 auto;}
-        .pp-eyebrow{display:inline-block;font-family:${typography.heading};font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#06332A;background:${colors.mint};border-radius:${radii.pill}px;padding:6px 14px;font-weight:700;}
+        .pp-eyebrow{display:inline-block;font-family:${typography.heading};font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#0E1726;background:${colors.mint};border-radius:${radii.pill}px;padding:6px 14px;font-weight:700;}
         .pp-hero h1{font-family:${typography.heading};font-size:clamp(32px,5vw,52px);line-height:1.05;margin:${spacing.md} 0 ${spacing.sm} 0;letter-spacing:-0.02em;}
         .pp-hero p{color:${colors.muted};font-size:17px;line-height:1.6;margin:0;max-width:60ch;}
         .pp-section{max-width:960px;margin:0 auto;padding:${spacing.xl} ${spacing.md};}
@@ -47,7 +47,7 @@ export function FormatScreen() {
         .pp-card dt{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:${colors.muted};}
         .pp-card dd{margin:0;font-weight:700;}
         .pp-badge{display:inline-block;border-radius:${radii.pill}px;padding:4px 12px;font-size:13px;font-weight:700;border:1px solid ${colors.line};}
-        .is-approved{background:#E6F7F0;color:#06332A;border-color:#BDE8D9;}
+        .is-approved{background:#E6F7F0;color:#0E1726;border-color:#BDE8D9;}
         .is-declined{background:#FDECEC;color:#7A1F1F;border-color:#F5C6C6;}
         .pp-next{color:${colors.muted};font-weight:400;line-height:1.55;}
         .pp-bar{height:8px;border-radius:${radii.pill}px;background:${colors.line};overflow:hidden;}
@@ -62,7 +62,7 @@ export function FormatScreen() {
           <RevealOnScroll delayMs={0}>
             <span className="pp-eyebrow">Clear Mint</span>
             <h1 id="format-title">Format</h1>
-            <p>Consistent USD amounts, dates and cap usage across PayProxy. Every number, date and balance on this page is formatted the same way.</p>
+            <p>Consistent USD amounts, dates and cap usage across Digna. Every number, date and balance on this page is formatted the same way.</p>
           </RevealOnScroll>
         </div>
       </section>

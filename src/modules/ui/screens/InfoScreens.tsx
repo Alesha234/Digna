@@ -7,14 +7,14 @@ const h1: React.CSSProperties = { fontFamily: typography.heading, fontSize: 32, 
 const h2: React.CSSProperties = { fontFamily: typography.heading, fontSize: 20, margin: "28px 0 6px" };
 const UPDATED = "October 31, 2026";
 
-/** What PayProxy keeps and why, in plain words. */
+/** What Digna keeps and why, in plain words. */
 export function PrivacyScreen() {
   return (
     <article style={page}>
       <h1 style={h1}>Privacy</h1>
       <p style={{ color: colors.muted, margin: 0 }}>Last updated {UPDATED}</p>
-      <h2 style={h2}>What PayProxy is</h2>
-      <p>PayProxy is a working sandbox: your account, wallet, cards and payments are real records, but every dollar is sample money. PayProxy is not a bank and never touches real cards, bank accounts or money.</p>
+      <h2 style={h2}>What Digna is</h2>
+      <p>Digna is a working sandbox: your account, wallet, cards and payments are real records, but every dollar is sample money. Digna is not a bank and never touches real cards, bank accounts or money.</p>
       <h2 style={h2}>What we keep</h2>
       <ul>
         <li>Your email address and a password (stored scrambled by our sign-in provider, Supabase; we never see it).</li>
@@ -43,15 +43,15 @@ export function TermsScreen() {
       <h1 style={h1}>Terms</h1>
       <p style={{ color: colors.muted, margin: 0 }}>Last updated {UPDATED}</p>
       <h2 style={h2}>A sandbox with sample money</h2>
-      <p>PayProxy shows how capped virtual cards would work. Balances, cards, merchants and payments are samples: nothing you do here moves real money, and PayProxy cards can't be used anywhere else.</p>
+      <p>Digna shows how capped virtual cards would work. Balances, cards, merchants and payments are samples: nothing you do here moves real money, and Digna cards can't be used anywhere else.</p>
       <h2 style={h2}>Not a bank, not affiliated</h2>
-      <p>PayProxy is not a bank or a payment company. Chime, Cash App and any card or merchant named here are examples only; PayProxy isn't affiliated with or endorsed by them. The sample merchants' rules are illustrations, and real checkouts' rules vary.</p>
+      <p>Digna is not a bank or a payment company. Chime, Cash App and any card or merchant named here are examples only; Digna isn't affiliated with or endorsed by them. The sample merchants' rules are illustrations, and real checkouts' rules vary.</p>
       <h2 style={h2}>AI answers</h2>
       <p>The money assistant and Snap a bill use Meta's AI. Their answers can be wrong, and they are not financial advice.</p>
       <h2 style={h2}>Fair use</h2>
       <p>One account per person, please. Don't try to break, overload or misuse the service; we may limit or remove accounts that do. The AI has daily limits so it stays available for everyone.</p>
       <h2 style={h2}>As is</h2>
-      <p>PayProxy is provided as is, while it's being built and tested. It may change, pause or lose sample data.</p>
+      <p>Digna is provided as is, while it's being built and tested. It may change, pause or lose sample data.</p>
     </article>
   );
 }
@@ -83,10 +83,10 @@ export function FeedbackScreen() {
     <section style={{ ...page, background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 28 }}>
       <h1 style={h1}>Send feedback</h1>
       {done ? (
-        <p role="status" style={{ fontSize: 17 }}>Thank you! It went straight to the PayProxy team.</p>
+        <p role="status" style={{ fontSize: 17 }}>Thank you! It went straight to the Digna team.</p>
       ) : (
         <>
-          <p style={{ color: colors.muted, marginTop: 0 }}>What worked, what broke, what you wish PayProxy did. Every note is read.</p>
+          <p style={{ color: colors.muted, marginTop: 0 }}>What worked, what broke, what you wish Digna did. Every note is read.</p>
           <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 }}>
               Your feedback

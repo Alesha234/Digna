@@ -111,7 +111,7 @@ export function AlertsScreen() {
             onClick={toggle}
             style={{
               backgroundColor: enabled ? colors.mintDark : colors.mint,
-              color: "#06332A",
+              color: "#0E1726",
               border: "none",
               borderRadius: radii.pill,
               paddingTop: spacing.md,

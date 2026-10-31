@@ -8,7 +8,7 @@ const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
 /**
  * The test checkout: pick a sandbox merchant, an amount and a card, and see what a real checkout would say. Outside
- * cards are sample cards checked against the merchant's rule; PayProxy cards also follow their caps and the wallet.
+ * cards are sample cards checked against the merchant's rule; Digna cards also follow their caps and the wallet.
  */
 export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void }) {
   const { cards, payments, pay, balance, mode } = usePayProxy();
@@ -59,7 +59,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
           {MERCHANTS.map((m) => (
             <button key={m.id} type="button" aria-pressed={m.id === merchantId} onClick={() => pickMerchant(m.id)}
-              style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: typography.body, background: m.id === merchantId ? "#E3F7F1" : colors.surface, border: `2px solid ${m.id === merchantId ? colors.mint : colors.line}` }}>
+              style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: typography.body, background: m.id === merchantId ? "#FFF3D6" : colors.surface, border: `2px solid ${m.id === merchantId ? colors.mint : colors.line}` }}>
               <strong style={{ display: "block", fontSize: 16, color: colors.ink }}>{m.name}</strong>
               <span style={{ fontSize: 13, color: colors.muted }}>{m.kind}</span>
             </button>
@@ -85,7 +85,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                   <option key={m.id} value={m.id}>{m.label} · {m.kind}</option>
                 ))}
               </optgroup>
-              <optgroup label="Your PayProxy capped cards">
+              <optgroup label="Your Digna capped cards">
                 {usable.map((c) => (
                   <option key={c.id} value={`card:${c.id}`}>{c.name} ···· {c.last4} · {money(c.capCents - c.spentCents)} left{c.status === "frozen" ? " · frozen" : ""}</option>
                 ))}
@@ -95,7 +95,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         </div>
         {usable.length === 0 && (
           <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>
-            You have no PayProxy cards yet.{" "}
+            You have no Digna cards yet.{" "}
             <button type="button" onClick={props.onCreateCard} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Make a capped card</button>
             , then come back.
           </p>
@@ -108,7 +108,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
       </section>
 
       {last && (
-        <section role="status" aria-label="Result" style={{ ...box, borderColor: last.result === "approved" ? colors.mint : "#F4B4AE", background: last.result === "approved" ? "#F0FBF7" : "#FFF5F4" }}>
+        <section role="status" aria-label="Result" style={{ ...box, borderColor: last.result === "approved" ? "#12B76A" : "#F4B4AE", background: last.result === "approved" ? "#F0FBF7" : "#FFF5F4" }}>
           <h2 style={{ fontFamily: typography.heading, fontSize: 22, margin: "0 0 6px" }}>{last.result === "approved" ? "Approved" : "Declined"}</h2>
           <p style={{ margin: 0, lineHeight: 1.6 }}>
             {money(last.amountCents)} at {last.merchant} with your {last.label}. {last.reason ?? "The payment went through."}
@@ -134,7 +134,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                   <strong>{p.merchant}</strong> · {methodLabel(p.method, cards.find((c) => c.id === p.cardId)?.name)}
                   {p.reason && <span style={{ display: "block", fontSize: 13, color: colors.muted }}>{p.reason}</span>}
                 </span>
-                <span style={{ whiteSpace: "nowrap", fontWeight: 700, color: p.result === "approved" ? colors.mintDark : "#B42318" }}>
+                <span style={{ whiteSpace: "nowrap", fontWeight: 700, color: p.result === "approved" ? "#067647" : "#B42318" }}>
                   {money(p.amountCents)} · {p.result}
                 </span>
               </li>

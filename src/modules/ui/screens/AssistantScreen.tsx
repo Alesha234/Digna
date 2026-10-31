@@ -87,13 +87,13 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
     cause = "the card may have expired";
     next = "Make a new card for " + txn.storeName + " with a later date and try again.";
   }
-  return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". In calm words: the store asked, and PayProxy said no to protect you. Next step: " + next + " This is test mode, so nothing real moves.";
+  return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". In calm words: the store asked, and Digna said no to protect you. Next step: " + next + " This is test mode, so nothing real moves.";
 }
 
 export function AssistantScreen(props: { initialPrompt?: string }) {
   const { cards, transactions, payments, balance, mode } = usePayProxy();
   const [messages, setMessages] = useState<ChatMsg[]>(function () {
-    const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your PayProxy helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.";
+    const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your Digna helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.";
     return [makeMsg("assistant", first)];
   });
   const [input, setInput] = useState<string>(function () {
@@ -148,10 +148,10 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
     }) : undefined;
     const label: string = snapTxn ? cardLabelFor(snapTxn.cardId) : "your card";
     let reply: string = buildLocalReply(trimmed, snapTxn, snapCard, label);
-    // What Muse Spark is told: what PayProxy is, the sandbox merchants' rules, and this person's own cards and tries.
+    // What Muse Spark is told: what Digna is, the sandbox merchants' rules, and this person's own cards and tries.
     const system: string = [
-      "You are PayProxy's money assistant. PayProxy is a sandbox with sample money only: no real card, bank or merchant is involved.",
-      "PayProxy gives people whose Cash App, Chime, debit or prepaid cards get declined a virtual card per service, with its own spending cap, that runs as a credit card and is paid from their PayProxy wallet.",
+      "You are Digna's money assistant. Digna is a sandbox with sample money only: no real card, bank or merchant is involved.",
+      "Digna gives people whose Cash App, Chime, debit or prepaid cards get declined a virtual card per service, with its own spending cap, that runs as a credit card and is paid from their Digna wallet.",
       "Answer in plain, friendly words, in 2 to 5 short sentences: why it happened and the one or two things to do next. Never invent rules beyond the ones below.",
       "Merchant rules: " + MERCHANTS.map(function (m) { return m.name + " (" + m.kind + "): " + m.rule; }).join(" "),
       "Wallet: " + cents(balance.availableCents) + " sample money.",
@@ -341,7 +341,7 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
                   border: "none",
                   borderRadius: radii.pill,
                   backgroundColor: colors.mint,
-                  color: "#06332A",
+                  color: "#0E1726",
                   padding: "10px 18px",
                   fontFamily: typography.body,
                   fontWeight: 700,

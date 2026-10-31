@@ -1,4 +1,4 @@
--- PayProxy sandbox: every account, card and payment here uses sample money only. No real card, bank or payment
+-- Digna sandbox: every account, card and payment here uses sample money only. No real card, bank or payment
 -- network is ever contacted. Run once in Supabase's SQL Editor, after 0001-0016 and the rpc files.
 
 -- 1. The earlier money triggers and functions named columns these tables don't have (merchant_name, status,
@@ -78,7 +78,7 @@ REVOKE ALL ON FUNCTION public.add_money(BIGINT, TEXT) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.add_money(BIGINT, TEXT) TO authenticated;
 
 -- 5. The sandbox merchants and what each accepts, as many real checkouts do: some take only credit cards.
---    PayProxy's virtual cards run as credit cards, paid from the wallet's sample money and held to their caps.
+--    Digna's virtual cards run as credit cards, paid from the wallet's sample money and held to their caps.
 CREATE OR REPLACE FUNCTION public.sandbox_merchants() RETURNS JSONB LANGUAGE sql IMMUTABLE AS $$
   SELECT '[
     {"id": "nimbus_cloud", "name": "Nimbus Cloud", "kind": "Cloud hosting billing", "accepts": ["credit"], "rule": "Cloud billing accounts take credit cards only: debit and prepaid cards are declined."},
@@ -90,7 +90,7 @@ $$;
 GRANT EXECUTE ON FUNCTION public.sandbox_merchants() TO anon, authenticated;
 
 -- 6. Pay at a sandbox merchant. Outside cards (sample Chime debit, Cash App Card, prepaid, Chime Credit Builder) are
---    checked against the merchant's rule only. A PayProxy card must also be the person's, active, not expired, under
+--    checked against the merchant's rule only. A Digna card must also be the person's, active, not expired, under
 --    its cap, and covered by the wallet; an approved payment comes off the wallet and counts toward the cap.
 CREATE OR REPLACE FUNCTION public.sandbox_pay(p_merchant_id TEXT, p_amount_cents BIGINT, p_method TEXT, p_card_id UUID DEFAULT NULL) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE
@@ -112,7 +112,7 @@ BEGIN
 
   IF p_method = 'payproxy' THEN
     SELECT * INTO v_card FROM public.virtual_cards WHERE id = p_card_id AND user_id = v_uid FOR UPDATE;
-    IF NOT FOUND THEN RAISE EXCEPTION 'Pick one of your PayProxy cards.'; END IF;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Pick one of your Digna cards.'; END IF;
     SELECT balance_cents INTO v_balance FROM public.wallets WHERE user_id = v_uid FOR UPDATE;
     IF v_card.status = 'frozen' THEN v_result := 'declined'; v_code := 'frozen'; v_reason := 'This card is frozen. Unfreeze it to pay.';
     ELSIF v_card.status = 'closed' THEN v_result := 'declined'; v_code := 'closed'; v_reason := 'This card is closed.';
@@ -159,7 +159,7 @@ $$;
 REVOKE ALL ON FUNCTION public.delete_my_account() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.delete_my_account() TO authenticated;
 
--- 8. Feedback from the people trying PayProxy, read by the owner in Supabase's Table Editor. Anyone may send some
+-- 8. Feedback from the people trying Digna, read by the owner in Supabase's Table Editor. Anyone may send some
 --    (signed in or not), at most 10 a day per person; nobody can read anyone's through the app.
 CREATE TABLE IF NOT EXISTS public.feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

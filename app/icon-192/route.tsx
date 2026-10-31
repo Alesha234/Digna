@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
 
 export function GET() {
-  return new ImageResponse((<svg width="192" height="192" viewBox="0 0 48 48"><rect width="48" height="48" rx="12" fill="#0C1F2E" /><rect x="10" y="12" width="23" height="16" rx="3.5" fill="none" stroke="#7CF2D2" strokeWidth="2" opacity="0.6" /><rect x="15" y="19" width="23" height="16" rx="3.5" fill="#0EC49A" /><rect x="19" y="22.5" width="5.5" height="4.2" rx="1.1" fill="#0C1F2E" opacity="0.8" /><rect x="19" y="30" width="15" height="2.4" rx="1.2" fill="#0C1F2E" opacity="0.28" /><rect x="19" y="30" width="9.5" height="2.4" rx="1.2" fill="#0C1F2E" /></svg>), { width: 192, height: 192 });
+  return new ImageResponse((<svg width="192" height="192" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0E1726" /><path d="M14 10h16a22 22 0 0 1 0 44H14z" fill="#FFFFFF" /><rect x="26" y="26" width="26" height="17" rx="5" fill="#FFB020" /><rect x="31" y="30.5" width="6.5" height="4.5" rx="1.3" fill="#0E1726" opacity="0.85" /></svg>), { width: 192, height: 192 });
 }
