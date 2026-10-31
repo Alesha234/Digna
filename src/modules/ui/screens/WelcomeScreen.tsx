@@ -1,9 +1,43 @@
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
-import { testModeMessage } from "@/modules/ui/data/demoData";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void }) {
-  const { onGetStarted, onSignIn } = props;
+/** The hero's picture: three capped virtual cards, fanned, each with how much of its cap is spent. Sample cards. */
+const HERO_CARDS = [
+  { name: "Car rental", cap: 150, spent: 40, last: "7769", bg: "linear-gradient(135deg, #1B2B3A, #0A8F8A)", turn: "-9deg", shift: "-34px -20px" },
+  { name: "Hotel", cap: 200, spent: 120, last: "1881", bg: "linear-gradient(135deg, #0A8F8A, #0EC49A)", turn: "6deg", shift: "40px 14px" },
+  { name: "Cloud hosting", cap: 50, spent: 32, last: "4242", bg: "linear-gradient(135deg, #0C1F2E, #17405C)", turn: "-2deg", shift: "0px 48px" },
+];
+
+function HeroCards() {
+  return (
+    <div className="pp-card-stack" aria-label="Sample capped cards: cloud hosting, hotel and car rental" role="img">
+      {HERO_CARDS.map((c) => (
+        <div key={c.name} className="pp-vcard" style={{ background: c.bg, rotate: c.turn, translate: c.shift }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontFamily: typography.heading, fontWeight: 700, letterSpacing: "-0.01em" }}>PayProxy</span>
+            <span style={{ fontSize: 12, opacity: 0.85 }}>Virtual · Sample</span>
+          </div>
+          <div className="pp-vcard-chip" />
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
+              <span style={{ fontWeight: 700 }}>{c.name}</span>
+              <span style={{ opacity: 0.9 }}>
+                ${c.spent} of ${c.cap} cap
+              </span>
+            </div>
+            <div className="pp-vcard-meter">
+              <span style={{ width: `${Math.round((c.spent / c.cap) * 100)}%` }} />
+            </div>
+            <div style={{ fontSize: 14, letterSpacing: "0.16em", marginTop: 10, opacity: 0.9 }}>•••• {c.last}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void; onTryDemo?: () => void }) {
+  const { onGetStarted, onSignIn, onTryDemo } = props;
   void theme;
 
   const focusStyle = ":focus-visible{outline:3px solid " + colors.midnight + ";outline-offset:2px}";
@@ -14,7 +48,6 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         background: colors.page,
         color: colors.ink,
         fontFamily: typography.body,
-        minHeight: "100vh",
       }}
     >
       <style>{".pp-btn-mint" + focusStyle + ".pp-btn-secondary" + focusStyle + "a" + focusStyle + "button" + focusStyle}</style>
@@ -22,69 +55,39 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       {/* 1 hero */}
       <section className="pp-hero" style={{ background: colors.page, padding: spacing.xxl + " " + spacing.lg }}>
         <RevealOnScroll delayMs={0}>
-          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
-            <p
-              style={{
-                display: "inline-block",
-                background: colors.surface,
-                border: "1px solid " + colors.line,
-                color: colors.muted,
-                borderRadius: radii.pill,
-                padding: "6px 12px",
-                fontSize: 13,
-                fontFamily: typography.body,
-                margin: "0 0 " + spacing.md,
-              }}
-            >
-              Test mode
-            </p>
-            <h1 style={{ fontFamily: typography.heading, fontSize: 40, lineHeight: 1.1, margin: "0 0 " + spacing.md, color: colors.ink }}>
-              PayProxy virtual cards with spending caps
-            </h1>
-            <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 17, lineHeight: 1.6, maxWidth: 560, margin: "0 0 " + spacing.lg }}>
-              For people turned away by card not accepted. Create a capped virtual card for the services that only take
-              traditional bank cards, and pay with confidence.
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md }}>
-              <button
-                type="button"
-                className="pp-btn-mint"
-                onClick={onGetStarted}
-                style={{
-                  background: colors.mint,
-                  color: colors.midnight,
-                  border: "none",
-                  borderRadius: radii.pill,
-                  padding: "12px 22px",
-                  fontFamily: typography.body,
-                  fontWeight: 700,
-                  fontSize: 16,
-                  cursor: "pointer",
-                  boxShadow: shadows.soft,
-                }}
-              >
-                Get started
-              </button>
-              <button
-                type="button"
-                className="pp-btn-secondary"
-                onClick={onSignIn}
-                style={{
-                  background: colors.surface,
-                  color: colors.ink,
-                  border: "1px solid " + colors.line,
-                  borderRadius: radii.pill,
-                  padding: "12px 22px",
-                  fontFamily: typography.body,
-                  fontWeight: 600,
-                  fontSize: 16,
-                  cursor: "pointer",
-                }}
-              >
-                Sign in
-              </button>
+          <div className="pp-hero-grid">
+            <div>
+              <h1 className="pp-hero-title">Pay where your card gets declined.</h1>
+              <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 18, lineHeight: 1.6, maxWidth: 540, margin: "0 0 " + spacing.lg }}>
+                Cloud hosting, hotels and car rentals often turn away Cash App, Chime and prepaid cards. PayProxy gives you a
+                virtual card for each one, with its own spending cap, so you pay with confidence and never overspend.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
+                <button
+                  type="button"
+                  className="pp-btn-mint"
+                  onClick={onGetStarted}
+                  style={{ background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "14px 26px", fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: shadows.soft }}
+                >
+                  Get started
+                </button>
+                <button
+                  type="button"
+                  className="pp-btn-secondary"
+                  onClick={onTryDemo}
+                  style={{ background: colors.surface, color: colors.ink, border: "1px solid " + colors.line, borderRadius: radii.pill, padding: "14px 26px", fontFamily: typography.body, fontWeight: 600, fontSize: 16, cursor: "pointer" }}
+                >
+                  Try the demo
+                </button>
+              </div>
+              <p style={{ color: colors.muted, fontSize: 14, margin: spacing.md + " 0 0" }}>
+                Already have an account?{" "}
+                <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 14, cursor: "pointer", textDecoration: "underline" }}>
+                  Sign in
+                </button>
+              </p>
             </div>
-            <p style={{ color: colors.muted, fontSize: 13, margin: spacing.md + " 0 0" }}>No real money moves.</p>
+            <HeroCards />
           </div>
         </RevealOnScroll>
       </section>
@@ -193,10 +196,6 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
-      {/* 8 test-mode footer note */}
-      <footer style={{ background: colors.page, padding: spacing.lg, textAlign: "center", borderTop: "1px solid " + colors.line }}>
-        <p style={{ color: colors.muted, fontSize: 13, margin: 0, fontFamily: typography.body }}>{testModeMessage}</p>
-      </footer>
     </div>
   );
 }

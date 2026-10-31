@@ -11,17 +11,12 @@ import { AddMoneyScreen } from "@/modules/ui/screens/AddMoneyScreen";
 import { SnapBillScreen } from "@/modules/ui/screens/SnapBillScreen";
 import { AssistantScreen } from "@/modules/ui/screens/AssistantScreen";
 import { SettingsScreen } from "@/modules/ui/screens/SettingsScreen";
-import { StylesScreen } from "@/modules/ui/screens/StylesScreen";
-import { ThemeScreen } from "@/modules/ui/screens/ThemeScreen";
 import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
-import { ProviderInfoScreen } from "@/modules/ui/screens/ProviderInfoScreen";
-import { FormatScreen } from "@/modules/ui/screens/FormatScreen";
 import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
-import { AppShellScreen } from "@/modules/ui/screens/AppShellScreen";
 import type { AppScreen } from "@/modules/ui/types";
 import type { BillScanResult } from "@/modules/ui/types";
 
-type ShowcaseScreen = "styles" | "theme" | "demo-data" | "provider" | "format" | "alerts" | "app-shell";
+type ShowcaseScreen = "demo-data" | "alerts";
 type Screen = AppScreen | ShowcaseScreen;
 
 function InnerApp() {
@@ -73,7 +68,7 @@ function InnerApp() {
 
   function renderScreen() {
     if (screen === "welcome") {
-      return <WelcomeScreen onGetStarted={handleGetStarted} onSignIn={handleSignIn} />;
+      return <WelcomeScreen onGetStarted={handleGetStarted} onSignIn={handleSignIn} onTryDemo={() => setScreen("demo-data")} />;
     }
     if (screen === "auth") {
       return <AuthScreen />;
@@ -102,26 +97,11 @@ function InnerApp() {
     if (screen === "settings") {
       return <SettingsScreen onSignOut={handleSignOut} onBack={handleBackToDashboard} />;
     }
-    if (screen === "styles") {
-      return <StylesScreen />;
-    }
-    if (screen === "theme") {
-      return <ThemeScreen />;
-    }
     if (screen === "demo-data") {
       return <DemoDataScreen />;
     }
-    if (screen === "provider") {
-      return <ProviderInfoScreen />;
-    }
-    if (screen === "format") {
-      return <FormatScreen />;
-    }
     if (screen === "alerts") {
       return <AlertsScreen />;
-    }
-    if (screen === "app-shell") {
-      return <AppShellScreen />;
     }
     return (
       <DashboardScreen
@@ -134,7 +114,6 @@ function InnerApp() {
 
   return (
     <AppShell current={screen} onNavigate={onNavigate}>
-      <p role="note">Test mode: demo only, no real money moves.</p>
       {renderScreen()}
     </AppShell>
   );

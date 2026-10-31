@@ -6,21 +6,15 @@ void theme;
 
 type NavEntry = { value: AppScreen | string; label: string };
 
+// The pages a visitor uses. The home page is the PayProxy name at the top left.
 const navEntries: NavEntry[] = [
-  { value: "welcome", label: "Welcome" },
   { value: "dashboard", label: "Dashboard" },
   { value: "add-money", label: "Add money" },
   { value: "create-card", label: "Create card" },
-  { value: "snap-bill", label: "Snap bill" },
+  { value: "snap-bill", label: "Snap a bill" },
   { value: "assistant", label: "Assistant" },
-  { value: "settings", label: "Settings" },
-  { value: "styles", label: "Styles" },
-  { value: "theme", label: "Theme" },
-  { value: "demo-data", label: "Demo data" },
-  { value: "provider", label: "Provider" },
-  { value: "format", label: "Format" },
   { value: "alerts", label: "Alerts" },
-  { value: "app-shell", label: "App shell" },
+  { value: "settings", label: "Settings" },
 ];
 
 const footerLinkStyle: React.CSSProperties = {
@@ -45,6 +39,7 @@ export function AppShell(props: {
   ledger?: React.ReactNode;
 }) {
   const { current, onNavigate, children, ledger } = props;
+  const [open, setOpen] = React.useState(false);
 
   return (
     <div
@@ -69,74 +64,37 @@ export function AppShell(props: {
           boxShadow: shadows.soft,
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(180px, 320px) 1fr",
-            gap: spacing.md,
-            alignItems: "center",
-            maxWidth: "1120px",
-            margin: "0 auto",
-            paddingTop: spacing.md,
-            paddingBottom: spacing.md,
-            paddingLeft: spacing.lg,
-            paddingRight: spacing.lg,
-          }}
-        >
+        <div className="pp-header-row">
           <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
-            <span
-              style={{
-                fontFamily: typography.heading,
-                fontWeight: 700,
-                fontSize: "20px",
-                letterSpacing: "-0.02em",
-                color: colors.ink,
+            <button
+              type="button"
+              onClick={(): void => {
+                setOpen(false);
+                onNavigate("welcome");
               }}
+              aria-label="PayProxy home"
+              style={{ background: "transparent", border: 0, padding: 0, cursor: "pointer", fontFamily: typography.heading, fontWeight: 700, fontSize: "22px", letterSpacing: "-0.02em", color: colors.ink }}
             >
               PayProxy
-            </span>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                backgroundColor: colors.mint,
-                color: colors.midnight,
-                borderRadius: radii.pill,
-                paddingTop: spacing.sm,
-                paddingBottom: spacing.sm,
-                paddingLeft: spacing.md,
-                paddingRight: spacing.md,
-                fontFamily: typography.body,
-                fontSize: "12px",
-                fontWeight: 700,
-              }}
-            >
-              Test mode
-            </span>
+            </button>
+            <span className="pp-test-pill">Test mode</span>
           </div>
-          <nav aria-label="Primary" style={{ display: "flex", flexWrap: "wrap", gap: spacing.sm }}>
+          <button type="button" className="pp-menu-toggle" aria-expanded={open} aria-controls="pp-nav" onClick={(): void => setOpen(!open)}>
+            {open ? "Close" : "Menu"}
+          </button>
+          <nav id="pp-nav" aria-label="Primary" className={open ? "pp-nav is-open" : "pp-nav"}>
             {navEntries.map((entry: NavEntry) => {
               const active: boolean = current === entry.value;
               return (
                 <button
                   key={entry.value}
                   type="button"
-                  onClick={(): void => onNavigate(entry.value)}
-                  aria-current={active ? "page" : undefined}
-                  style={{
-                    borderRadius: radii.pill,
-                    border: `1px solid ${active ? colors.mint : colors.line}`,
-                    backgroundColor: active ? colors.mint : colors.surface,
-                    color: active ? colors.midnight : colors.muted,
-                    fontFamily: typography.body,
-                    fontSize: "13px",
-                    fontWeight: active ? 700 : 500,
-                    paddingTop: spacing.sm,
-                    paddingBottom: spacing.sm,
-                    paddingLeft: spacing.md,
-                    paddingRight: spacing.md,
-                    cursor: "pointer",
+                  className={active ? "pp-nav-link is-active" : "pp-nav-link"}
+                  onClick={(): void => {
+                    setOpen(false);
+                    onNavigate(entry.value);
                   }}
+                  aria-current={active ? "page" : undefined}
                 >
                   {entry.label}
                 </button>
@@ -203,12 +161,12 @@ export function AppShell(props: {
             paddingLeft: spacing.lg,
             paddingRight: spacing.lg,
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
             gap: spacing.lg,
           }}
         >
           <div>
-            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0` }}>
+            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0`, color: "#FFFFFF" }}>
               Product
             </h2>
             <button type="button" onClick={(): void => onNavigate("dashboard")} style={footerLinkStyle}>
@@ -225,7 +183,7 @@ export function AppShell(props: {
             </button>
           </div>
           <div>
-            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0` }}>
+            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0`, color: "#FFFFFF" }}>
               Help
             </h2>
             <button type="button" onClick={(): void => onNavigate("assistant")} style={footerLinkStyle}>
@@ -239,7 +197,7 @@ export function AppShell(props: {
             </button>
           </div>
           <div>
-            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0` }}>
+            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0`, color: "#FFFFFF" }}>
               Test mode
             </h2>
             <p style={{ fontFamily: typography.body, fontSize: "14px", lineHeight: 1.6, margin: 0, opacity: 0.9 }}>
@@ -250,17 +208,14 @@ export function AppShell(props: {
             </button>
           </div>
           <div>
-            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0` }}>
+            <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0`, color: "#FFFFFF" }}>
               About
             </h2>
             <p style={{ fontFamily: typography.body, fontSize: "14px", lineHeight: 1.6, margin: 0, opacity: 0.9 }}>
               Calm, capped spending for travel and everyday checkout.
             </p>
             <button type="button" onClick={(): void => onNavigate("welcome")} style={footerLinkStyle}>
-              Welcome
-            </button>
-            <button type="button" onClick={(): void => onNavigate("provider")} style={footerLinkStyle}>
-              Provider
+              Home
             </button>
           </div>
         </div>
@@ -281,10 +236,7 @@ export function AppShell(props: {
             opacity: 0.8,
           }}
         >
-          <span>PayProxy · Test mode · No real money</span>
-          <span style={{ borderRadius: radii.card, border: `1px solid ${colors.line}`, padding: `2px ${spacing.sm}` }}>
-            Calm shell
-          </span>
+          <span>© PayProxy · Test mode: sample money only</span>
         </div>
       </footer>
     </div>
