@@ -1,6 +1,6 @@
 import "./styles.css";
 import { useState } from "react";
-import { PayProxyProvider } from "@/modules/ui/state/PayProxyProvider";
+import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { AppShell } from "@/modules/ui/components/AppShell";
 import { WelcomeScreen } from "@/modules/ui/screens/WelcomeScreen";
 import { AuthScreen } from "@/modules/ui/screens/AuthScreen";
@@ -13,108 +13,76 @@ import { AssistantScreen } from "@/modules/ui/screens/AssistantScreen";
 import { SettingsScreen } from "@/modules/ui/screens/SettingsScreen";
 import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
 import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
+import { CheckoutScreen } from "@/modules/ui/screens/CheckoutScreen";
 import type { AppScreen } from "@/modules/ui/types";
-import type { BillScanResult } from "@/modules/ui/types";
 
-type ShowcaseScreen = "demo-data" | "alerts";
-type Screen = AppScreen | ShowcaseScreen;
+/** The pages anyone can see; every other page needs an account or the demo. */
+const OPEN: AppScreen[] = ["welcome", "auth", "signup"];
 
 function InnerApp() {
-  const [screen, setScreen] = useState<Screen>("welcome");
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard } = usePayProxy();
+  const [question, setQuestion] = useState<string | undefined>(undefined);
 
-  function onNavigate(next: AppScreen | string): void {
-    setScreen(next as Screen);
+  function go(next: AppScreen | string): void {
+    clearNotice();
+    setScreen(next as AppScreen);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+  function openCard(cardId: string): void {
+    selectCard(cardId);
+    go("card-detail");
+  }
+  function ask(q: string): void {
+    setQuestion(q);
+    go("assistant");
   }
 
-  function handleOpenCard(cardId: string): void {
-    setSelectedCardId(cardId);
-    setScreen("card-detail");
-  }
-
-  function handleAddMoney(): void {
-    setScreen("add-money");
-  }
-
-  function handleCreateCard(): void {
-    setScreen("create-card");
-  }
-
-  function handleCreated(cardId: string): void {
-    setSelectedCardId(cardId);
-    setScreen("card-detail");
-  }
-
-  function handleMakeCard(_bill: BillScanResult): void {
-    setScreen("create-card");
-  }
-
-  function handleBackToDashboard(): void {
-    setScreen("dashboard");
-  }
-
-  function handleGetStarted(): void {
-    setScreen("auth");
-  }
-
-  function handleSignIn(): void {
-    setScreen("auth");
-  }
-
-  function handleSignOut(): void {
-    setSelectedCardId(null);
-    setScreen("welcome");
-  }
-
-  function renderScreen() {
-    if (screen === "welcome") {
-      return <WelcomeScreen onGetStarted={handleGetStarted} onSignIn={handleSignIn} onTryDemo={() => setScreen("demo-data")} />;
+  function page() {
+    if (screen === "welcome") return <WelcomeScreen onGetStarted={() => go("signup")} onSignIn={() => go("auth")} onTryDemo={signInDemo} />;
+    if (!ready) return <p style={{ padding: 24 }}>Loading your account…</p>;
+    if (screen === "auth" || screen === "signup") return <AuthScreen key={screen} startWith={screen === "signup" ? "signup" : "signin"} />;
+    if (mode === "guest" && !OPEN.includes(screen)) return <AuthScreen startWith="signin" />;
+    switch (screen) {
+      case "card-detail":
+        return <CardDetailScreen cardId={selectedCardId ?? ""} onBack={() => go("dashboard")} onAddMoney={() => go("add-money")} />;
+      case "create-card":
+        return <CreateCardScreen onCreated={openCard} onCancel={() => go("dashboard")} />;
+      case "add-money":
+        return <AddMoneyScreen onDone={() => go("dashboard")} onCancel={() => go("dashboard")} />;
+      case "snap-bill":
+        return <SnapBillScreen onMakeCard={() => go("create-card")} onCancel={() => go("dashboard")} />;
+      case "assistant":
+        return <AssistantScreen key={question ?? "assistant"} initialPrompt={question} />;
+      case "settings":
+        return <SettingsScreen onSignOut={() => go("welcome")} onBack={() => go("dashboard")} />;
+      case "checkout":
+        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} />;
+      case "alerts":
+        return <AlertsScreen />;
+      case "demo-data":
+        return <DemoDataScreen />;
+      default:
+        return <DashboardScreen onOpenCard={openCard} onAddMoney={() => go("add-money")} onCreateCard={() => go("create-card")} />;
     }
-    if (screen === "auth") {
-      return <AuthScreen />;
-    }
-    if (screen === "card-detail") {
-      return (
-        <CardDetailScreen
-          cardId={selectedCardId ?? ""}
-          onBack={handleBackToDashboard}
-          onAddMoney={handleAddMoney}
-        />
-      );
-    }
-    if (screen === "create-card") {
-      return <CreateCardScreen onCreated={handleCreated} onCancel={handleBackToDashboard} />;
-    }
-    if (screen === "add-money") {
-      return <AddMoneyScreen onDone={handleBackToDashboard} onCancel={handleBackToDashboard} />;
-    }
-    if (screen === "snap-bill") {
-      return <SnapBillScreen onMakeCard={handleMakeCard} onCancel={handleBackToDashboard} />;
-    }
-    if (screen === "assistant") {
-      return <AssistantScreen />;
-    }
-    if (screen === "settings") {
-      return <SettingsScreen onSignOut={handleSignOut} onBack={handleBackToDashboard} />;
-    }
-    if (screen === "demo-data") {
-      return <DemoDataScreen />;
-    }
-    if (screen === "alerts") {
-      return <AlertsScreen />;
-    }
-    return (
-      <DashboardScreen
-        onOpenCard={handleOpenCard}
-        onAddMoney={handleAddMoney}
-        onCreateCard={handleCreateCard}
-      />
-    );
   }
 
   return (
-    <AppShell current={screen} onNavigate={onNavigate}>
-      {renderScreen()}
+    <AppShell current={screen} onNavigate={go}>
+      {mode === "demo" && screen !== "welcome" && (
+        <p role="note" style={{ background: "#FFF6E5", border: "1px solid #F5D08A", borderRadius: 10, padding: "10px 14px", margin: "0 0 16px", fontSize: 14 }}>
+          You're in the demo: nothing is saved.{" "}
+          <button type="button" onClick={() => go("signup")} style={{ background: "transparent", border: 0, padding: 0, fontWeight: 700, textDecoration: "underline", cursor: "pointer", fontSize: 14 }}>
+            Create a free account
+          </button>{" "}
+          to keep your cards and ask the AI.
+        </p>
+      )}
+      {notice && (
+        <p role="alert" style={{ background: "#FFF5F4", border: "1px solid #F4B4AE", borderRadius: 10, padding: "10px 14px", margin: "0 0 16px", fontSize: 14, color: "#B42318" }}>
+          {notice}
+        </p>
+      )}
+      {page()}
     </AppShell>
   );
 }

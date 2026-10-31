@@ -6,6 +6,7 @@ import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { formatCurrency, formatDate } from "@/modules/ui/lib/format";
 import type { BillScanResult } from "@/modules/ui/types";
 import { demoUser, demoBalance, demoCards, demoTransactions } from "@/modules/ui/data/demoData";
+import { accessToken } from "@/modules/ui/lib/supabase";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
 export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => void; onCancel?: () => void }) {
@@ -118,34 +119,48 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     void (async function (): Promise<void> {
       try {
         const image: string | null = await shrinkToDataUrl(file);
-        let payload: { messages: Array<{ role: string; content: string }>; image?: string } = {
-          messages: [{ role: "user", content: "Read this bill photo. Return JSON with amountCents, store, dueDate." }],
-        };
-        if (image) {
-          payload = { messages: payload.messages, image: image };
-        }
-        try {
-          await fetch("/api/ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-        } catch {
-          // fall through to demo result
-        }
         const due: Date = new Date(Date.now() + 14 * 86400000);
-        const iso: string = due.toISOString().slice(0, 10);
-        const demo: BillScanResult = {
+        let scan: BillScanResult = {
           id: "scan_" + String(Date.now()),
-          storeName: "Demo Store",
+          storeName: "Sample bill",
           amountCents: 4500,
-          dueDate: iso,
-          confidence: "medium",
+          dueDate: due.toISOString().slice(0, 10),
+          confidence: "low",
         };
+        // Muse Spark reads the photo (signed-in people only); without an account, a sample result shows instead.
+        const token: string | null = await accessToken();
+        if (token && image) {
+          const res: Response = await fetch("/api/ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify({
+              system: "You read photos of bills and invoices. Reply with JSON only, no other words: {\"store\": string, \"amountDollars\": number, \"dueDate\": \"YYYY-MM-DD\" or null, \"confidence\": \"high\"|\"medium\"|\"low\"}.",
+              messages: [{ role: "user", content: "Read this bill: who is it from, the total due, and the due date." }],
+              image: image,
+            }),
+          });
+          const data = (await res.json().catch(function () { return {}; })) as { text?: unknown; error?: unknown };
+          if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "The AI couldn't read that photo.");
+          const raw: string = typeof data.text === "string" ? data.text : "";
+          const json = /\{[\s\S]*\}/.exec(raw);
+          const read = json ? (JSON.parse(json[0]) as { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown }) : {};
+          const dollars: number = Number(read.amountDollars);
+          if (typeof read.store !== "string" || !Number.isFinite(dollars) || dollars <= 0) throw new Error("The AI couldn't find a store and an amount on that photo. Try a clearer one.");
+          scan = {
+            id: "scan_" + String(Date.now()),
+            storeName: read.store.slice(0, 60),
+            amountCents: Math.round(dollars * 100),
+            dueDate: typeof read.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : scan.dueDate,
+            confidence: read.confidence === "high" || read.confidence === "medium" ? read.confidence : "low",
+          };
+        } else {
+          setError("Sign in to have the AI read your bill. Showing a sample result.");
+        }
+        const demo: BillScanResult = scan;
         setLastScan(demo);
         setResult(demo);
-      } catch {
-        setError("Could not read the bill. Please try again.");
+      } catch (e: unknown) {
+        setError(e instanceof Error && e.message ? e.message : "Could not read the bill. Please try again.");
       } finally {
         setIsBusy(false);
       }

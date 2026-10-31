@@ -1,6 +1,8 @@
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { accessToken } from "@/modules/ui/lib/supabase";
+import { MERCHANTS, methodLabel } from "@/modules/ui/lib/sandbox";
 import { assistantStarters } from "@/modules/ui/data/demoData";
 import type { AssistantMessage } from "@/modules/ui/types";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
@@ -89,8 +91,7 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
 }
 
 export function AssistantScreen(props: { initialPrompt?: string }) {
-  const { cards, transactions, user } = usePayProxy();
-  void user;
+  const { cards, transactions, payments, balance, mode } = usePayProxy();
   const [messages, setMessages] = useState<ChatMsg[]>(function () {
     const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your PayProxy helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.";
     return [makeMsg("assistant", first)];
@@ -147,23 +148,37 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
     }) : undefined;
     const label: string = snapTxn ? cardLabelFor(snapTxn.cardId) : "your card";
     let reply: string = buildLocalReply(trimmed, snapTxn, snapCard, label);
+    // What Muse Spark is told: what PayProxy is, the sandbox merchants' rules, and this person's own cards and tries.
+    const system: string = [
+      "You are PayProxy's money assistant. PayProxy is a sandbox with sample money only: no real card, bank or merchant is involved.",
+      "PayProxy gives people whose Cash App, Chime, debit or prepaid cards get declined a virtual card per service, with its own spending cap, that runs as a credit card and is paid from their PayProxy wallet.",
+      "Answer in plain, friendly words, in 2 to 5 short sentences: why it happened and the one or two things to do next. Never invent rules beyond the ones below.",
+      "Merchant rules: " + MERCHANTS.map(function (m) { return m.name + " (" + m.kind + "): " + m.rule; }).join(" "),
+      "Wallet: " + cents(balance.availableCents) + " sample money.",
+      "Cards: " + (cards.length ? cards.slice(0, 8).map(function (c) { return c.name + " cap " + cents(c.capCents) + ", spent " + cents(c.spentCents) + ", " + c.status; }).join("; ") : "none yet") + ".",
+      "Recent tries: " + (payments.length ? payments.slice(0, 6).map(function (p) { return cents(p.amountCents) + " at " + p.merchant + " with " + methodLabel(p.method) + ": " + p.result + (p.reason ? " (" + p.reason + ")" : ""); }).join("; ") : "none") + ".",
+    ].join(" ").slice(0, 2000);
+    const history = messages.slice(-6).map(function (m) { return { role: m.role, content: m.text.slice(0, 1000) }; });
     try {
+      const token: string | null = mode === "live" ? await accessToken() : null;
+      if (!token) throw new Error(mode === "demo" ? "The AI answers signed-in people. Create a free account to ask it; here's a quick explanation for now." : "Sign in to ask the AI; here's a quick explanation for now.");
       const res: Response = await fetch("/api/ai", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
         body: JSON.stringify({
+          system,
           messages: [
+            ...history,
             { role: "user", content: trimmed + (snapTxn ? " Context: " + snapTxn.storeName + " " + cents(snapTxn.amountCents) + " on " + day(snapTxn.occurredAt) + ", reason: " + (snapTxn.reason || "declined") : "") },
           ],
         }),
       });
-      if (res.ok) {
-        const data = (await res.json()) as { text?: unknown };
-        if (data && typeof data.text === "string" && data.text.trim().length > 0) reply = data.text;
-      }
+      const data = (await res.json().catch(function () { return {}; })) as { text?: unknown; error?: unknown };
+      if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "The AI couldn't answer right now.");
+      if (typeof data.text === "string" && data.text.trim().length > 0) reply = data.text;
     } catch (e) {
-      const msg: string = e instanceof Error && e.message ? e.message : "Assistant is unavailable right now. Here is a plain-words guess.";
-      setError(msg + " Showing a local plain-words explanation instead.");
+      const msg: string = e instanceof Error && e.message ? e.message : "Assistant is unavailable right now.";
+      setError(msg);
       reply = buildLocalReply(trimmed, snapTxn, snapCard, label);
     }
     const am: ChatMsg = makeMsg("assistant", reply);

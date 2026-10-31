@@ -1,6 +1,7 @@
 import * as React from "react";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 import type { AppScreen } from "@/modules/ui/types";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 
 void theme;
 
@@ -9,6 +10,7 @@ type NavEntry = { value: AppScreen | string; label: string };
 // The pages a visitor uses. The home page is the PayProxy name at the top left.
 const navEntries: NavEntry[] = [
   { value: "dashboard", label: "Dashboard" },
+  { value: "checkout", label: "Test checkout" },
   { value: "add-money", label: "Add money" },
   { value: "create-card", label: "Create card" },
   { value: "snap-bill", label: "Snap a bill" },
@@ -40,6 +42,7 @@ export function AppShell(props: {
 }) {
   const { current, onNavigate, children, ledger } = props;
   const [open, setOpen] = React.useState(false);
+  const { mode, signOut } = usePayProxy();
 
   return (
     <div
@@ -100,6 +103,16 @@ export function AppShell(props: {
                 </button>
               );
             })}
+            {mode === "guest" ? (
+              <>
+                <button type="button" className="pp-nav-link" onClick={(): void => { setOpen(false); onNavigate("auth"); }}>Sign in</button>
+                <button type="button" className="pp-nav-link is-active" onClick={(): void => { setOpen(false); onNavigate("signup"); }}>Create account</button>
+              </>
+            ) : (
+              <button type="button" className="pp-nav-link" onClick={(): void => { setOpen(false); void signOut(); }}>
+                {mode === "demo" ? "Leave demo" : "Sign out"}
+              </button>
+            )}
           </nav>
         </div>
       </header>
@@ -180,6 +193,9 @@ export function AppShell(props: {
             </button>
             <button type="button" onClick={(): void => onNavigate("snap-bill")} style={footerLinkStyle}>
               Snap a bill
+            </button>
+            <button type="button" onClick={(): void => onNavigate("checkout")} style={footerLinkStyle}>
+              Test checkout
             </button>
           </div>
           <div>

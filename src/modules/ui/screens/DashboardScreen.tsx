@@ -160,9 +160,6 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
               ))}
             </div>
           )}
-          <p style={{ fontFamily: typography.body, color: colors.midnightInk, backgroundColor: colors.midnight, borderRadius: radii.card, padding: spacing.md, margin: 0, fontSize: 13 }}>
-            Midnight ledger keeps capped spending tidy.
-          </p>
         </section>
       </div>
     </div>

@@ -343,6 +343,25 @@ a {
   background: #7CF2D2;
 }
 
+/* The sample card that sits over the hero picture's corner. */
+.pp-hero-float {
+  position: absolute;
+  left: -20px;
+  bottom: -28px;
+  width: min(300px, 70vw);
+  rotate: -4deg;
+}
+.pp-hero-float .pp-vcard {
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .pp-hero-float {
+    left: 8px;
+    bottom: -36px;
+    scale: 0.85;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

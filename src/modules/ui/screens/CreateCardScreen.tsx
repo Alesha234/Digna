@@ -28,11 +28,11 @@ export function CreateCardScreen(props: CreateCardScreenProps) {
   const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
 
-  function handleSubmit(input: CreateInput): void {
+  async function handleSubmit(input: CreateInput): Promise<void> {
     setIsSubmitting(true);
     setServerError(null);
     try {
-      const created = createCard(input);
+      const created = await createCard(input);
       setIsSubmitting(false);
       if (onCreated) {
         onCreated(created.id);

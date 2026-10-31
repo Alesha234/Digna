@@ -55,4 +55,4 @@ export type AssistantMessage = {
   createdAt: string;
 };
 
-export type AppScreen = 'welcome' | 'auth' | 'dashboard' | 'card-detail' | 'create-card' | 'add-money' | 'snap-bill' | 'assistant' | 'settings';
+export type AppScreen = 'welcome' | 'auth' | 'signup' | 'dashboard' | 'card-detail' | 'create-card' | 'add-money' | 'snap-bill' | 'assistant' | 'settings' | 'checkout' | 'alerts' | 'demo-data';

@@ -78,8 +78,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
     if (err !== null || next === null) return;
     setSubmitting(true);
     try {
-      await Promise.resolve();
-      addMoneyCents(next);
+      await addMoneyCents(next);
       setAddedCents(next);
     } catch (err2: unknown) {
       const msg: string = err2 instanceof Error && err2.message ? err2.message : "Something went wrong. Try again.";

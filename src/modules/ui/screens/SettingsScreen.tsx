@@ -63,7 +63,7 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
   const [warnExpiring, setWarnExpiring] = useState<boolean>(true);
 
   function handleSignOut(): void {
-    signOut();
+    void signOut();
     if (typeof props.onSignOut === "function") {
       props.onSignOut();
     }

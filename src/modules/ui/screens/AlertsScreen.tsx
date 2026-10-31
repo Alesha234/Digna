@@ -2,15 +2,17 @@ import { useMemo, useState } from "react";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { WarningBanner } from "@/modules/ui/components/WarningBanner";
 import { isNearCap, isExpiringSoon, isLowBalance, buildWarnings } from "@/modules/ui/lib/alerts";
-import { demoBalance, demoCards, testModeMessage } from "@/modules/ui/data/demoData";
+import { testModeMessage } from "@/modules/ui/data/demoData";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
 export function AlertsScreen() {
   const [enabled, setEnabled] = useState<boolean>(false);
+  const { cards: demoCards, balance: demoBalance } = usePayProxy();
 
   const warnings = useMemo(function () {
     return buildWarnings(demoCards, demoBalance);
-  }, []);
+  }, [demoCards, demoBalance]);
 
   const lowBalance: boolean = isLowBalance(demoBalance);
   const nearCapCount: number = demoCards.filter(function (card) {
