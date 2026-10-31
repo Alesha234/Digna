@@ -1,3 +1,4 @@
+import type { VirtualCard } from "@/modules/ui/types";
 /**
  * The sandbox checkout's merchants and cards, the same ones the database's sandbox_merchants() and sandbox_pay()
  * use. Everything is sample money: no real card, bank or payment network is ever contacted. The database decides
@@ -63,3 +64,67 @@ export function decide(
   if (!merchant.accepts.includes(kind)) return { result: "declined", reason: `${merchant.name} doesn't take ${kind} cards. ${merchant.rule}`, code: "other" };
   return { result: "approved", reason: null, code: null };
 }
+
+/** The practice wallet: sample everyday cards anyone can type in at a sample checkout (the database's practice_wallet()).
+ *  These are payment companies' published test numbers, so they can never charge a real account. */
+export const PRACTICE_WALLET: { method: Exclude<PayMethod, "payproxy">; label: string; kind: CardKind; number: string; exp: string; cvc: string }[] = [
+  { method: "chime_debit", label: "Chime debit card (sample)", kind: "debit", number: "4000056655665556", exp: "12/29", cvc: "123" },
+  { method: "cash_app_card", label: "Cash App Card (sample)", kind: "debit", number: "5200828282828210", exp: "08/29", cvc: "456" },
+  { method: "prepaid_card", label: "Prepaid card (sample)", kind: "prepaid", number: "5105105105105100", exp: "04/28", cvc: "789" },
+  { method: "chime_credit_builder", label: "Chime Credit Builder (sample)", kind: "credit", number: "4242424242424242", exp: "10/30", cvc: "321" },
+];
+
+export const digitsOnly = (s: string) => s.replace(/\D/g, "");
+
+/** 4000 0012 3456 7890, as people read card numbers. */
+export const formatCardNumber = (s: string) => digitsOnly(s).slice(0, 19).replace(/(\d{4})(?=\d)/g, "$1 ");
+
+/** Visa or Mastercard, from the first digit, as checkout forms show it. */
+export const brandOf = (s: string): "Visa" | "Mastercard" | null => {
+  const d = digitsOnly(s);
+  if (d.startsWith("4")) return "Visa";
+  if (/^(5[1-5]|2[2-7])/.test(d)) return "Mastercard";
+  return null;
+};
+
+/** The card number's own check digit, so typos are caught before paying, like real checkouts do. */
+export function luhnOk(s: string): boolean {
+  const d = digitsOnly(s);
+  if (d.length < 13 || d.length > 19) return false;
+  let sum = 0;
+  for (let i = 0; i < d.length; i++) {
+    let n = Number(d[d.length - 1 - i]);
+    if (i % 2 === 1) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+  }
+  return sum % 10 === 0;
+}
+
+export type CheckoutForm = { name: string; number: string; exp: string; cvc: string; zip: string };
+export type CheckoutOutcome = { result: "approved" | "declined"; reason: string | null; code: string | null; method: PayMethod; cardId: string | null; cardName: string; last4: string };
+
+/** Plain-words problems with a typed card, before anything is sent; null when it looks complete. */
+export function formProblem(f: CheckoutForm): string | null {
+  if (f.name.trim().length < 2) return "Enter the name on the card.";
+  if (!luhnOk(f.number)) return "That card number doesn't look right. Check it and try again.";
+  if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(f.exp.replace(/\s/g, ""))) return "Enter the expiry date as MM/YY.";
+  if (!/^\d{3,4}$/.test(f.cvc)) return "Enter the 3-digit security code from the card.";
+  if (!/^\d{5}$/.test(f.zip)) return "Enter a 5-digit ZIP code.";
+  return null;
+}
+
+/** The sample account's copy of checkout_pay: which card was typed, and whether its expiry and code match. */
+export function matchCard(f: CheckoutForm, cards: VirtualCard[]): { method: PayMethod; card: VirtualCard | null; label: string; detailsOk: boolean } | null {
+  const number = digitsOnly(f.number);
+  const exp = f.exp.replace(/\s/g, "");
+  const own = cards.find((c) => c.cardNumber === number);
+  if (own) return { method: "payproxy", card: own, label: own.name, detailsOk: own.exp === exp && own.cvc === f.cvc };
+  const sample = PRACTICE_WALLET.find((c) => c.number === number);
+  if (sample) return { method: sample.method, card: null, label: sample.label, detailsOk: sample.exp === exp && sample.cvc === f.cvc };
+  return null;
+}
+
+export const DETAILS_MISMATCH = "The expiry date or security code doesn't match this card. Check them and try again.";

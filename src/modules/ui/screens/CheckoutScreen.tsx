@@ -1,76 +1,208 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
-import { MERCHANTS, OUTSIDE_METHODS, methodLabel, type PayMethod } from "@/modules/ui/lib/sandbox";
+import {
+  MERCHANTS,
+  PRACTICE_WALLET,
+  brandOf,
+  formProblem,
+  formatCardNumber,
+  methodLabel,
+  digitsOnly,
+  type CheckoutForm,
+  type CheckoutOutcome,
+} from "@/modules/ui/lib/sandbox";
+import type { VirtualCard } from "@/modules/ui/types";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
 
 const box: React.CSSProperties = { background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20 };
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+const field: React.CSSProperties = { padding: "12px 14px", borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 16, width: "100%", boxSizing: "border-box", fontFamily: typography.body, background: "#FFFFFF" };
+const labelStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 };
+const pill = (primary: boolean): React.CSSProperties => ({
+  background: primary ? colors.mint : colors.surface,
+  color: colors.midnight,
+  border: primary ? 0 : `1px solid ${colors.line}`,
+  borderRadius: radii.pill,
+  padding: "10px 18px",
+  fontWeight: primary ? 700 : 600,
+  fontSize: 14,
+  cursor: "pointer",
+});
+
+/** What each sample business sells, so its checkout reads like a real one. */
+const SHOP: Record<string, { picture: string; button: string; orders: { label: string; cents: number }[] }> = {
+  nimbus_cloud: { picture: "cloud", button: "Pay", orders: [{ label: "Starter plan, this month's bill", cents: 3200 }, { label: "Pro plan, this month's bill", cents: 18000 }] },
+  harborview_hotel: { picture: "hotel", button: "Place hold of", orders: [{ label: "Deposit hold at check-in, 1 night", cents: 15000 }, { label: "Deposit hold at check-in, 3 nights", cents: 42000 }] },
+  roadready_rentals: { picture: "rental", button: "Place hold of", orders: [{ label: "Security deposit, compact car", cents: 20000 }, { label: "Security deposit, SUV", cents: 35000 }] },
+  streambox: { picture: "stream", button: "Pay", orders: [{ label: "Monthly plan", cents: 1599 }, { label: "Yearly plan", cents: 15999 }] },
+};
+
+const EMPTY: CheckoutForm = { name: "", number: "", exp: "", cvc: "", zip: "" };
+
+/** A sample business's picture by Meta's Muse Image, shown once it has loaded; a soft gradient until then. */
+function BizPicture({ name }: { name: string }) {
+  const [ok, setOk] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #FFF3D6, #DDEAF3)" }}>
+      {mounted && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={`/api/picture/${name}`} alt="" onLoad={() => setOk(true)} onError={() => setOk(false)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: ok ? 1 : 0, transition: "opacity .4s" }} />
+      )}
+    </div>
+  );
+}
+
+function copy(text: string): void {
+  try {
+    void navigator.clipboard?.writeText(text);
+  } catch {
+    /* copying is a convenience only */
+  }
+}
+
+/** One card in the practice wallet: its details to type in (or copy), and a button that fills them in. */
+function WalletCard(props: { title: string; sub: string; number: string; exp: string; cvc: string; dark?: boolean; hidden?: boolean; onUse: () => void }) {
+  const [show, setShow] = useState(!props.hidden);
+  const ink = props.dark ? "#FFFFFF" : colors.ink;
+  const muted = props.dark ? "#C9CFDB" : colors.muted;
+  const small: React.CSSProperties = { background: "transparent", border: 0, padding: 0, color: props.dark ? "#FFC94D" : colors.mintDark, fontWeight: 700, fontSize: 12, cursor: "pointer" };
+  return (
+    <div style={{ borderRadius: 14, padding: 14, background: props.dark ? "linear-gradient(135deg, #0E1726, #17405C)" : colors.page, border: props.dark ? 0 : `1px solid ${colors.line}`, color: ink }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+        <strong style={{ fontSize: 15 }}>{props.title}</strong>
+        <span style={{ fontSize: 12, color: muted }}>{brandOf(props.number)} · {props.sub}</span>
+      </div>
+      <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 15, letterSpacing: 1, margin: "10px 0 6px" }}>
+        {show ? formatCardNumber(props.number) : `•••• •••• •••• ${props.number.slice(-4)}`}
+        {show && <button type="button" style={{ ...small, marginLeft: 8 }} onClick={() => copy(props.number)} aria-label={`Copy the card number for ${props.title}`}>Copy</button>}
+      </div>
+      <div style={{ display: "flex", gap: 14, fontSize: 13, color: muted, flexWrap: "wrap", alignItems: "center" }}>
+        <span>Expires <strong style={{ color: ink }}>{show ? props.exp : "••/••"}</strong></span>
+        <span>Code <strong style={{ color: ink }}>{show ? props.cvc : "•••"}</strong></span>
+        {props.hidden && <button type="button" style={small} onClick={() => setShow(!show)}>{show ? "Hide" : "Show details"}</button>}
+        <button type="button" style={{ ...small, marginLeft: "auto" }} onClick={props.onUse} aria-label={`Fill in ${props.title}`}>Fill in for me</button>
+      </div>
+    </div>
+  );
+}
 
 /**
- * "Try paying": pick a place, an amount and a card, and see what a real checkout would say. Everyday cards are samples
- * checked against the place's rule; Digna cards also follow their limits and the wallet.
+ * "Try paying": a sample business's own checkout page. People type a card in, the way they would anywhere: one of
+ * their Digna cards (its details are on the card's page and in the wallet here) or a sample everyday card from the
+ * practice wallet. The database checks the card, its expiry and code, the business's rules, the card's limit and the
+ * wallet, then answers like a real checkout, with Digna's plain-words reason and a fix when it says no.
  */
 export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void; onAddMoney?: () => void }) {
-  const { cards, payments, pay, balance, mode, setCardLimit } = usePayProxy();
+  const { cards, payments, balance, mode, checkout, setCardLimit } = usePayProxy();
   const [merchantId, setMerchantId] = useState(MERCHANTS[0].id);
   const merchant = MERCHANTS.find((m) => m.id === merchantId)!;
-  const [amount, setAmount] = useState((merchant.suggestCents / 100).toFixed(2));
-  const usable = cards.filter((c) => c.status !== "closed");
-  const [method, setMethod] = useState<string>("chime_debit");
+  const shop = SHOP[merchantId];
+  const [orderIx, setOrderIx] = useState(0);
+  const amountCents = shop.orders[orderIx].cents;
+  const [form, setForm] = useState<CheckoutForm>(EMPTY);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [last, setLast] = useState<{ result: "approved" | "declined"; reason: string | null; code: string | null; cardId: string | null; merchant: string; amountCents: number; label: string } | null>(null);
+  const [last, setLast] = useState<(CheckoutOutcome & { merchant: string; amountCents: number; receipt: string; at: string }) | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
+  // The latest checkout, so a retry right after raising a limit uses the raised limit.
+  const checkoutRef = useRef(checkout);
+  checkoutRef.current = checkout;
+  const cardsRef = useRef(cards);
+  cardsRef.current = cards;
+  const usable = cards.filter((c) => c.status !== "closed" && c.cardNumber);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 7000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   function pickMerchant(id: string): void {
     setMerchantId(id);
-    setAmount((MERCHANTS.find((m) => m.id === id)!.suggestCents / 100).toFixed(2));
+    setOrderIx(0);
+    setLast(null);
+    setError(null);
+  }
+  function set<K extends keyof CheckoutForm>(k: K, v: string): void {
+    setForm((f) => ({ ...f, [k]: v }));
+    setError(null);
+  }
+  function fill(number: string, exp: string, cvc: string): void {
+    setForm((f) => ({ name: f.name || "Alex Rivera", number: formatCardNumber(number), exp, cvc, zip: f.zip || "10001" }));
+    setError(null);
     setLast(null);
   }
 
-  async function onPay(): Promise<void> {
-    setError(null);
-    const cents = Math.round(Number(amount) * 100);
-    if (!Number.isFinite(cents) || cents <= 0 || cents > 500000) return setError("Enter an amount between $0.01 and $5,000.");
-    const isCard = method.startsWith("card:");
-    const cardId = isCard ? method.slice(5) : null;
-    const payMethod: PayMethod = isCard ? "payproxy" : (method as PayMethod);
+  async function run(f: CheckoutForm, cents: number): Promise<void> {
     setBusy(true);
+    setError(null);
+    const started = Date.now();
     try {
-      const out = await pay(merchantId, cents, payMethod, cardId);
-      setLast({ ...out, cardId, merchant: merchant.name, amountCents: cents, label: methodLabel(payMethod, cards.find((c) => c.id === cardId)?.name) });
+      const out = await checkoutRef.current(merchantId, cents, f);
+      // A real card network takes a moment; so does this one, so the answer doesn't feel instant and fake.
+      await new Promise((r) => setTimeout(r, Math.max(0, 1300 - (Date.now() - started))));
+      const at = new Date();
+      setLast({ ...out, merchant: merchant.name, amountCents: cents, receipt: `DG-${at.getTime().toString(36).toUpperCase().slice(-8)}`, at: at.toLocaleString() });
+      if (out.method === "payproxy") {
+        // By now the card has been read back after the payment, so what's left is what the database holds.
+        const card = cardsRef.current.find((c) => c.id === out.cardId);
+        const left = card ? card.capCents - card.spentCents : null;
+        setToast(
+          out.result === "approved"
+            ? `${out.cardName}: ${money(cents)} at ${merchant.name} approved.${left !== null ? ` ${money(Math.max(0, left))} left on this card.` : ""}`
+            : `${out.cardName}: ${money(cents)} at ${merchant.name} declined. Tap the checkout to see why.`,
+        );
+      }
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
     } catch (e: unknown) {
+      await new Promise((r) => setTimeout(r, Math.max(0, 600 - (Date.now() - started))));
       setError(e instanceof Error ? e.message : "That payment didn't go through on our side. Try again.");
     } finally {
       setBusy(false);
     }
   }
 
-  // When a Digna card is declined for its limit, it can be raised on the spot, but only if the wallet really has the money.
-  const lastCard = last?.cardId ? cards.find((c) => c.id === last.cardId) : undefined;
+  async function onPay(event: React.FormEvent): Promise<void> {
+    event.preventDefault();
+    const problem = formProblem({ ...form, exp: form.exp.replace(/\s/g, "") });
+    if (problem) return setError(problem);
+    setLast(null);
+    await run(form, amountCents);
+  }
+
+  // A limit decline on a Digna card can be fixed on the spot, but only if the wallet really has the money.
+  const lastCard: VirtualCard | undefined = last?.cardId ? cards.find((c) => c.id === last.cardId) : undefined;
   const raiseTo = last && lastCard && last.code === "over_cap" ? lastCard.spentCents + last.amountCents : null;
   const canRaise = raiseTo !== null && last !== null && raiseTo <= 1_000_000 && last.amountCents <= balance.availableCents;
 
   async function raiseAndRetry(): Promise<void> {
     if (!last || !lastCard || raiseTo === null) return;
-    setError(null);
     setBusy(true);
     try {
       await setCardLimit(lastCard.id, raiseTo);
-      const out = await pay(merchantId, last.amountCents, "payproxy", lastCard.id);
-      setLast({ ...last, ...out });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "The limit couldn't be changed. Try again.");
-    } finally {
       setBusy(false);
+      return setError(e instanceof Error ? e.message : "The limit couldn't be changed. Try again.");
     }
+    const cents = last.amountCents;
+    setLast(null);
+    await new Promise((r) => setTimeout(r, 0));
+    await run(form, cents);
   }
 
+  const brand = brandOf(form.number);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: typography.body, color: colors.ink }}>
+      <style>{`.pp-co-grid{display:grid;gap:20px;grid-template-columns:1fr}@media(min-width:900px){.pp-co-grid{grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);align-items:start}}.pp-co-row{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr}@media(max-width:520px){.pp-co-row{grid-template-columns:1fr 1fr}}@keyframes pp-spin{to{transform:rotate(360deg)}}@keyframes pp-toast{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}`}</style>
+
       <header>
         <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Try paying</h1>
-        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6, maxWidth: 680 }}>
-          Pay the kinds of places that often turn away debit and prepaid cards, and see exactly what they'd say and why. Pick a place, an amount and a card, then press Pay. It's all practice money: nothing real is charged.
+        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6, maxWidth: 720 }}>
+          Pick a place, then pay at its checkout just like you would for real: type in a card from your wallet on the right. You'll see exactly what the place says, and why. It's all practice money, so nothing real is charged.
         </p>
       </header>
 
@@ -85,86 +217,182 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
             </button>
           ))}
         </div>
-        <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>
-          <strong style={{ color: colors.ink }}>What it accepts:</strong> {merchant.rule} This is a sample business; real places' rules vary.
-        </p>
       </section>
 
-      <section aria-label="Amount and card" style={box}>
-        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>2. How much, and with which card?</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 }}>
-            Amount (USD)
-            <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 16 }} />
-          </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 }}>
-            Card
-            <select value={method} onChange={(e) => setMethod(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 16, background: colors.surface }}>
-              <optgroup label="Everyday cards (examples)">
-                {OUTSIDE_METHODS.map((m) => (
-                  <option key={m.id} value={m.id}>{m.label} · {m.kind}</option>
-                ))}
-              </optgroup>
-              <optgroup label="Your Digna cards">
-                {usable.map((c) => (
-                  <option key={c.id} value={`card:${c.id}`}>{c.name} ···· {c.last4} · {money(c.capCents - c.spentCents)} left{c.status === "frozen" ? " · frozen" : ""}</option>
-                ))}
-              </optgroup>
-            </select>
-          </label>
-        </div>
-        {usable.length === 0 && (
-          <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>
-            You have no Digna cards yet.{" "}
-            <button type="button" onClick={props.onCreateCard} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Make a Digna card</button>
-            , then come back.
-          </p>
-        )}
-        <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>Your wallet: {money(balance.availableCents)} in practice money{mode === "demo" ? " (sample account)" : ""}.</p>
-        {error && <p role="alert" style={{ color: "#B42318", margin: "12px 0 0" }}>{error}</p>}
-        <button type="button" onClick={onPay} disabled={busy} style={{ marginTop: 16, background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "14px 28px", fontWeight: 700, fontSize: 16, cursor: busy ? "wait" : "pointer" }}>
-          {busy ? "Paying…" : `Pay ${merchant.name}`}
-        </button>
-      </section>
+      <div className="pp-co-grid">
+        {/* The business's checkout page */}
+        <section aria-label={`${merchant.name} checkout`} style={{ ...box, padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: "8px 16px", fontSize: 12, color: colors.muted, background: colors.page, borderBottom: `1px solid ${colors.line}` }}>
+            Sample business · practice checkout
+          </div>
+          <div style={{ position: "relative", height: 150 }}>
+            <BizPicture name={shop.picture} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,23,38,0) 30%, rgba(14,23,38,0.75))" }} />
+            <div style={{ position: "absolute", left: 20, bottom: 14, color: "#FFFFFF" }}>
+              <div style={{ fontFamily: typography.heading, fontSize: 24, fontWeight: 700 }}>{merchant.name}</div>
+              <div style={{ fontSize: 13, opacity: 0.9 }}>{merchant.kind}</div>
+            </div>
+          </div>
 
-      {last && (
-        <section role="status" aria-label="Result" style={{ ...box, borderColor: last.result === "approved" ? "#12B76A" : "#F4B4AE", background: last.result === "approved" ? "#F0FBF7" : "#FFF5F4" }}>
-          <h2 style={{ fontFamily: typography.heading, fontSize: 22, margin: "0 0 6px" }}>{last.result === "approved" ? "Approved. Your money's good here." : "Declined. Here's why."}</h2>
-          <p style={{ margin: 0, lineHeight: 1.6 }}>
-            {money(last.amountCents)} at {last.merchant} with your {last.label}. {last.reason ?? "It went through."}
-          </p>
-          {last.result === "declined" && canRaise && raiseTo !== null && (
-            <button type="button" onClick={() => void raiseAndRetry()} disabled={busy}
-              style={{ marginTop: 12, marginRight: 10, background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "10px 18px", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>
-              Raise this card's limit to {money(raiseTo)} and try again
-            </button>
-          )}
-          {last.result === "declined" && (last.code === "insufficient_balance" || (last.code === "over_cap" && !canRaise)) && props.onAddMoney && (
-            <>
-              {last.code === "over_cap" && (
-                <p style={{ margin: "10px 0 0", fontSize: 14, color: colors.muted }}>
-                  Your wallet has {money(balance.availableCents)}, not enough to cover {money(last.amountCents)}. Add money first, then raise the limit.
-                </p>
-              )}
-              <button type="button" onClick={props.onAddMoney}
-                style={{ marginTop: 12, marginRight: 10, background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "10px 18px", fontWeight: 700, cursor: "pointer" }}>
-                Add money
+          <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 18 }}>
+            <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+              <legend style={{ fontFamily: typography.heading, fontSize: 17, fontWeight: 700, marginBottom: 10 }}>Your order</legend>
+              {shop.orders.map((o, i) => (
+                <label key={o.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "12px 14px", marginBottom: 8, borderRadius: 10, cursor: "pointer", border: `1px solid ${i === orderIx ? colors.mint : colors.line}`, background: i === orderIx ? "#FFF9EB" : colors.surface }}>
+                  <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <input type="radio" name="order" checked={i === orderIx} onChange={() => { setOrderIx(i); setLast(null); }} />
+                    {o.label}
+                  </span>
+                  <strong>{money(o.cents)}</strong>
+                </label>
+              ))}
+              <p style={{ margin: "6px 0 0", fontSize: 13, color: colors.muted }}>
+                <strong style={{ color: colors.ink }}>Cards it takes:</strong> {merchant.rule}
+              </p>
+            </fieldset>
+
+            <form onSubmit={(e) => void onPay(e)} noValidate aria-label="Card details" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h3 style={{ fontFamily: typography.heading, fontSize: 17, margin: 0 }}>Pay by card</h3>
+                <span style={{ fontSize: 12, color: colors.muted, display: "flex", gap: 10, alignItems: "baseline" }}>
+                  {brand ? `${brand} card` : "Visa · Mastercard"}
+                  <a href="#pp-wallet" style={{ color: colors.mintDark, fontWeight: 700 }}>Use a card from your wallet</a>
+                </span>
+              </div>
+              <label style={labelStyle}>
+                Name on card
+                <input style={field} autoComplete="off" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Alex Rivera" />
+              </label>
+              <label style={labelStyle}>
+                Card number
+                <input style={{ ...field, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: 1 }} inputMode="numeric" autoComplete="off"
+                  value={form.number} onChange={(e) => set("number", formatCardNumber(e.target.value))} placeholder="1234 5678 9012 3456" />
+              </label>
+              <div className="pp-co-row">
+                <label style={labelStyle}>
+                  Expiry
+                  <input style={field} inputMode="numeric" autoComplete="off" placeholder="MM/YY" value={form.exp}
+                    onChange={(e) => {
+                      const d = digitsOnly(e.target.value).slice(0, 4);
+                      set("exp", d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d);
+                    }} />
+                </label>
+                <label style={labelStyle}>
+                  Security code
+                  <input style={field} inputMode="numeric" autoComplete="off" placeholder="123" value={form.cvc} onChange={(e) => set("cvc", digitsOnly(e.target.value).slice(0, 4))} />
+                </label>
+                <label style={labelStyle}>
+                  ZIP code
+                  <input style={field} inputMode="numeric" autoComplete="off" placeholder="10001" value={form.zip} onChange={(e) => set("zip", digitsOnly(e.target.value).slice(0, 5))} />
+                </label>
+              </div>
+              {error && <p role="alert" style={{ color: "#B42318", margin: 0 }}>{error}</p>}
+              <button type="submit" disabled={busy} style={{ background: colors.midnight, color: "#FFFFFF", border: 0, borderRadius: 12, padding: "15px 20px", fontWeight: 700, fontSize: 16, cursor: busy ? "wait" : "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
+                {busy ? (
+                  <>
+                    <span aria-hidden style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,0.35)", borderTopColor: "#FFFFFF", borderRadius: "50%", animation: "pp-spin .8s linear infinite" }} />
+                    Processing…
+                  </>
+                ) : (
+                  `${shop.button} ${money(amountCents)}`
+                )}
               </button>
-            </>
-          )}
-          {last.result === "declined" && props.onAskAssistant && (
-            <button type="button" onClick={() => props.onAskAssistant?.(`Why was my ${money(last.amountCents)} payment to ${last.merchant} with my ${last.label} declined, and what should I do?`)}
-              style={{ marginTop: 12, background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.pill, padding: "10px 18px", fontWeight: 600, cursor: "pointer" }}>
-              Ask the money assistant why
-            </button>
-          )}
+              <p style={{ margin: 0, fontSize: 12, color: colors.muted, textAlign: "center" }}>Practice checkout: no real card is charged.</p>
+            </form>
+
+            {last && (
+              <div ref={resultRef} role="status" aria-label="Result" style={{ borderRadius: 14, padding: 18, border: `1px solid ${last.result === "approved" ? "#12B76A" : "#F4B4AE"}`, background: last.result === "approved" ? "#F0FBF7" : "#FFF5F4" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <span aria-hidden style={{ width: 30, height: 30, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#FFFFFF", fontWeight: 800, background: last.result === "approved" ? "#12B76A" : "#D92D20" }}>
+                    {last.result === "approved" ? "✓" : "!"}
+                  </span>
+                  <h3 style={{ fontFamily: typography.heading, fontSize: 20, margin: 0 }}>
+                    {last.result === "approved" ? (shop.button === "Pay" ? "Payment approved" : "Hold approved") : "Your card was declined"}
+                  </h3>
+                </div>
+                {last.result === "approved" ? (
+                  <>
+                    <p style={{ margin: "0 0 10px", fontWeight: 600, color: "#067647" }}>Your money's good here.</p>
+                    <dl style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 14px", margin: 0, fontSize: 14 }}>
+                      <dt style={{ color: colors.muted }}>Paid to</dt><dd style={{ margin: 0 }}>{last.merchant}</dd>
+                      <dt style={{ color: colors.muted }}>Amount</dt><dd style={{ margin: 0 }}>{money(last.amountCents)}</dd>
+                      <dt style={{ color: colors.muted }}>Card</dt><dd style={{ margin: 0 }}>{last.method === "payproxy" ? `Digna card: ${last.cardName}` : last.cardName} ···· {last.last4}</dd>
+                      <dt style={{ color: colors.muted }}>Receipt</dt><dd style={{ margin: 0, fontFamily: "ui-monospace, Menlo, monospace" }}>{last.receipt}</dd>
+                      <dt style={{ color: colors.muted }}>When</dt><dd style={{ margin: 0 }}>{last.at}</dd>
+                    </dl>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ margin: "0 0 4px", lineHeight: 1.6 }}>
+                      {money(last.amountCents)} at {last.merchant} with your {last.method === "payproxy" ? `Digna card: ${last.cardName}` : last.cardName} ···· {last.last4}.
+                    </p>
+                    <p style={{ margin: 0, lineHeight: 1.6 }}><strong>Why:</strong> {last.reason}</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 14 }}>
+                      {canRaise && raiseTo !== null && (
+                        <button type="button" onClick={() => void raiseAndRetry()} disabled={busy} style={pill(true)}>
+                          Raise this card's limit to {money(raiseTo)} and try again
+                        </button>
+                      )}
+                      {(last.code === "insufficient_balance" || (last.code === "over_cap" && !canRaise)) && props.onAddMoney && (
+                        <button type="button" onClick={props.onAddMoney} style={pill(true)}>Add money</button>
+                      )}
+                      {last.code === "other" && last.method !== "payproxy" && usable.length > 0 && (
+                        <button type="button" onClick={() => fill(usable[0].cardNumber!, usable[0].exp ?? "", usable[0].cvc ?? "")} style={pill(true)}>
+                          Try my Digna card instead
+                        </button>
+                      )}
+                      {props.onAskAssistant && (
+                        <button type="button" style={pill(false)}
+                          onClick={() => props.onAskAssistant?.(`Why was my ${money(last.amountCents)} payment to ${last.merchant} with my ${last.cardName} declined, and what should I do?`)}>
+                          Ask the money assistant
+                        </button>
+                      )}
+                    </div>
+                    {last.code === "over_cap" && !canRaise && (
+                      <p style={{ margin: "10px 0 0", fontSize: 14, color: colors.muted }}>
+                        Your wallet has {money(balance.availableCents)}, not enough to cover {money(last.amountCents)}. Add money first, then raise the limit.
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </section>
-      )}
+
+        {/* The practice wallet */}
+        <aside id="pp-wallet" aria-label="Your practice wallet" style={{ ...box, scrollMarginTop: 120, display: "flex", flexDirection: "column", gap: 12 }}>
+          <div>
+            <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 4px" }}>Your practice wallet</h2>
+            <p style={{ margin: 0, fontSize: 13, color: colors.muted, lineHeight: 1.5 }}>
+              Type these into the checkout like a real card, or tap Fill in for me. Wallet: {money(balance.availableCents)} in practice money{mode === "demo" ? " (sample account)" : ""}.
+            </p>
+          </div>
+          <h3 style={{ fontSize: 14, margin: "6px 0 0" }}>Your Digna cards</h3>
+          {usable.length === 0 ? (
+            <p style={{ margin: 0, fontSize: 14, color: colors.muted }}>
+              You have no Digna cards yet.{" "}
+              <button type="button" onClick={props.onCreateCard} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Make one</button>
+              , then come back.
+            </p>
+          ) : (
+            usable.map((c) => (
+              <WalletCard key={c.id} dark hidden title={c.name} sub={`${money(Math.max(0, c.capCents - c.spentCents))} left${c.status === "frozen" ? " · paused" : ""}`}
+                number={c.cardNumber!} exp={c.exp ?? ""} cvc={c.cvc ?? ""} onUse={() => fill(c.cardNumber!, c.exp ?? "", c.cvc ?? "")} />
+            ))
+          )}
+          <h3 style={{ fontSize: 14, margin: "6px 0 0" }}>Everyday cards (examples)</h3>
+          {PRACTICE_WALLET.map((c) => (
+            <WalletCard key={c.method} title={c.label.replace(" (sample)", "")} sub={c.kind} number={c.number} exp={c.exp} cvc={c.cvc} onUse={() => fill(c.number, c.exp, c.cvc)} />
+          ))}
+          <p style={{ margin: 0, fontSize: 12, color: colors.muted }}>Example cards stand in for the cards people already carry. They only work on Digna's practice checkouts.</p>
+        </aside>
+      </div>
 
       <section aria-label="Recent tries" style={box}>
-        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>Your recent tries</h2>
+        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>Your recent payments</h2>
         {payments.length === 0 ? (
-          <p style={{ margin: 0, color: colors.muted }}>Nothing yet. Your tries show here, approved or declined.</p>
+          <p style={{ margin: 0, color: colors.muted }}>Nothing yet. Your payments show here, approved or declined.</p>
         ) : (
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {payments.slice(0, 20).map((p) => (
@@ -181,6 +409,17 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
           </ul>
         )}
       </section>
+
+      {toast && (
+        <div role="status" aria-label="Digna notification" style={{ position: "fixed", top: 116, right: 16, left: "auto", maxWidth: 360, zIndex: 50, background: colors.midnight, color: "#FFFFFF", borderRadius: 14, padding: "12px 16px", boxShadow: "0 12px 30px rgba(14,23,38,0.35)", animation: "pp-toast .25s ease-out", display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <span aria-hidden style={{ width: 28, height: 28, borderRadius: 8, background: "#FFB020", color: colors.midnight, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" }}>D</span>
+          <span style={{ fontSize: 14, lineHeight: 1.45 }}>
+            <strong style={{ display: "block", fontSize: 12, opacity: 0.8 }}>Digna · now</strong>
+            {toast}
+          </span>
+          <button type="button" onClick={() => setToast(null)} aria-label="Dismiss" style={{ background: "transparent", border: 0, color: "#C9CFDB", cursor: "pointer", fontSize: 16, marginLeft: 4 }}>×</button>
+        </div>
+      )}
     </div>
   );
 }

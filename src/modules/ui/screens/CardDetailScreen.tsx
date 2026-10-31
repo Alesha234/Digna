@@ -18,6 +18,7 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
   const [limitBusy, setLimitBusy] = useState<boolean>(false);
   const [limitError, setLimitError] = useState<string | null>(null);
   const [limitDone, setLimitDone] = useState<string | null>(null);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
 
 
   const card: VirtualCard | undefined = cards.find((c: VirtualCard) => c.id === cardId);
@@ -231,6 +232,43 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
       <div>
         <SpendingMeter spentCents={found.spentCents} capCents={found.capCents} />
       </div>
+      {found.cardNumber && !isClosed ? (
+        <section
+          aria-label="Card number"
+          style={{ background: "linear-gradient(135deg, #0E1726, #17405C)", color: "#FFFFFF", borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
+            <h2 style={{ fontFamily: typography.heading, margin: 0, fontSize: 20, color: "#FFFFFF" }}>{found.name}</h2>
+            <span style={{ fontSize: 13, opacity: 0.8 }}>Digna · Visa · practice card</span>
+          </div>
+          <p style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 22, letterSpacing: 2, margin: "18px 0 10px" }}>
+            {showDetails ? found.cardNumber.replace(/(\d{4})(?=\d)/g, "$1 ") : "•••• •••• •••• " + found.last4}
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 20, fontSize: 14, alignItems: "center" }}>
+            <span>Expires <strong>{showDetails ? found.exp : "••/••"}</strong></span>
+            <span>Security code <strong>{showDetails ? found.cvc : "•••"}</strong></span>
+            <button
+              type="button"
+              onClick={() => setShowDetails(!showDetails)}
+              style={{ marginLeft: "auto", background: "#FFB020", color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "9px 16px", fontWeight: 700, cursor: "pointer" }}
+            >
+              {showDetails ? "Hide details" : "Show card details"}
+            </button>
+            {showDetails ? (
+              <button
+                type="button"
+                onClick={() => { try { void navigator.clipboard?.writeText(found.cardNumber ?? ""); } catch { /* copying is optional */ } }}
+                style={{ background: "transparent", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.4)", borderRadius: radii.pill, padding: "9px 16px", fontWeight: 600, cursor: "pointer" }}
+              >
+                Copy number
+              </button>
+            ) : null}
+          </div>
+          <p style={{ margin: "14px 0 0", fontSize: 13, color: "#C9CFDB" }}>
+            Use these details on Try paying, just like a real card. Practice card: it works only on Digna's practice checkouts.
+          </p>
+        </section>
+      ) : null}
       {!isClosed ? (
         <div>
           <section

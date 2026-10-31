@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 /**
- * The landing page's pictures, drawn by Meta's Muse Image with the app owner's own Meta key (META_API_KEY), from the
+ * The site's pictures (the landing page and the sample businesses' checkout pages), drawn by Meta's Muse Image with the app owner's own Meta key (META_API_KEY), from the
  * fixed descriptions below and nothing a visitor sends. Each is drawn once and kept (in memory and on the server's
  * disk), so it costs about $0.01 per picture per deploy (Meta's price), not per visitor. Follows Meta's docs:
  * POST /v1/images/generations, base64 WebP back in data[0].b64_json.
@@ -20,6 +20,7 @@ const PICTURES: Record<string, { size: string; describe: string }> = {
   cloud: { size: "1536x1024", describe: "A focused young developer at a laptop in a cozy apartment in the evening, setting up hosting for their app, a mug of tea beside them" },
   hotel: { size: "1536x1024", describe: "A traveler with a small suitcase at a bright modern hotel front desk, handing over a card to a friendly receptionist" },
   rental: { size: "1536x1024", describe: "Two friends at a car rental counter on a sunny day, one receiving car keys, both smiling" },
+  stream: { size: "1536x1024", describe: "A relaxed young adult on a couch at night with a bowl of popcorn, watching a movie on a TV, warm lamp light" },
 };
 
 const made = new Map<string, Promise<Uint8Array>>();

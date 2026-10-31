@@ -3,7 +3,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { PayProxyUser, WalletBalance, VirtualCard, CardTransaction, BillScanResult, AppScreen } from "@/modules/ui/types";
 import { demoUser, demoBalance, demoCards, demoTransactions } from "@/modules/ui/data/demoData";
 import { supabase, plainError } from "@/modules/ui/lib/supabase";
-import { MERCHANTS, decide, type PayMethod, type SandboxPayment } from "@/modules/ui/lib/sandbox";
+import { MERCHANTS, DETAILS_MISMATCH, decide, matchCard, type CheckoutForm, type CheckoutOutcome, type PayMethod, type SandboxPayment } from "@/modules/ui/lib/sandbox";
 
 /**
  * Digna's data: a real account in the app's own Supabase project ("live"), or the sample walk-through with no
@@ -45,6 +45,8 @@ type PayProxyContextValue = {
   /** Changes a card's limit: down to what it has spent at the least, and up only as far as the wallet covers. */
   setCardLimit(id: string, capCents: number): Promise<void>;
   pay(merchantId: string, amountCents: number, method: PayMethod, cardId?: string | null): Promise<PayOutcome>;
+  /** Pays at a sample business's checkout with a typed card: one of your Digna cards or a practice wallet card. */
+  checkout(merchantId: string, amountCents: number, form: CheckoutForm): Promise<CheckoutOutcome>;
   /** Emails a link to set a new password (Supabase sends it; it reaches people once the project has an email service). */
   requestPasswordReset(email: string): Promise<void>;
   /** Sets a new password for the person who opened that link (or who is signed in). */
@@ -81,6 +83,9 @@ function cardFrom(r: Row): VirtualCard {
     status: str(r.status) as VirtualCard["status"],
     endDate: str(r.end_date),
     createdAt: str(r.created_at),
+    cardNumber: r.card_number ? str(r.card_number) : undefined,
+    exp: r.exp_month ? `${String(r.exp_month).padStart(2, "0")}/${String(r.exp_year).padStart(2, "0")}` : undefined,
+    cvc: r.cvc ? str(r.cvc) : undefined,
   };
 }
 
@@ -189,12 +194,13 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
     const live = mode === "live";
     const sb = supabase();
     /** Runs one database function, then reads everything back; a refusal becomes a plain notice and is thrown. */
-    async function call(fn: string, args: Record<string, unknown>): Promise<Row> {
+    /** Runs one of the database's functions; quiet when the screen shows the problem itself (no banner too). */
+    async function call(fn: string, args: Record<string, unknown>, quiet = false): Promise<Row> {
       if (!sb) throw new Error("Digna's database isn't set up on this site yet.");
       const { data, error } = await sb.rpc(fn, args);
       if (error) {
         const msg = plainError(error);
-        setNotice(msg);
+        if (!quiet) setNotice(msg);
         throw new Error(msg);
       }
       await load();
@@ -203,7 +209,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
     function demoStatus(id: string, status: VirtualCard["status"]): void {
       setCards((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
     }
-    return {
+    const api: PayProxyContextValue = {
       mode,
       ready,
       user,
@@ -291,7 +297,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
       },
       async setCardLimit(id, capCents) {
         if (live) {
-          await call("set_card_limit", { p_card_id: id, p_cap_cents: capCents });
+          await call("set_card_limit", { p_card_id: id, p_cap_cents: capCents }, true);
           return;
         }
         const card = cards.find((c) => c.id === id);
@@ -325,6 +331,32 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         setPayments((prev) => [{ id: `demo-pay-${Date.now()}`, merchantId, merchant: merchant.name, amountCents, method, cardId: card?.id ?? null, result: out.result, reason: out.reason, createdAt: at }, ...prev]);
         return out;
       },
+      async checkout(merchantId, amountCents, form) {
+        if (live) {
+          const out = await call("checkout_pay", { p_merchant_id: merchantId, p_amount_cents: amountCents, p_number: form.number, p_exp: form.exp, p_cvc: form.cvc, p_name: form.name, p_zip: form.zip }, true);
+          return {
+            result: str(out.result) as "approved" | "declined",
+            reason: out.reason ? str(out.reason) : null,
+            code: out.code ? str(out.code) : null,
+            method: str(out.method) as PayMethod,
+            cardId: out.card_id ? str(out.card_id) : null,
+            cardName: str(out.card_name),
+            last4: str(out.last4),
+          };
+        }
+        const merchant = MERCHANTS.find((m) => m.id === merchantId);
+        if (!merchant) throw new Error("Pick one of the places to pay.");
+        const match = matchCard(form, cards);
+        if (!match) throw new Error("This card number isn't one of your Digna cards or a practice wallet card. Copy one from your wallet and try again.");
+        const last4 = form.number.replace(/\D/g, "").slice(-4);
+        if (!match.detailsOk) {
+          const at = new Date().toISOString();
+          setPayments((prev) => [{ id: `demo-pay-${Date.now()}`, merchantId, merchant: merchant.name, amountCents, method: match.method, cardId: match.card?.id ?? null, result: "declined", reason: DETAILS_MISMATCH, createdAt: at }, ...prev]);
+          return { result: "declined", reason: DETAILS_MISMATCH, code: "card_details", method: match.method, cardId: match.card?.id ?? null, cardName: match.label, last4 };
+        }
+        const out = await api.pay(merchantId, amountCents, match.method, match.card?.id ?? null);
+        return { ...out, method: match.method, cardId: match.card?.id ?? null, cardName: match.label, last4 };
+      },
       async requestPasswordReset(email) {
         if (!sb) throw new Error("Accounts aren't set up on this site yet.");
         const { error } = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
@@ -356,6 +388,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
       },
       setLastScan,
     };
+    return api;
   }, [mode, ready, user, balance, cards, transactions, payments, screen, selectedCardId, lastScan, notice, load, enter]);
 
   return <PayProxyContext.Provider value={value}>{props.children}</PayProxyContext.Provider>;
