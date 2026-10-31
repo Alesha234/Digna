@@ -1,0 +1,120 @@
+{
+  "id": "live-card-panel",
+  "title": "Live Card Panel",
+  "version": "clear-mint-v1",
+  "audience": "Designers, product managers, and engineers working with VirtualCardView in Dashboard and Card Detail flows",
+  "objectives": [
+    "Recognize the live card panel as a light crisp card floating on the midnight ledger band for contrast and focus",
+    "Interpret the readable hierarchy of name, masked number, cap, end date, and Freeze/Unfreeze/Close status actions",
+    "Explain the cap meter and warnings as visual-only linkage that mirrors existing logic without change",
+    "Apply phone behavior rules: vertical stacking, 44pt tap targets, and no horizontal scroll"
+  ],
+  "sections": [
+    {
+      "id": "panel-on-dark",
+      "title": "Panel on Dark: Midnight Ledger Band",
+      "bodyMarkdown": "The live card sits as a light, crisp rectangle floating on a deep midnight ledger band that spans the width of the view. The dark band creates quiet contrast, letting the card’s edge, subtle shadow, and rounded corners read instantly without competing noise. Motion is restrained: the card fades and lifts slightly on appear, settling quickly with no bounce, keeping focus on the band itself. Spacing around the card breathes, so the midnight background frames rather than crowds. On light surroundings, the band anchors the eye downward, guiding attention to the active card as the single source of truth. The panel does not mimic a carousel or stack; it presents one clear card at a time, centered and stable. Glare is avoided with soft, matte surfaces and gentle elevation only. The result feels like a tray designed to hold one card perfectly.",
+      "analogy": "Transit card resting on a dark velvet tray under a soft spotlight - the tray recedes, the card pops.",
+      "pitch30s": "Think dark tray, light card. The midnight band isolates one crisp card so your eye lands instantly, with no carousel clutter.",
+      "keyPoints": [
+        "Light crisp card floats centered on full-width midnight ledger band for maximum contrast",
+        "Subtle shadow and rounded corners signal elevation; motion is a soft fade-and-lift only",
+        "One card at a time, framed by breathing space, not a carousel or stack"
+      ],
+      "quiz": [
+        {
+          "question": "What is the purpose of the midnight ledger band?",
+          "options": ["To display multiple cards in a carousel", "To provide high-contrast framing that isolates the single live card", "To replace the card detail screen", "To animate the background continuously"],
+          "answerIndex": 1,
+          "explanation": "The dark band frames and isolates the light card, creating contrast and focus without carousel behavior."
+        },
+        {
+          "question": "How should motion behave for the panel on dark?",
+          "options": ["Bouncy carousel slide", "Restrained fade and slight lift with quick settle", "Parallax scrolling", "Continuous shimmer"],
+          "answerIndex": 1,
+          "explanation": "Motion is minimal - a quick fade-and-lift settles fast to keep focus on contrast, not animation."
+        }
+      ]
+    },
+    {
+      "id": "readable-hierarchy",
+      "title": "Readable Hierarchy: Name, Number, Cap, Status",
+      "bodyMarkdown": "The card’s information is arranged for instant scanning from top to bottom. The card name leads in stronger weight, such as Google Cloud or Hotel trip, anchoring identity at a glance. Beneath it, the masked number appears in a lighter, monospaced style that signals it is reference-only, not to be copied. Cap and end date sit together as supporting details, clearly secondary but still aligned on a clean grid with generous line spacing. Status actions Freeze, Unfreeze, and Close remain in their familiar placement and wording; nothing moves or renames, preserving muscle memory. Visual hierarchy uses size and contrast rather than color alone, so primary and secondary levels stay distinct even in quick glances. Transitions between states are subtle, with a soft cross-fade that confirms change without flashing or shifting layout. The overall impression is calm, ordered, and effortless to read in a second.",
+      "analogy": "Hotel key sleeve - name on top in bold, number below in faint type, dates tucked neatly at the bottom.",
+      "pitch30s": "Name first, number faint, cap and date together, actions stay put. Size and contrast do the work, not color.",
+      "keyPoints": [
+        "Name leads heaviest (e.g., Google Cloud, Hotel trip); masked number is lighter monospaced reference",
+        "Cap and end date are secondary, grid-aligned with airy line spacing",
+        "Freeze/Unfreeze/Close stay in familiar place and wording; hierarchy uses size/contrast, not color alone"
+      ],
+      "quiz": [
+        {
+          "question": "Where does the card name appear in the hierarchy?",
+          "options": ["Hidden in a menu", "At the top in strongest weight like Google Cloud or Hotel trip", "Below the cap meter in small type", "Only after tapping"],
+          "answerIndex": 1,
+          "explanation": "The name anchors the top in heaviest weight for instant identity recognition."
+        },
+        {
+          "question": "What is unchanged about status actions?",
+          "options": ["They are removed on mobile", "Freeze/Unfreeze/Close keep same placement and wording with subtle cross-fade", "They change color to indicate status only", "They move to a carousel"],
+          "answerIndex": 1,
+          "explanation": "Status actions preserve muscle memory; only a soft cross-fade confirms state change."
+        }
+      ]
+    },
+    {
+      "id": "cap-meter-warnings",
+      "title": "Cap Meter and Warnings: Visual Only",
+      "bodyMarkdown": "The spend cap is shown as a thin, calm meter anchored near the card details, translating the existing cap logic into a glanceable visual without altering any rules. The track is muted against the card’s light surface, while the fill progresses smoothly from left to right as spend approaches the limit, using gentle easing rather than abrupt jumps. Warning states are communicated through changes in contrast and accompanying iconography, never relying on color as the sole signal, and always paired with clear text. The meter does not animate continuously; it settles after a brief, purposeful fill motion that confirms the current position. Spacing keeps the meter distinct from numbers, so the eye can reference amount and proportion separately. Logic, thresholds, and enforcement remain exactly as before—the meter simply mirrors them. This visual linkage makes proximity to the cap instantly felt, reducing surprise while preserving trust that underlying behavior is unchanged and predictable.",
+      "analogy": "Fuel gauge beside the odometer - same engine rules, just a needle that mirrors how close you are to empty.",
+      "pitch30s": "The meter is a mirror, not new math. It fills gently left to right, warnings use icon plus text, logic stays untouched.",
+      "keyPoints": [
+        "Thin meter near details mirrors existing cap logic; track muted, fill eases left to right",
+        "Warnings pair icon and text with contrast change, never color alone",
+        "Brief fill motion then settles; thresholds and enforcement unchanged"
+      ],
+      "quiz": [
+        {
+          "question": "What does the cap meter change?",
+          "options": ["It changes the cap enforcement thresholds", "Nothing - it visually mirrors existing logic without altering rules", "It auto-increases the cap", "It replaces the spend amount"],
+          "answerIndex": 1,
+          "explanation": "The meter is visual only; logic, thresholds, and enforcement remain exactly as before."
+        },
+        {
+          "question": "How are warning states communicated?",
+          "options": ["Color alone on the fill", "Contrast change plus iconography and clear text", "Vibration only", "Hiding the cap number"],
+          "answerIndex": 1,
+          "explanation": "Warnings use contrast, icon, and text together for accessible, glanceable feedback."
+        }
+      ]
+    },
+    {
+      "id": "phone-behavior",
+      "title": "Phone Behavior: Stack, Tap, No Scroll",
+      "bodyMarkdown": "On phones, the midnight band and card stack vertically with the ledger content, never requiring sideways scrolling to reveal information. The live card remains full-width within comfortable margins, softly elevated above the band so it stays distinct even on small screens. All interactive elements, including Freeze, Unfreeze, and Close, meet a minimum tap target of 44pt with generous padding, ensuring comfortable thumb reach without crowding. Touch feedback is subtle: a gentle press dimming rather than aggressive ripple, respecting the calm aesthetic while confirming contact. Type scales down gracefully, preserving hierarchy with slightly tighter leading but unchanged order, so Google Cloud or Hotel trip still leads clearly. The layout reflows in a single column; elements do not overlap or truncate unexpectedly. Motion remains minimal during scroll, avoiding parallax or sticky jitter. The result feels native to the hand, prioritizing readability, effortless tapping, and steady vertical flow over decorative complexity on compact viewports.",
+      "analogy": "Stacked trays in a narrow cabinet - everything slides vertically, buttons stay big enough for thumbs.",
+      "pitch30s": "On phones it stacks vertically. No horizontal scroll, big 44pt tap targets, single-column flow that stays calm while scrolling.",
+      "keyPoints": [
+        "Vertical stack of midnight band and ledger; no horizontal scroll, full-width card with margins",
+        "Freeze/Unfreeze/Close and all taps are at least 44pt with generous padding",
+        "Single-column reflow preserves hierarchy; minimal motion, no parallax or truncation"
+      ],
+      "quiz": [
+        {
+          "question": "What is required for phone tap targets?",
+          "options": ["16pt icons packed tightly", "At least 44pt with generous padding for Freeze/Unfreeze/Close and all actions", "Only the card itself is tappable", "Horizontal swipe targets"],
+          "answerIndex": 1,
+          "explanation": "All interactive elements must meet 44pt minimum to ensure comfortable, accessible thumb tapping."
+        },
+        {
+          "question": "How does the layout adapt on small screens?",
+          "options": ["Requires horizontal scroll to see cap", "Stacks vertically in a single column with preserved hierarchy and no overlap", "Hides the live card", "Uses a carousel"],
+          "answerIndex": 1,
+          "explanation": "The phone layout reflows to a vertical single column with no horizontal scroll or truncation."
+        }
+      ]
+    }
+  ],
+  "relatedScreens": ["DashboardScreen", "CardDetailScreen"],
+  "accessibilityNotes": "Text on the midnight band meets contrast requirements for dark backgrounds. Status is never conveyed by color alone; pair with icon and text labels for Freeze/Unfreeze/Close. All actions are keyboard-operable with visible focus indicators. Respect reduced-motion preferences by limiting to fade and gentle easing, avoiding parallax, bounce, or continuous animation."
+}

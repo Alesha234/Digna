@@ -1,59 +1,121 @@
 {
-  "manifestId": "alerts",
-  "title": "Warnings Before You Hit the Limit",
-  "moduleName": "Alerts",
-  "audience": "Cardholders",
+  "id": "alerts",
+  "title": "Warnings - Clear Mint Cards",
+  "version": "clear-mint-v1",
+  "audience": "Cardholders managing spending caps and balances",
   "objectives": [
-    "Understand what a near-cap warning means and why it triggers before you reach your limit.",
-    "Recognize what a low-balance warning means and how it helps prevent a declined payment.",
-    "Know what clear, plain-language action to take when you receive an alert."
+    "Understand what low-balance and near-cap warnings mean and why they appear early.",
+    "Recognize the calm mint card design and where to find actions.",
+    "Know what clear steps to take after an alert — add funds, adjust cap, or pause spending.",
+    "Trust that threshold logic and wording stay the same beneath the refreshed look."
   ],
-  "analogy": {
-    "title": "Low-Fuel Light for Your Spending",
-    "text": "Think of alerts like the low-fuel light on your car dashboard or the 20% battery warning on your phone. They don't mean you've stopped - they mean you should plan ahead. A near-cap alert is like seeing you have 50 miles left before empty; you can slow down or refuel soon. A low-balance alert is like your phone warning you to plug in before it shuts off. Both give you time to act calmly - add funds, adjust your cap, or pause spending - so you avoid an unexpected stop."
-  },
-  "pitch30Seconds": "Imagine never being surprised at checkout. Our alerts are calm, early warnings that you are close to your spending cap or your balance is running low. Instead of a sudden decline, you get time to act - add money to your account, adjust your cap, or wait on a purchase. It's about control and confidence. You stay in charge, avoid embarrassment at the register, and keep spending exactly where you want it.",
-  "keyPoints": [
-    "A close-to-cap signal tells you you're approaching your spending limit and a purchase could be declined soon.",
-    "A running-low balance signal tells you funds are getting low and it's time to add money to avoid disruption.",
-    "When you get an alert, check your balance and cap, then add funds, adjust your cap, or pause spending.",
-    "Alerts use a calm, trustworthy tone to help you act early without alarm or confusion."
-  ],
-  "recallQuiz": [
+  "sections": [
     {
-      "question": "What does a 'near your cap' alert mean?",
-      "options": [
-        "You have exceeded your cap and your card is blocked",
-        "You are close to your spending limit and should review before your next purchase",
-        "Your balance is zero",
-        "Your account has been closed"
+      "id": "low-balance-nudge",
+      "title": "Low-Balance Nudge on a Soft Mint Card",
+      "bodyMarkdown": "When your balance runs low, you will see a gentle nudge that lives inside a soft mint card. The card uses 14px corners and airy padding so the message feels calm and spacious rather than crowded or urgent. A thin calm-blue accent line anchors the left edge, guiding the eye with no alarm color or harsh red. Inside, the wording stays exactly the same as before, with clear plain language and an icon paired with text so meaning never depends on color alone. The card appears at the top of your overview, close to where you check funds, making it easy to spot without interrupting your flow. You can dismiss it or tap to act, and both buttons are large enough for touch and keyboard focus. This restyle keeps the original triggers and timing while giving you a friendlier, trustworthy moment to add money before a purchase is declined. It is designed to reassure, not scare, and to help you stay in control.",
+      "analogy": "Friendly fuel-gauge reminder: like a dashboard light that glows softly at quarter tank, telling you to plan a refuel soon, not that you are stranded.",
+      "pitch30s": "Think low-fuel light for your money. This mint card nudges you kindly when balance dips, with calm blue and airy space, so you can add funds before a purchase ever declines.",
+      "keyPoints": [
+        "Soft mint card with 14px corners, airy padding, calm-blue accent, no alarm color.",
+        "Icon plus text means color is never the sole signal for meaning.",
+        "Same triggers and wording; dismiss and act buttons stay keyboard-visible."
       ],
-      "correctIndex": 1,
-      "explanation": "A near-cap alert is an early warning that you are approaching your limit, giving you time to adjust your cap or spending before a decline."
+      "quiz": [
+        {
+          "question": "What does the low-balance soft mint card tell you?",
+          "options": ["You are out of money and blocked", "Your balance is getting low and you have time to add funds", "Your cap was automatically increased"],
+          "answerIndex": 1,
+          "explanation": "It is an early, calm nudge that funds are running low so you can add money before a decline."
+        },
+        {
+          "question": "How is the low-balance nudge styled?",
+          "options": ["14px corners, airy padding, calm-blue accent, no alarm color", "Red flashing banner with bounce animation", "Hidden text with color-only cue"],
+          "answerIndex": 0,
+          "explanation": "The design is calm and spacious with rounded corners, airy padding, and a gentle blue accent, never harsh red or bounce."
+        }
+      ]
     },
     {
-      "question": "What does a 'running low' balance alert mean?",
-      "options": [
-        "Your spending cap has increased automatically",
-        "Your available funds are getting low and you may need to add money soon",
-        "You earned a cashback reward",
-        "Your card will never decline"
+      "id": "close-to-cap-nudge",
+      "title": "Close-to-Cap Nudge — SpendingMeter Restyled",
+      "bodyMarkdown": "As you approach your spending cap, the SpendingMeter appears with a refreshed look but familiar meaning. This update is SpendingMeter + text preserved, only restyled, with softer mint surroundings, rounded corners, and balanced spacing that keeps numbers easy to read. You still see the same cap value, spent amount, and plain-language warning at the same threshold, so nothing about when it triggers has changed. The meter bar now uses a calm progression with a subtle blue highlight as you near the limit instead of a sharp warning flash. Icons sit beside every color cue, ensuring the state is clear even without color perception. Resting inside a light card layout, the component breathes on small screens and stays aligned with your spending overview. Dismiss and adjust-cap buttons remain keyboard reachable with visible focus rings. This is a visual refresh, not a logic change, helping you notice your limit early and decide calmly whether to adjust your cap or pause spending.",
+      "analogy": "Like a fuel gauge with the same numbers but a cleaner face — the needle and labels are identical, only the glass and trim look calmer and easier to read.",
+      "pitch30s": "Your SpendingMeter still shows the same spend and cap numbers at the same moment, just in a softer card that breathes. Familiar data, now easier on eyes and thumbs.",
+      "keyPoints": [
+        "SpendingMeter + text preserved, only restyled for calm readability.",
+        "Same thresholds and wording; only spacing, corners, and accent updated.",
+        "Icon plus text and visible focus keep it accessible on phones."
       ],
-      "correctIndex": 1,
-      "explanation": "A low-balance alert tells you funds are running low so you can add money before a payment is declined."
+      "quiz": [
+        {
+          "question": "What changed about the SpendingMeter near-cap warning?",
+          "options": ["SpendingMeter + text preserved, only restyled", "Threshold logic now triggers later", "Wording was rewritten with new jargon"],
+          "answerIndex": 0,
+          "explanation": "Only the styling changed; the meter, text, and trigger timing stayed exactly the same."
+        },
+        {
+          "question": "How do you know you are close to your cap?",
+          "options": ["Meter shows spent vs cap with calm blue highlight and plain text", "Card blocks without warning", "Balance automatically tops up"],
+          "answerIndex": 0,
+          "explanation": "The meter and plain-language text tell you early, giving time to adjust cap or pause spending."
+        }
+      ]
     },
     {
-      "question": "What is the best next step after you receive an alert?",
-      "options": [
-        "Ignore it and keep spending",
-        "Immediately close your account",
-        "Check your balance and cap, then add funds, adjust your cap, or pause spending",
-        "Share your password with someone to check for you"
+      "id": "warnings-list-rhythm",
+      "title": "Warnings List Rhythm — Tinted Band and Stacked Cards",
+      "bodyMarkdown": "When several alerts are active, they live inside a gentle warnings list that feels easy to scan on any device. A light tinted band background groups the alerts together without boxing you in, creating a calm zone that separates warnings from other content. Inside the band, each message is a stacked soft card with rounded corners, generous padding, and a clear hierarchy of icon, title, and action. The cards stack vertically with even rhythm so your eye moves naturally from one to the next, and the layout is phone-friendly, reflowing to full width with comfortable tap targets on small screens. Color accents are subtle and always paired with icons and text, so meaning never relies on hue alone. Motion is minimal and respects reduced preferences, with no bounce or shake. This rhythm keeps the experience airy and trustworthy while preserving the original wording, triggers, and actions you already know.",
+      "analogy": "Like a well-spaced bulletin board with soft cards pinned in a tinted strip — each note is distinct, stacked evenly, easy to scan without clutter.",
+      "pitch30s": "Multiple warnings now live in a tinted band with stacked soft cards. Airy, phone-friendly rhythm helps you scan quickly and act calmly, without color-only cues or bouncy motion.",
+      "keyPoints": [
+        "Tinted band background groups alerts; stacked soft cards create calm rhythm.",
+        "Phone-friendly full-width cards with generous padding and tap targets.",
+        "Color never alone — icon plus text, reduced-motion with no bounce."
       ],
-      "correctIndex": 2,
-      "explanation": "Checking your balance and cap lets you take a calm, plain-language action — add money, adjust your cap, or wait — to stay in control."
+      "quiz": [
+        {
+          "question": "How are multiple warnings organized?",
+          "options": ["In a tinted band with stacked soft cards and even rhythm", "In a single red flashing popup that blocks the screen", "Hidden behind a color-only dot"],
+          "answerIndex": 0,
+          "explanation": "The tinted band groups alerts and soft cards stack vertically for calm, phone-friendly scanning."
+        },
+        {
+          "question": "What makes the list accessible?",
+          "options": ["Color is never sole signal; icons and text paired, no bounce motion", "Only color tells you severity", "Buttons are invisible to keyboard"],
+          "answerIndex": 0,
+          "explanation": "Meaning uses icon plus text, motion respects reduced-motion, and buttons stay keyboard-visible."
+        }
+      ]
+    },
+    {
+      "id": "what-did-not-change",
+      "title": "What Did Not Change — Same Triggers, Text, and Actions",
+      "bodyMarkdown": "Despite the calmer visual style, the behavior you rely on has not changed at all. We kept same triggers, so low-balance and close-to-cap warnings appear at exactly the same thresholds and timing as before. We also kept same text, preserving the plain language you recognize without rewriting or adding new jargon. And we kept same actions, meaning dismiss, view details, add funds, and adjust cap work just like they did previously. There is no new logic to learn and no surprise change in when an alert appears or how you respond. The mint cards, tinted band, and calm-blue accents are only a restyle to reduce stress and improve readability, especially on phones. Your spending cap, balance calculations, and decline rules remain untouched. This approach lets you trust what you see because consistency is preserved underneath a friendlier surface. You can continue to act early with confidence, knowing the system still watches the same limits and guides you with the same clear words.",
+      "analogy": "Like repainting a trusted road sign mint and blue but keeping its exact words and placement — it feels friendlier, but guides you the same way.",
+      "pitch30s": "New look, same rules. Same triggers fire at the same time, same text guides you, same buttons act. Only the calm mint styling is new, so you stay confident.",
+      "keyPoints": [
+        "Same triggers at same thresholds and timing.",
+        "Same text in plain language, no new jargon.",
+        "Same actions: dismiss, view, add funds, adjust cap."
+      ],
+      "quiz": [
+        {
+          "question": "What stayed the same after the mint restyle?",
+          "options": ["Same triggers, same text, and same actions", "Threshold logic changed to be stricter", "All alerts were removed"],
+          "answerIndex": 0,
+          "explanation": "Only visuals changed; timing, wording, and available actions are identical to before."
+        },
+        {
+          "question": "Do you need to learn new steps to respond?",
+          "options": ["No, dismiss, add funds, and adjust cap work exactly as before", "Yes, all buttons moved and renamed", "Yes, alerts now auto-block purchases"],
+          "answerIndex": 0,
+          "explanation": "Actions and logic are unchanged, so your familiar next steps still apply."
+        }
+      ]
     }
   ],
-  "testModeNote": "In test mode, alerts work the same way using sample data so you can practice without affecting real funds.",
-  "nextManifestId": null
+  "relatedScreens": ["AlertsScreen", "WarningBanner"],
+  "accessibilityNotes": "color is never sole signal (icon+text), reduced-motion (no bounce), keyboard-visible dismiss/act buttons",
+  "doNotChange": ["threshold logic", "wording"]
 }

@@ -1,221 +1,202 @@
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { testModeMessage } from "@/modules/ui/data/demoData";
-import { theme, colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-export function WelcomeScreen() {
-  void PayProxyProvider;
+export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void }) {
+  const { onGetStarted, onSignIn } = props;
   void theme;
-  const { setScreen, signInDemo } = usePayProxy();
 
-  function handleDemo() {
-    signInDemo();
-    setScreen("dashboard");
-  }
-
-  const benefits: Array<{ title: string; body: string; icon: string }> = [
-    {
-      title: "Capped cards for each service",
-      body: "Create a virtual card per service with its own spending cap for cloud, hotels, rentals, and subscriptions.",
-      icon: "💳",
-    },
-    {
-      title: "Freeze in one tap",
-      body: "Pause or resume any card instantly when a charge looks wrong or a trip ends.",
-      icon: "❄️",
-    },
-    {
-      title: "Plain-words decline help",
-      body: "Understand why a payment was declined and what to do next, without bank jargon.",
-      icon: "💬",
-    },
-  ];
+  const focusStyle = ":focus-visible{outline:3px solid " + colors.midnight + ";outline-offset:2px}";
 
   return (
     <div
       style={{
-        background: colors.background,
-        fontFamily: typography.fontFamily,
+        background: colors.page,
+        color: colors.ink,
+        fontFamily: typography.body,
         minHeight: "100vh",
-        padding: spacing.lg,
-        display: "flex",
-        justifyContent: "center",
       }}
     >
-      <div style={{ width: "100%", maxWidth: 480 }}>
-        <div
-          style={{
-            display: "inline-block",
-            background: colors.primarySoft,
-            color: colors.primary,
-            borderRadius: radii.pill,
-            padding: "6px 12px",
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightMedium,
-            marginBottom: spacing.md,
-          }}
-        >
-          {testModeMessage}
-        </div>
+      <style>{".pp-btn-mint" + focusStyle + ".pp-btn-secondary" + focusStyle + "a" + focusStyle + "button" + focusStyle}</style>
 
-        <div
-          style={{
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightBold,
-            color: colors.primary,
-            letterSpacing: 1,
-            marginBottom: spacing.md,
-          }}
-        >
-          PayProxy
-        </div>
-
-        <h1
-          style={{
-            fontSize: typography.sizeLg,
-            fontWeight: typography.weightBold,
-            color: colors.text,
-            margin: `0 0 ${spacing.md}px 0`,
-            lineHeight: 1.3,
-          }}
-        >
-          Virtual cards with spending caps when your card is not accepted
-        </h1>
-
-        <p
-          style={{
-            fontSize: typography.sizeSm,
-            color: colors.textMuted,
-            margin: `0 0 ${spacing.lg}px 0`,
-            lineHeight: 1.5,
-          }}
-        >
-          PayProxy helps Cash App, Chime, and prepaid users who get declined by
-          cloud providers, hotels, car rentals, and subscriptions. Set a cap
-          for each service and pay with confidence.
-        </p>
-
-        <div
-          style={{
-            background: colors.surface,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radii.lg,
-            boxShadow: shadows.soft,
-            padding: spacing.lg,
-            marginBottom: spacing.lg,
-            display: "flex",
-            flexDirection: "column",
-            gap: spacing.md,
-          }}
-        >
-          {benefits.map((b) => (
-            <div
-              key={b.title}
-              style={{ display: "flex", gap: spacing.md, alignItems: "flex-start" }}
+      {/* 1 hero */}
+      <section className="pp-hero" style={{ background: colors.page, padding: spacing.xxl + " " + spacing.lg }}>
+        <RevealOnScroll delayMs={0}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <p
+              style={{
+                display: "inline-block",
+                background: colors.surface,
+                border: "1px solid " + colors.line,
+                color: colors.muted,
+                borderRadius: radii.pill,
+                padding: "6px 12px",
+                fontSize: 13,
+                fontFamily: typography.body,
+                margin: "0 0 " + spacing.md,
+              }}
             >
-              <div
+              Test mode
+            </p>
+            <h1 style={{ fontFamily: typography.heading, fontSize: 40, lineHeight: 1.1, margin: "0 0 " + spacing.md, color: colors.ink }}>
+              PayProxy virtual cards with spending caps
+            </h1>
+            <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 17, lineHeight: 1.6, maxWidth: 560, margin: "0 0 " + spacing.lg }}>
+              For people turned away by card not accepted. Create a capped virtual card for the services that only take
+              traditional bank cards, and pay with confidence.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md }}>
+              <button
+                type="button"
+                className="pp-btn-mint"
+                onClick={onGetStarted}
                 style={{
-                  background: colors.primarySoft,
-                  borderRadius: radii.md,
-                  width: 36,
-                  height: 36,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
+                  background: colors.mint,
+                  color: colors.midnight,
+                  border: "none",
+                  borderRadius: radii.pill,
+                  padding: "12px 22px",
+                  fontFamily: typography.body,
+                  fontWeight: 700,
+                  fontSize: 16,
+                  cursor: "pointer",
+                  boxShadow: shadows.soft,
                 }}
               >
-                <span>{b.icon}</span>
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontSize: typography.sizeMd,
-                    fontWeight: typography.weightMedium,
-                    color: colors.text,
-                  }}
-                >
-                  {b.title}
-                </div>
-                <div
-                  style={{
-                    fontSize: typography.sizeSm,
-                    color: colors.textMuted,
-                    marginTop: 2,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {b.body}
-                </div>
-              </div>
+                Get started
+              </button>
+              <button
+                type="button"
+                className="pp-btn-secondary"
+                onClick={onSignIn}
+                style={{
+                  background: colors.surface,
+                  color: colors.ink,
+                  border: "1px solid " + colors.line,
+                  borderRadius: radii.pill,
+                  padding: "12px 22px",
+                  fontFamily: typography.body,
+                  fontWeight: 600,
+                  fontSize: 16,
+                  cursor: "pointer",
+                }}
+              >
+                Sign in
+              </button>
             </div>
-          ))}
-        </div>
+            <p style={{ color: colors.muted, fontSize: 13, margin: spacing.md + " 0 0" }}>No real money moves.</p>
+          </div>
+        </RevealOnScroll>
+      </section>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: spacing.md, marginBottom: spacing.xl }}>
+      {/* 2 acceptance features grid */}
+      <section className="pp-section" style={{ padding: spacing.xxl + " " + spacing.lg, background: colors.page }}>
+        <RevealOnScroll delayMs={80}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: typography.heading, color: colors.ink, margin: "0 0 " + spacing.lg }}>Accepted where your card is not</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: spacing.md }}>
+              {[
+                { t: "Cloud services", b: "Pay cloud providers that only take traditional bank cards." },
+                { t: "Hotels", b: "Book hotels that decline prepaid cards at check-in." },
+                { t: "Car rentals", b: "Reserve car rentals that require a traditional bank card." },
+                { t: "Subscriptions", b: "Keep subscriptions running that only take traditional bank cards." },
+              ].map((f) => (
+                <article
+                  key={f.t}
+                  className="pp-card pp-lift"
+                  style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg, boxShadow: shadows.soft }}
+                >
+                  <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 17 }}>{f.t}</h3>
+                  <p style={{ margin: 0, color: colors.muted, fontSize: 14, lineHeight: 1.5 }}>{f.b}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </RevealOnScroll>
+      </section>
+
+      {/* 3 virtual cards explainer */}
+      <section className="pp-section" style={{ padding: spacing.xxl + " " + spacing.lg, background: colors.surface, borderTop: "1px solid " + colors.line, borderBottom: "1px solid " + colors.line }}>
+        <RevealOnScroll delayMs={160}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: typography.heading, color: colors.ink, margin: "0 0 " + spacing.md }}>Virtual cards with spending caps</h2>
+            <p style={{ color: colors.muted, fontSize: 16, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
+              Create a separate virtual card for each service with its own spending cap. If a charge goes over the cap,
+              it is declined in plain words — so cloud bills, hotel holds, and subscriptions never surprise you.
+            </p>
+          </div>
+        </RevealOnScroll>
+      </section>
+
+      {/* 4 numbered steps How it works */}
+      <section className="pp-section" style={{ padding: spacing.xxl + " " + spacing.lg, background: colors.page }}>
+        <RevealOnScroll delayMs={0}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: typography.heading, color: colors.ink, margin: "0 0 " + spacing.lg }}>How it works</h2>
+            <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: spacing.md }}>
+              {[
+                { n: "1", t: "Sign up", b: "Create your PayProxy account in minutes." },
+                { n: "2", t: "Add money", b: "Add sample money to your wallet. No real money moves." },
+                { n: "3", t: "Create capped card", b: "Create a capped card for each service and pay." },
+              ].map((s) => (
+                <li key={s.t}>
+                  <article className="pp-card pp-lift" style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg, boxShadow: shadows.soft }}>
+                    <div style={{ fontFamily: typography.heading, background: colors.mint, color: colors.midnight, width: 32, height: 32, borderRadius: radii.pill, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: spacing.md }}>{s.n}</div>
+                    <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 17 }}>{s.t}</h3>
+                    <p style={{ margin: 0, color: colors.muted, fontSize: 14, lineHeight: 1.5 }}>{s.b}</p>
+                  </article>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </RevealOnScroll>
+      </section>
+
+      {/* 5 controls */}
+      <section className="pp-section" style={{ padding: spacing.xxl + " " + spacing.lg, background: colors.page }}>
+        <RevealOnScroll delayMs={80}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: typography.heading, color: colors.ink, margin: "0 0 " + spacing.md }}>Stay in control</h2>
+            <p style={{ color: colors.muted, fontSize: 16, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
+              Freeze, unfreeze or close in one tap. Pause any card instantly when a charge looks wrong or a trip ends,
+              then resume it whenever you are ready.
+            </p>
+          </div>
+        </RevealOnScroll>
+      </section>
+
+      {/* 6 audience */}
+      <section className="pp-section" style={{ padding: spacing.xxl + " " + spacing.lg, background: colors.surface, borderTop: "1px solid " + colors.line }}>
+        <RevealOnScroll delayMs={160}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: typography.heading, color: colors.ink, margin: "0 0 " + spacing.md }}>For Cash App, Chime and prepaid cards</h2>
+            <p style={{ color: colors.muted, fontSize: 16, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
+              Built for Cash App, Chime, and prepaid users who get turned away by card not accepted. Use PayProxy virtual
+              cards with spending caps for cloud services, hotels, car rentals, and subscriptions.
+            </p>
+          </div>
+        </RevealOnScroll>
+      </section>
+
+      {/* 7 midnight CTA */}
+      <section className="pp-ledger-band" style={{ background: colors.midnight, color: colors.midnightInk, padding: spacing.xxl + " " + spacing.lg, textAlign: "center" }}>
+        <RevealOnScroll delayMs={0}>
+          <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 28 }}>Stop getting declined. Start with a capped card.</h2>
           <button
             type="button"
-            onClick={() => setScreen("auth")}
-            style={{
-              background: colors.primary,
-              color: colors.white,
-              border: "none",
-              borderRadius: radii.md,
-              padding: spacing.md,
-              fontSize: typography.sizeMd,
-              fontWeight: typography.weightBold,
-              fontFamily: typography.fontFamily,
-              cursor: "pointer",
-            }}
+            className="pp-btn-mint"
+            onClick={onGetStarted}
+            style={{ background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "12px 28px", fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer" }}
           >
             Get started
           </button>
-          <button
-            type="button"
-            onClick={handleDemo}
-            style={{
-              background: colors.white,
-              color: colors.primary,
-              border: `1px solid ${colors.border}`,
-              borderRadius: radii.md,
-              padding: spacing.md,
-              fontSize: typography.sizeMd,
-              fontWeight: typography.weightMedium,
-              fontFamily: typography.fontFamily,
-              cursor: "pointer",
-              boxShadow: shadows.soft,
-            }}
-          >
-            Try demo
-          </button>
-        </div>
+        </RevealOnScroll>
+      </section>
 
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: typography.sizeSm,
-            color: colors.textMuted,
-          }}
-        >
-          Already have an account?{" "}
-          <button
-            type="button"
-            onClick={() => setScreen("auth")}
-            style={{
-              background: "transparent",
-              border: "none",
-              padding: 0,
-              color: colors.primary,
-              fontSize: typography.sizeSm,
-              fontWeight: typography.weightMedium,
-              fontFamily: typography.fontFamily,
-              cursor: "pointer",
-              textDecoration: "underline",
-            }}
-          >
-            Sign in
-          </button>
-        </div>
-      </div>
+      {/* 8 test-mode footer note */}
+      <footer style={{ background: colors.page, padding: spacing.lg, textAlign: "center", borderTop: "1px solid " + colors.line }}>
+        <p style={{ color: colors.muted, fontSize: 13, margin: 0, fontFamily: typography.body }}>{testModeMessage}</p>
+      </footer>
     </div>
   );
 }

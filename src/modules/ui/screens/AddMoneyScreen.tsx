@@ -1,317 +1,304 @@
 import * as React from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { BalanceCard } from "@/modules/ui/components/BalanceCard";
+import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
-import { parseDollarsInputToCents, validateAddMoneyCents } from "@/modules/ui/lib/validation";
 import { formatCurrency } from "@/modules/ui/lib/format";
-import { theme } from "@/modules/ui/theme";
+import { validateAddMoneyCents } from "@/modules/ui/lib/validation";
+import { testModeMessage } from "@/modules/ui/data/demoData";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
+
+void theme;
 
 function getBalanceCents(balance: unknown): number {
   const rec = balance as Record<string, unknown>;
   if (typeof rec.availableCents === "number") return rec.availableCents as number;
-  if (typeof rec.cents === "number") return rec.cents as number;
   if (typeof rec.balanceCents === "number") return rec.balanceCents as number;
+  if (typeof rec.cents === "number") return rec.cents as number;
   if (typeof rec.totalCents === "number") return rec.totalCents as number;
   return 0;
 }
 
-type ScreenParam = Parameters<ReturnType<typeof usePayProxy>["setScreen"]>[0];
-
-function toScreen(value: string): ScreenParam {
-  return value as unknown as ScreenParam;
+function parseDollarsToCents(value: string): number | null {
+  const trimmed: string = value.trim();
+  if (trimmed === "") return null;
+  const parsed: number = parseFloat(trimmed.replace(/[$,\s]/g, ""));
+  if (!Number.isFinite(parsed)) return null;
+  return Math.round(parsed * 100);
 }
 
-export function AddMoneyScreen() {
-  const { balance, addMoneyCents, setScreen } = usePayProxy();
-  const [amountDollars, setAmountDollars] = useState<string>("");
-  const [addedCents, setAddedCents] = useState<number | null>(null);
-
-  const cents: number | null = parseDollarsInputToCents(amountDollars);
-  const error: string | null = cents === null ? "Enter an amount like 25.00" : validateAddMoneyCents(cents);
+export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => void }) {
+  const { onDone, onCancel } = props;
+  const { balance, addMoneyCents } = usePayProxy();
   const balanceCents: number = getBalanceCents(balance);
+  const [amount, setAmount] = useState<string>("");
+  const [touched, setTouched] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [addedCents, setAddedCents] = useState<number | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const cents: number | null = parseDollarsToCents(amount);
+  const validationError: string | null =
+    cents === null
+      ? touched && amount.trim() !== ""
+        ? "Enter an amount like 25.00"
+        : touched && amount.trim() === ""
+          ? "Enter an amount like 25.00"
+          : null
+      : validateAddMoneyCents(cents);
+  const showError: boolean = touched && validationError !== null;
+  const newBalanceCents: number = addedCents !== null ? balanceCents : balanceCents;
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>): void {
-    setAmountDollars(e.target.value);
+    setAmount(e.target.value);
+    setServerError(null);
+    if (addedCents !== null) setAddedCents(null);
+  }
+
+  function handlePick(value: string): void {
+    setAmount(value);
+    setTouched(true);
+    setServerError(null);
     setAddedCents(null);
+    inputRef.current?.focus();
   }
 
-  function handleChip(value: string): void {
-    setAmountDollars(value);
-    setAddedCents(null);
+  function handleFocusBalance(): void {
+    inputRef.current?.focus();
   }
 
-  function handleAdd(): void {
-    if (cents === null) return;
-    const validationError: string | null = validateAddMoneyCents(cents);
-    if (validationError !== null) return;
-    addMoneyCents(cents);
-    setAddedCents(cents);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+    e.preventDefault();
+    setTouched(true);
+    setServerError(null);
+    const next: number | null = parseDollarsToCents(amount);
+    const err: string | null =
+      next === null ? "Enter an amount like 25.00" : validateAddMoneyCents(next);
+    if (err !== null || next === null) return;
+    setSubmitting(true);
+    try {
+      await Promise.resolve();
+      addMoneyCents(next);
+      setAddedCents(next);
+    } catch (err2: unknown) {
+      const msg: string = err2 instanceof Error && err2.message ? err2.message : "Something went wrong. Try again.";
+      setServerError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  function goDashboard(): void {
-    setScreen(toScreen("dashboard"));
+  function handleDone(): void {
+    if (onDone) onDone();
   }
 
-  function goCreateCard(): void {
-    setScreen(toScreen("create-card"));
+  function handleCancel(): void {
+    if (onCancel) onCancel();
   }
 
-  const chips: string[] = ["10", "25", "50"];
+  const picks: string[] = ["10", "25", "50"];
 
   return (
-    <div
-      style={{
-        backgroundColor: theme.colors.background,
-        fontFamily: theme.typography.fontFamily,
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        padding: theme.spacing.lg,
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 480 }}>
-        <button
-          type="button"
-          onClick={goDashboard}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: theme.colors.textMuted,
-            fontFamily: theme.typography.fontFamily,
-            fontSize: theme.typography.sizeSm,
-            fontWeight: theme.typography.weightMedium,
-            marginBottom: theme.spacing.md,
-            padding: 0,
-          }}
-        >
-          {"\u2190 Back to dashboard"}
-        </button>
-
-        <div
-          style={{
-            backgroundColor: theme.colors.surface,
-            border: `1px solid ${theme.colors.border}`,
-            borderRadius: theme.radii.lg,
-            boxShadow: theme.shadows.soft,
-            padding: theme.spacing.lg,
-          }}
-        >
-          <h1
+    <RevealOnScroll>
+      <div
+        style={{
+          backgroundColor: colors.page,
+          fontFamily: typography.body,
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          padding: spacing.lg,
+        }}
+      >
+        <style>{`.pp-card{transition:transform 160ms ease,box-shadow 160ms ease;}.pp-lift:hover{transform:translateY(-2px);box-shadow:${shadows.soft},0 12px 32px rgba(16,32,29,0.12);}.pp-btn-mint{transition:transform 160ms ease,filter 160ms ease;background-color:${colors.mint} !important;}.pp-btn-mint:hover:not(:disabled){filter:brightness(1.04);transform:translateY(-1px);background-color:${colors.mintDark} !important;}.pp-btn-mint:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid ${colors.ink};outline-offset:2px;}@media (prefers-reduced-motion: reduce){.pp-card,.pp-btn-mint{transition:none !important;transform:none !important;}}`}</style>
+        <div style={{ width: "100%", maxWidth: 480, display: "grid", gap: spacing.lg }}>
+          <BalanceCard balanceCents={balanceCents} onAddMoney={handleFocusBalance} />
+          <section
+            className="pp-card pp-lift"
+            aria-labelledby="add-money-title"
             style={{
-              margin: 0,
-              color: theme.colors.text,
-              fontFamily: theme.typography.fontFamily,
-              fontSize: theme.typography.sizeLg,
-              fontWeight: theme.typography.weightBold,
+              backgroundColor: colors.surface,
+              color: colors.ink,
+              border: `1px solid ${colors.line}`,
+              borderRadius: radii.card,
+              boxShadow: shadows.soft,
+              padding: spacing.lg,
+              fontFamily: typography.body,
             }}
           >
-            Add money
-          </h1>
-          <p
-            style={{
-              margin: 0,
-              marginTop: theme.spacing.sm,
-              color: theme.colors.textMuted,
-              fontSize: theme.typography.sizeSm,
-              fontWeight: theme.typography.weightMedium,
-            }}
-          >
-            Current balance: {formatCurrency(balanceCents)}
-          </p>
-          <p
-            style={{
-              margin: 0,
-              marginTop: theme.spacing.sm,
-              color: theme.colors.textMuted,
-              fontSize: theme.typography.sizeSm,
-            }}
-          >
-            Test mode: sample money, no real money moves.
-          </p>
-
-          {addedCents !== null && error === null ? (
-            <div
-              role="status"
-              style={{
-                marginTop: theme.spacing.md,
-                backgroundColor: theme.colors.background,
-                border: `1px solid ${theme.colors.border}`,
-                borderRadius: theme.radii.md,
-                padding: theme.spacing.md,
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: theme.colors.success,
-                  fontSize: theme.typography.sizeMd,
-                  fontWeight: theme.typography.weightBold,
-                }}
-              >
-                Added {formatCurrency(addedCents)} - new balance {formatCurrency(balanceCents)}
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  gap: theme.spacing.sm,
-                  marginTop: theme.spacing.md,
-                  flexWrap: "wrap",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={goDashboard}
-                  style={{
-                    flex: 1,
-                    backgroundColor: theme.colors.primary,
-                    color: theme.colors.white,
-                    border: "none",
-                    borderRadius: theme.radii.pill,
-                    padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-                    fontSize: theme.typography.sizeSm,
-                    fontWeight: theme.typography.weightBold,
-                    cursor: "pointer",
-                  }}
-                >
-                  Back to dashboard
-                </button>
-                <button
-                  type="button"
-                  onClick={goCreateCard}
-                  style={{
-                    flex: 1,
-                    backgroundColor: theme.colors.surface,
-                    color: theme.colors.primary,
-                    border: `1px solid ${theme.colors.primary}`,
-                    borderRadius: theme.radii.pill,
-                    padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-                    fontSize: theme.typography.sizeSm,
-                    fontWeight: theme.typography.weightBold,
-                    cursor: "pointer",
-                  }}
-                >
-                  Create card
-                </button>
-              </div>
-            </div>
-          ) : null}
-
-          <label
-            htmlFor="add-money-amount"
-            style={{
-              display: "block",
-              marginTop: theme.spacing.md,
-              color: theme.colors.text,
-              fontSize: theme.typography.sizeSm,
-              fontWeight: theme.typography.weightMedium,
-            }}
-          >
-            Amount (USD)
-          </label>
-          <input
-            id="add-money-amount"
-            inputMode="decimal"
-            placeholder="25.00"
-            value={amountDollars}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              marginTop: theme.spacing.sm,
-              border: `1px solid ${error ? theme.colors.danger : theme.colors.border}`,
-              borderRadius: theme.radii.md,
-              padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-              fontFamily: theme.typography.fontFamily,
-              fontSize: theme.typography.sizeMd,
-              color: theme.colors.text,
-              backgroundColor: theme.colors.white,
-            }}
-          />
-
-          <div
-            style={{
-              display: "flex",
-              gap: theme.spacing.sm,
-              marginTop: theme.spacing.md,
-            }}
-          >
-            {chips.map((c: string) => (
-              <button
-                key={c}
-                type="button"
-                onClick={function onChip(): void {
-                  handleChip(c);
-                }}
-                style={{
-                  flex: 1,
-                  backgroundColor: theme.colors.background,
-                  color: theme.colors.text,
-                  border: `1px solid ${theme.colors.border}`,
-                  borderRadius: theme.radii.pill,
-                  padding: `${theme.spacing.sm}px 0`,
-                  fontSize: theme.typography.sizeSm,
-                  fontWeight: theme.typography.weightMedium,
-                  cursor: "pointer",
-                }}
-              >
-                ${c}
-              </button>
-            ))}
-          </div>
-
-          {error !== null && amountDollars !== "" ? (
-            <p
-              role="alert"
+            <h1
+              id="add-money-title"
               style={{
                 margin: 0,
-                marginTop: theme.spacing.sm,
-                color: theme.colors.danger,
-                fontSize: theme.typography.sizeSm,
+                fontFamily: typography.heading,
+                fontSize: "24px",
+                lineHeight: 1.2,
+                color: colors.ink,
               }}
             >
-              {error}
+              Add money
+            </h1>
+            <p style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "14px" }}>
+              Current balance: {formatCurrency(balanceCents)}
             </p>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={error !== null}
-            style={{
-              width: "100%",
-              marginTop: theme.spacing.md,
-              backgroundColor: error !== null ? theme.colors.border : theme.colors.primary,
-              color: theme.colors.white,
-              border: "none",
-              borderRadius: theme.radii.pill,
-              padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-              fontSize: theme.typography.sizeMd,
-              fontWeight: theme.typography.weightBold,
-              cursor: error !== null ? "not-allowed" : "pointer",
-              opacity: error !== null ? 0.7 : 1,
-            }}
-          >
-            Add money
-          </button>
-
-          <button
-            type="button"
-            onClick={goDashboard}
-            style={{
-              width: "100%",
-              marginTop: theme.spacing.sm,
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              color: theme.colors.textMuted,
-              fontSize: theme.typography.sizeSm,
-              fontWeight: theme.typography.weightMedium,
-            }}
-          >
-            Cancel
-          </button>
+            <p style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "14px" }}>
+              {testModeMessage} Test mode sample money, No real money moves.
+            </p>
+            {addedCents !== null ? (
+              <section
+                className="pp-card"
+                aria-label="Top-up confirmation"
+                style={{
+                  marginTop: spacing.lg,
+                  backgroundColor: colors.page,
+                  border: `1px solid ${colors.line}`,
+                  borderRadius: radii.card,
+                  padding: spacing.md,
+                }}
+              >
+                <p style={{ margin: 0, color: colors.ink, fontWeight: 700 }}>
+                  Added {formatCurrency(addedCents)} — new balance {formatCurrency(newBalanceCents)}
+                </p>
+                <button
+                  type="button"
+                  className="pp-btn-mint"
+                  onClick={handleDone}
+                  style={{
+                    width: "100%",
+                    marginTop: spacing.md,
+                    backgroundColor: colors.mint,
+                    color: "#06332A",
+                    border: `1px solid ${colors.mint}`,
+                    borderRadius: radii.pill,
+                    padding: `${spacing.md} ${spacing.xl}`,
+                    fontFamily: typography.body,
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Done
+                </button>
+              </section>
+            ) : null}
+            <form onSubmit={handleSubmit} noValidate style={{ marginTop: spacing.lg }}>
+              <label
+                htmlFor="add-money-amount"
+                style={{ display: "block", fontSize: "14px", fontWeight: 600, color: colors.ink }}
+              >
+                Amount in USD
+              </label>
+              <input
+                ref={inputRef}
+                id="add-money-amount"
+                name="amount"
+                inputMode="decimal"
+                autoComplete="off"
+                placeholder="25.00"
+                value={amount}
+                onChange={handleChange}
+                onBlur={function onBlur(): void {
+                  setTouched(true);
+                }}
+                aria-invalid={showError}
+                aria-describedby={showError ? "add-money-error" : "add-money-hint"}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  marginTop: spacing.sm,
+                  border: `1px solid ${showError ? "#B3261E" : colors.line}`,
+                  borderRadius: radii.card,
+                  padding: `${spacing.sm} ${spacing.md}`,
+                  fontFamily: typography.body,
+                  fontSize: "16px",
+                  color: colors.ink,
+                  backgroundColor: colors.surface,
+                }}
+              />
+              <p id="add-money-hint" style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "13px" }}>
+                Enter $1 to $5,000.
+              </p>
+              <div style={{ display: "flex", gap: spacing.sm, marginTop: spacing.md }} role="group" aria-label="Quick amounts">
+                {picks.map(function renderPick(v: string) {
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={function onPick(): void {
+                        handlePick(v);
+                      }}
+                      aria-label={`Set amount $${v}`}
+                      style={{
+                        flex: 1,
+                        backgroundColor: colors.page,
+                        color: colors.ink,
+                        border: `1px solid ${colors.line}`,
+                        borderRadius: radii.pill,
+                        padding: `${spacing.sm} 0`,
+                        fontFamily: typography.body,
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                      }}
+                    >
+                      ${v}
+                    </button>
+                  );
+                })}
+              </div>
+              {showError ? (
+                <p id="add-money-error" role="alert" style={{ margin: 0, marginTop: spacing.sm, color: "#B3261E", fontSize: "14px" }}>
+                  {validationError}
+                </p>
+              ) : null}
+              {serverError !== null ? (
+                <p role="alert" style={{ margin: 0, marginTop: spacing.sm, color: "#B3261E", fontSize: "14px" }}>
+                  {serverError}
+                </p>
+              ) : null}
+              <button
+                type="submit"
+                className="pp-btn-mint"
+                disabled={submitting}
+                style={{
+                  width: "100%",
+                  marginTop: spacing.md,
+                  backgroundColor: colors.mint,
+                  color: "#06332A",
+                  border: `1px solid ${colors.mint}`,
+                  borderRadius: radii.pill,
+                  padding: `${spacing.md} ${spacing.xl}`,
+                  fontFamily: typography.body,
+                  fontSize: "15px",
+                  fontWeight: 700,
+                  cursor: submitting ? "not-allowed" : "pointer",
+                  opacity: submitting ? 0.7 : 1,
+                }}
+              >
+                {submitting ? "Adding…" : "Add money"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={{
+                  width: "100%",
+                  marginTop: spacing.sm,
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: colors.muted,
+                  fontFamily: typography.body,
+                  fontSize: "14px",
+                  fontWeight: 600,
+                }}
+              >
+                Cancel
+              </button>
+            </form>
+          </section>
         </div>
       </div>
-    </div>
+    </RevealOnScroll>
   );
 }

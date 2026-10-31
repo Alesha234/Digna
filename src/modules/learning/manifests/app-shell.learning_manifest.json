@@ -1,0 +1,120 @@
+{
+  "id": "app-shell",
+  "title": "App Shell - Sticky Bar and Footer",
+  "version": "clear-mint-v1",
+  "audience": "New users, demo viewers, and teammates learning the conceptual App Shell framing",
+  "objectives": [
+    "Explain how the sticky top bar keeps navigation and primary actions reachable with calm visual treatment",
+    "Describe the contained centered width and airy gutters that improve readability and focus",
+    "Identify the four-column footer shell covering product, help, demo/test-mode, and trust information",
+    "Recognize what stayed unchanged — routes, labels, and order — to preserve familiarity and trust"
+  ],
+  "sections": [
+    {
+      "id": "sticky-top-bar",
+      "title": "Sticky Top Bar That Stays Visible",
+      "bodyMarkdown": "The App Shell adds a sticky top bar that stays visible as you scroll, so navigation and key actions are always within reach. It uses a calm translucent blur and subtle border to feel light without distracting from content. On the left you find the logo that returns to home, in the center the main navigation links, and on the right the primary actions: Add Money and Create Card, emphasized as the most common next steps. This hierarchy reduces hunting and clicks. On phones the bar collapses gracefully: navigation tucks behind a menu button, while the logo and primary actions remain accessible. The pattern keeps the experience predictable across screen sizes, reinforcing that the shell frames content but never competes with it.",
+      "analogy": "Like a calm storefront awning that stays overhead as you browse, showing the shop name, aisles, and checkout buttons wherever you walk.",
+      "pitch30s": "The top bar sticks as you scroll, keeping logo, navigation, and Add Money or Create Card always handy, with calm blur and border, collapsing neatly on phones.",
+      "keyPoints": [
+        "Stays visible on scroll with calm translucent blur and subtle border",
+        "Holds logo home, central navigation, and emphasized Add Money and Create Card actions",
+        "Collapses gracefully on phones: navigation tucks behind a menu button while core actions remain"
+      ],
+      "quiz": [
+        {
+          "question": "What does the sticky top bar keep always visible?",
+          "options": ["Navigation and primary actions", "Only the footer links", "Background decorative images"],
+          "answerIndex": 0,
+          "explanation": "The bar stays on scroll so logo, navigation, and Add Money / Create Card remain reachable."
+        },
+        {
+          "question": "How does the bar behave on phones?",
+          "options": ["It disappears completely", "Navigation collapses behind a menu button while logo and actions stay accessible", "It scrolls away with content"],
+          "answerIndex": 1,
+          "explanation": "Phone collapse keeps the pattern predictable: navigation tucks away but core wayfinding remains."
+        }
+      ]
+    },
+    {
+      "id": "contained-reading-width",
+      "title": "Contained Reading Width with Airy Gutters",
+      "bodyMarkdown": "Inside the shell, content lives in a contained reading width centered on the page. Instead of stretching edge to edge, it leaves airy gutters on the sides that let the eye rest and help you focus. This maximum width keeps line length readable on large monitors while still feeling spacious on laptops. Headings, cards, and tables align to the same central column, creating a calm vertical rhythm as you scan downward. The gutters are not wasted space; they signal that the page is intentional and uncluttered, like margins in a well-designed book. When the window narrows, the gutters shrink first, then the content reflows, so nothing feels cramped or abruptly broken. The result is a consistent, comfortable reading experience from desktop to tablet.",
+      "analogy": "Like margins in a well-printed book that keep text comfortable and centered with breathing room on each side.",
+      "pitch30s": "Content sits in a centered column with airy gutters, keeping lines readable on big screens and comfortable on small ones for a calm rhythm.",
+      "keyPoints": [
+        "Content centered in a maximum width with airy side gutters",
+        "Aligns headings, cards, and tables to a shared central column for vertical rhythm",
+        "Gutters shrink first on narrow screens, then content reflows without crowding"
+      ],
+      "quiz": [
+        {
+          "question": "Why use a contained centered width?",
+          "options": ["To keep line length readable and focus with airy gutters", "To stretch content edge-to-edge on large monitors", "To hide navigation"],
+          "answerIndex": 0,
+          "explanation": "Contained width with gutters improves readability and calm focus across screen sizes."
+        },
+        {
+          "question": "What happens as the window narrows?",
+          "options": ["Gutters shrink first, then content reflows", "Content disappears", "Footer moves to the top"],
+          "answerIndex": 0,
+          "explanation": "Gutters absorb shrinkage first, keeping content comfortable before reflowing."
+        }
+      ]
+    },
+    {
+      "id": "four-column-footer-shell",
+      "title": "Four-Column Footer Shell",
+      "bodyMarkdown": "The bottom of the shell completes the frame with a four-column footer that acts like a quiet info desk. It is organized into Product, Help, Demo or test-mode note, and a Trust note, so you can find orientation without scrolling back up. Product and Help list stable destinations for exploring features or getting support. The Demo column clarifies that data is for testing and not real money movement, reducing confusion for new viewers. The Trust note reassures with plain language about security and intent, without jargon or false promises. Columns stay even and scannable, using simple headings and calm spacing rather than dense walls of links. On narrow screens they stack vertically in the same order, preserving findability. Together they close the page with balance and transparency.",
+      "analogy": "Like an info desk at the back of a store with four labeled counters: product, help, demo notice, and trust reassurance.",
+      "pitch30s": "The footer closes the page with four clear columns — product, help, demo note, and trust note — scannable on desktop and stacked on mobile.",
+      "keyPoints": [
+        "Four even columns: Product, Help, Demo/test-mode note, and Trust note",
+        "Provides orientation, support, demo clarity, and plain-language reassurance",
+        "Stacks vertically on mobile in same order to keep findability"
+      ],
+      "quiz": [
+        {
+          "question": "What are the four footer columns?",
+          "options": ["Product, Help, Demo/test-mode note, Trust note", "Home, Search, Cart, Profile", "Logo, Banner, Ads, Social"],
+          "answerIndex": 0,
+          "explanation": "Footer shell organizes orientation into product, help, demo clarity, and trust reassurance."
+        },
+        {
+          "question": "How does the footer adapt on narrow screens?",
+          "options": ["Columns stack vertically in same order", "Columns disappear", "Columns become a slideshow"],
+          "answerIndex": 0,
+          "explanation": "Stacking preserves order and findability without changing meaning."
+        }
+      ]
+    },
+    {
+      "id": "what-stayed-same",
+      "title": "What Stayed the Same",
+      "bodyMarkdown": "Importantly, the shell changes only the frame, not what is inside. All routes stay the same, so bookmarks and shared links continue to work. Labels keep their exact wording to avoid relearning, and the navigation order is preserved so muscle memory remains intact. Cards, tables, and flows function exactly as before; the shell simply centers and surfaces them more predictably. This distinction teaches a key design principle: improve wayfinding and consistency without moving the underlying content. Users should feel that the app is more polished and easier to scan, not that they have entered a different product. By keeping routes, labels, and order stable, the update builds trust and lets teams iterate on presentation while preserving learned behavior and existing workflows across sessions.",
+      "analogy": "Like renovating a gallery frame while leaving all paintings, titles, and wall order exactly where visitors expect to find them.",
+      "pitch30s": "Only the frame changed; routes, labels, and order stayed the same, so everything works where you left it, just easier to find.",
+      "keyPoints": [
+        "Same routes — bookmarks and shared links keep working",
+        "Same labels and wording — no relearning needed",
+        "Same navigation order — muscle memory preserved"
+      ],
+      "quiz": [
+        {
+          "question": "What stayed the same after the App Shell update?",
+          "options": ["Routes, labels, and navigation order", "All colors and pages were renamed", "Primary actions were removed"],
+          "answerIndex": 0,
+          "explanation": "Only the framing changed; routes, labels, and order stayed stable for trust."
+        },
+        {
+          "question": "Why keep routes and labels unchanged?",
+          "options": ["To preserve bookmarks, shared links, and learned behavior", "To hide features", "To force relearning"],
+          "answerIndex": 0,
+          "explanation": "Stability lets presentation improve while workflows and muscle memory remain intact."
+        }
+      ]
+    }
+  ],
+  "relatedScreens": ["AppShellScreen"],
+  "accessibilityNotes": "Conceptually the shell includes a skip-link and landmark regions so assistive tech can jump to main content; keyboard users Tab through navigation and primary actions in logical order with visible focus indicators; the experience respects reduced-motion preferences with no slide animation for collapsed navigation."
+}

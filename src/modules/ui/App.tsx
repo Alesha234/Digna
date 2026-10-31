@@ -1,5 +1,6 @@
 import "./styles.css";
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { useState } from "react";
+import { PayProxyProvider } from "@/modules/ui/state/PayProxyProvider";
 import { AppShell } from "@/modules/ui/components/AppShell";
 import { WelcomeScreen } from "@/modules/ui/screens/WelcomeScreen";
 import { AuthScreen } from "@/modules/ui/screens/AuthScreen";
@@ -10,75 +11,131 @@ import { AddMoneyScreen } from "@/modules/ui/screens/AddMoneyScreen";
 import { SnapBillScreen } from "@/modules/ui/screens/SnapBillScreen";
 import { AssistantScreen } from "@/modules/ui/screens/AssistantScreen";
 import { SettingsScreen } from "@/modules/ui/screens/SettingsScreen";
+import { StylesScreen } from "@/modules/ui/screens/StylesScreen";
+import { ThemeScreen } from "@/modules/ui/screens/ThemeScreen";
+import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
+import { ProviderInfoScreen } from "@/modules/ui/screens/ProviderInfoScreen";
+import { FormatScreen } from "@/modules/ui/screens/FormatScreen";
+import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
+import { AppShellScreen } from "@/modules/ui/screens/AppShellScreen";
+import type { AppScreen } from "@/modules/ui/types";
+import type { BillScanResult } from "@/modules/ui/types";
+
+type ShowcaseScreen = "styles" | "theme" | "demo-data" | "provider" | "format" | "alerts" | "app-shell";
+type Screen = AppScreen | ShowcaseScreen;
 
 function InnerApp() {
-  const { user, screen } = usePayProxy();
+  const [screen, setScreen] = useState<Screen>("welcome");
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
-  if (!user) {
+  function onNavigate(next: AppScreen | string): void {
+    setScreen(next as Screen);
+  }
+
+  function handleOpenCard(cardId: string): void {
+    setSelectedCardId(cardId);
+    setScreen("card-detail");
+  }
+
+  function handleAddMoney(): void {
+    setScreen("add-money");
+  }
+
+  function handleCreateCard(): void {
+    setScreen("create-card");
+  }
+
+  function handleCreated(cardId: string): void {
+    setSelectedCardId(cardId);
+    setScreen("card-detail");
+  }
+
+  function handleMakeCard(_bill: BillScanResult): void {
+    setScreen("create-card");
+  }
+
+  function handleBackToDashboard(): void {
+    setScreen("dashboard");
+  }
+
+  function handleGetStarted(): void {
+    setScreen("auth");
+  }
+
+  function handleSignIn(): void {
+    setScreen("auth");
+  }
+
+  function handleSignOut(): void {
+    setSelectedCardId(null);
+    setScreen("welcome");
+  }
+
+  function renderScreen() {
+    if (screen === "welcome") {
+      return <WelcomeScreen onGetStarted={handleGetStarted} onSignIn={handleSignIn} />;
+    }
     if (screen === "auth") {
       return <AuthScreen />;
     }
-    return <WelcomeScreen />;
-  }
-
-  if (screen === "card-detail") {
+    if (screen === "card-detail") {
+      return (
+        <CardDetailScreen
+          cardId={selectedCardId ?? ""}
+          onBack={handleBackToDashboard}
+          onAddMoney={handleAddMoney}
+        />
+      );
+    }
+    if (screen === "create-card") {
+      return <CreateCardScreen onCreated={handleCreated} onCancel={handleBackToDashboard} />;
+    }
+    if (screen === "add-money") {
+      return <AddMoneyScreen onDone={handleBackToDashboard} onCancel={handleBackToDashboard} />;
+    }
+    if (screen === "snap-bill") {
+      return <SnapBillScreen onMakeCard={handleMakeCard} onCancel={handleBackToDashboard} />;
+    }
+    if (screen === "assistant") {
+      return <AssistantScreen />;
+    }
+    if (screen === "settings") {
+      return <SettingsScreen onSignOut={handleSignOut} onBack={handleBackToDashboard} />;
+    }
+    if (screen === "styles") {
+      return <StylesScreen />;
+    }
+    if (screen === "theme") {
+      return <ThemeScreen />;
+    }
+    if (screen === "demo-data") {
+      return <DemoDataScreen />;
+    }
+    if (screen === "provider") {
+      return <ProviderInfoScreen />;
+    }
+    if (screen === "format") {
+      return <FormatScreen />;
+    }
+    if (screen === "alerts") {
+      return <AlertsScreen />;
+    }
+    if (screen === "app-shell") {
+      return <AppShellScreen />;
+    }
     return (
-      <AppShell>
-        <div>Test mode: demo only, no real money moves.</div>
-        <CardDetailScreen />
-      </AppShell>
-    );
-  }
-
-  if (screen === "create-card") {
-    return (
-      <AppShell>
-        <div>Test mode: demo only, no real money moves.</div>
-        <CreateCardScreen />
-      </AppShell>
-    );
-  }
-
-  if (screen === "add-money") {
-    return (
-      <AppShell>
-        <div>Test mode: demo only, no real money moves.</div>
-        <AddMoneyScreen />
-      </AppShell>
-    );
-  }
-
-  if (screen === "snap-bill") {
-    return (
-      <AppShell>
-        <div>Test mode: demo only, no real money moves.</div>
-        <SnapBillScreen />
-      </AppShell>
-    );
-  }
-
-  if (screen === "assistant") {
-    return (
-      <AppShell>
-        <div>Test mode: demo only, no real money moves.</div>
-        <AssistantScreen />
-      </AppShell>
-    );
-  }
-
-  if (screen === "settings") {
-    return (
-      <AppShell>
-        <div>Test mode: demo only, no real money moves.</div>
-        <SettingsScreen />
-      </AppShell>
+      <DashboardScreen
+        onOpenCard={handleOpenCard}
+        onAddMoney={handleAddMoney}
+        onCreateCard={handleCreateCard}
+      />
     );
   }
 
   return (
-    <AppShell>
-      <div>Test mode: demo only, no real money moves.</div>
-      <DashboardScreen />
+    <AppShell current={screen} onNavigate={onNavigate}>
+      <p role="note">Test mode: demo only, no real money moves.</p>
+      {renderScreen()}
     </AppShell>
   );
 }

@@ -1,0 +1,96 @@
+{
+  "id": "clear-mint-styles",
+  "title": "Clear Mint Layout and Motion",
+  "version": "clear-mint-v1",
+  "audience": "Designers, developers, and product team members new to the Clear Mint visual language",
+  "objectives": [
+    "Understand the contained grid and reading width that create centered, airy, phone-first layouts",
+    "Recognize alternating tinted mint and dark midnight bands as presentational rhythm on home and dashboard",
+    "Describe scroll-in reveal and hover-lift as subtle, optional motion that does not change functionality",
+    "Apply reduced-motion preference support and keyboard-visible focus with logical tab order"
+  ],
+  "sections": [
+    {
+      "id": "contained-grid-reading-width",
+      "title": "Contained Grid and Reading Width",
+      "bodyMarkdown": "The layout uses a contained, centered container rather than edge-to-edge walls of text. This creates generous white space on the sides, letting the eye rest and keeping focus on the central column. Content width is limited to a comfortable reading measure so lines never become a tiring long marathon. On larger screens, multiple columns sit side by side in a balanced grid, while on phones the same content stacks vertically in a single column. Nothing changes in function, only arrangement. The order remains logical, spacing stays airy, and headers align to the container edges. Imagine breathing room around each block, like pages centered on a desk, preserving clarity whether you view on a wide monitor or a small handheld device.",
+      "analogy": "Like library shelves centered in a bright hall with wide aisles, where the same books are easy to scan whether you walk the main hall or a narrow side aisle.",
+      "pitch30s": "We center content in a contained grid with a comfortable reading width, so wide screens feel airy and phones stack naturally without changing what you can do.",
+      "keyPoints": [
+        "Contained centered container provides side breathing room and focus",
+        "Reading measure limits line length for comfort",
+        "Phone-first stacking reflows grid to single column with same order"
+      ],
+      "quiz": [
+        {"question": "What is the main purpose of the contained grid?", "options": ["Increase centered focus and airy spacing", "Add new navigation features", "Change button functionality"], "answerIndex": 0, "explanation": "The container centers content for focus and airiness; it does not add features."},
+        {"question": "How does the grid behave on phones?", "options": ["Content stacks vertically in logical order", "Content is hidden until expanded", "Columns shrink to unreadable size"], "answerIndex": 0, "explanation": "Phone layout stacks columns vertically while preserving order and readability."}
+      ]
+    },
+    {
+      "id": "mint-midnight-bands",
+      "title": "Tinted Mint and Midnight Bands",
+      "bodyMarkdown": "Visual rhythm comes from alternating horizontal bands of color behind content. Light tinted bands feel open, calm, and mint-fresh, ideal for introducing information or showcasing primary actions. Dark midnight bands feel grounded and cozy, helping contrasting text and illustrations stand out without harshness. By switching between these two modes section by section, the home and dashboard gain a natural pacing, like breathing in and out as you scroll. Bands extend full width while inner content stays contained, so the alternation is clear but not overwhelming. No functionality shifts between bands; navigation order, button behavior, and information hierarchy stay identical. The contrast is solely presentational, guiding attention and preventing visual monotony through gentle tonal variation that supports comprehension and comfort across long scrolling journeys and repeated daily use.",
+      "analogy": "Like a gallery hallway alternating soft daylight rooms with cozy evening rooms, guiding you forward without changing the artwork itself.",
+      "pitch30s": "We alternate light mint and dark midnight bands on home and dashboard to create a breathing rhythm that guides the eye without changing any features.",
+      "keyPoints": [
+        "Light tinted bands feel open and calm for introductions",
+        "Dark midnight bands feel grounded and make contrast pop",
+        "Alternation is presentational rhythm, not functional change"
+      ],
+      "quiz": [
+        {"question": "What do alternating bands provide?", "options": ["Visual pacing and rhythm without functional change", "Different features per band color", "Hidden navigation in dark bands"], "answerIndex": 0, "explanation": "Bands create tonal rhythm; functionality and hierarchy stay identical."},
+        {"question": "How are bands structured?", "options": ["Full-width background with contained inner content", "Narrow centered strips only", "Random color per card"], "answerIndex": 0, "explanation": "Bands extend full width while inner content stays contained for clarity."}
+      ]
+    },
+    {
+      "id": "scroll-reveal",
+      "title": "Scroll-In Reveal",
+      "bodyMarkdown": "Sections do not simply pop into existence; they gracefully enter view as you scroll. When a new block approaches the middle of the viewport, it subtly rises a short distance while fading from translucent to opaque. The motion is slow, soft, and brief, suggesting depth rather than demanding attention. It helps orient the reader by marking progress through the page without abrupt jumps. Animations are sequenced lightly, so neighboring elements do not all move at once but create a gentle cascade. Importantly, this reveal changes no interaction or content availability; everything is already present in the document and remains accessible even if motion is disabled. It is purely polish that adds a sense of liveliness while preserving readability, never obscuring text or delaying access to controls that should appear instantly visible today.",
+      "analogy": "Like pages gently lifted onto a lit table as you walk by, just enough movement to mark progress without hiding the words.",
+      "pitch30s": "As you scroll, sections softly rise and fade in to mark progress, adding liveliness without ever hiding content or changing interactions.",
+      "keyPoints": [
+        "Subtle rise and fade as sections enter view",
+        "Gentle cascade sequencing suggests depth",
+        "Purely presentational; content remains available without motion"
+      ],
+      "quiz": [
+        {"question": "What motion occurs on scroll reveal?", "options": ["Subtle rise and fade to opaque", "Rapid spinning and scaling", "Page reload animation"], "answerIndex": 0, "explanation": "Reveal is a slow, soft rise and fade, not dramatic motion."},
+        {"question": "Does reveal affect availability?", "options": ["No, content is already present and accessible", "Yes, content loads only after animation", "Yes, buttons are disabled until revealed"], "answerIndex": 0, "explanation": "Reveal is polish only; all content remains accessible even with motion off."}
+      ]
+    },
+    {
+      "id": "hover-lift-cards",
+      "title": "Hover Lift on Soft Cards",
+      "bodyMarkdown": "Cards that hold discrete information appear soft and approachable with rounded corners and spacious padding. At rest they sit quietly with a delicate shadow that separates them from the background. When a pointer hovers over a card, it responds with a gentle upward lift and a slightly deeper, softer shadow, as if the card is floating closer. The movement is minimal, just enough to signal interactivity and hierarchy without startling the eye. On touch devices, the same cards remain static and fully usable via tap, with no hover dependency for core actions. This effect never changes what a card does; it only reinforces affordance through motion and depth. Focus states complement hover by ensuring keyboard users receive an equally clear indication of selection through a visible ring that remains consistent across all input methods and contexts.",
+      "analogy": "Like soft cushioned tiles on a table that slightly levitate when you point, showing they can be picked up, yet still work perfectly when tapped.",
+      "pitch30s": "Soft cards show a gentle lift and deeper shadow on hover to signal they are interactive, while remaining fully usable by tap and keyboard.",
+      "keyPoints": [
+        "Rounded, padded cards with delicate resting shadow",
+        "Hover triggers gentle lift and softer deeper shadow for affordance",
+        "No hover dependency; touch and keyboard remain fully functional"
+      ],
+      "quiz": [
+        {"question": "What does hover-lift communicate?", "options": ["Interactivity and hierarchy through depth", "A change in card functionality", "That the card is disabled"], "answerIndex": 0, "explanation": "Lift uses depth to signal affordance without changing function."},
+        {"question": "How does it work on touch devices?", "options": ["Cards stay static and work via tap", "Cards cannot be used without a mouse", "Tap requires double activation"], "answerIndex": 0, "explanation": "Hover is optional enhancement; tap remains fully usable."}
+      ]
+    },
+    {
+      "id": "reduced-motion-focus",
+      "title": "Reduced Motion and Keyboard Focus",
+      "bodyMarkdown": "Motion and hover enhancements respect user needs and input diversity. For people who prefer less animation, the system honors the reduced-motion preference, disabling scroll reveals and card lifts so content appears instantly without transition. No information is lost when motion is turned off; the page simply becomes still, prioritizing comfort and reducing potential vestibular disturbance. Equally important is keyboard accessibility. Every interactive element shows a high-contrast focus ring when navigated via keyboard, never hidden or clipped, ensuring sighted keyboard users always know their position. Tab order follows visual layout logically from top to bottom and left to right, preserving an intuitive path through banners, grids, and cards. These choices guarantee inclusion, making beauty compatible with accessibility by treating motion as optional enhancement rather than required functionality for any essential task everyday users enjoy always.",
+      "analogy": "Like a library with ramps alongside stairs, soft lighting that can dim, and glowing handrails that always show where you are.",
+      "pitch30s": "We respect reduced-motion by disabling animations and always show a clear focus ring with logical tab order, keeping motion optional and navigation inclusive.",
+      "keyPoints": [
+        "Reduced-motion preference disables reveal and lift instantly",
+        "Focus ring always visible and never clipped for keyboard users",
+        "Logical top-to-bottom tab order matches visual layout"
+      ],
+      "quiz": [
+        {"question": "What happens when reduced motion is preferred?", "options": ["Animations are disabled and content appears instantly", "Content is hidden", "Page forces stronger animations"], "answerIndex": 0, "explanation": "System disables motion so content appears still without loss."},
+        {"question": "What ensures keyboard visibility?", "options": ["Always-visible focus ring and logical tab order", "Focus only on mouse hover", "Tab order is random"], "answerIndex": 0, "explanation": "High-contrast focus ring and logical order ensure keyboard users always know position."}
+      ]
+    }
+  ],
+  "relatedScreens": ["StylesScreen"],
+  "accessibilityNotes": "Motion is optional enhancement: reduced-motion preference disables scroll reveal and hover lift via media query with no content loss. All interactive controls show an always-visible high-contrast focus ring, never hidden or clipped, and tab order follows visual layout logically for keyboard navigation."
+}

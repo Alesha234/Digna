@@ -1,92 +1,111 @@
 import { AppWarning } from "@/modules/ui/types";
-import { theme, colors, spacing, radii, typography } from "@/modules/ui/theme";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-export function WarningBanner(props: { warning: AppWarning; actionLabel?: string; onAction?: () => void }) {
-  const { warning, actionLabel, onAction }: { warning: AppWarning; actionLabel?: string; onAction?: () => void } = props;
-  const resolvedLabel: string = actionLabel ?? "View";
-  const accent: string = warning.kind === "near-cap" ? colors.warning : warning.kind === "low-balance" ? colors.danger : colors.primary;
-  const iconText: string = warning.kind === "expiring" ? "◷" : "!";
+export function WarningBanner(props: { warnings: AppWarning[]; onAction?: (w: AppWarning) => void }) {
+  const { warnings, onAction } = props;
+  if (!warnings || warnings.length === 0) {
+    return null;
+  }
+  function getActionLabel(w: AppWarning): string | undefined {
+    return (w as AppWarning & { actionLabel?: string }).actionLabel;
+  }
   return (
-    <div
+    <section
+      className="pp-warnings"
+      role="status"
+      aria-live="polite"
       style={{
         display: "flex",
-        alignItems: "center",
-        gap: spacing.sm,
-        backgroundColor: colors.surface,
-        border: `1px solid ${theme.colors.border}`,
-        borderLeft: `4px solid ${accent}`,
-        borderRadius: radii.md,
-        paddingTop: spacing.sm,
-        paddingBottom: spacing.sm,
-        paddingLeft: spacing.md,
-        paddingRight: spacing.md,
+        flexDirection: "column",
+        gap: theme.spacing.sm,
+        marginBottom: spacing.md,
       }}
     >
-      <span
-        aria-hidden="true"
+      <ul
         style={{
+          listStyle: "none",
+          margin: 0,
+          padding: 0,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 28,
-          height: 28,
-          borderRadius: radii.md,
-          backgroundColor: colors.primarySoft,
-          color: accent,
-          fontSize: typography.sizeSm,
-          fontWeight: typography.weightBold,
-          border: `1px solid ${colors.border}`,
-          flexShrink: 0,
+          flexDirection: "column",
+          gap: spacing.sm,
         }}
       >
-        {iconText}
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            color: colors.text,
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightBold,
-          }}
-        >
-          {warning.title}
-        </div>
-        <div
-          style={{
-            color: colors.textMuted,
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightMedium,
-          }}
-        >
-          {warning.message}
-        </div>
-      </div>
-      {onAction ? (
-        <button
-          type="button"
-          onClick={() => {
-            if (onAction) {
-              onAction();
-            }
-          }}
-          style={{
-            backgroundColor: colors.surface,
-            color: colors.primary,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radii.md,
-            paddingTop: spacing.sm,
-            paddingBottom: spacing.sm,
-            paddingLeft: spacing.md,
-            paddingRight: spacing.md,
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightMedium,
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
-        >
-          {resolvedLabel}
-        </button>
-      ) : null}
-    </div>
+        {warnings.map((w: AppWarning) => {
+          const label: string | undefined = getActionLabel(w);
+          return (
+            <li
+              key={w.id}
+              className="pp-card pp-warning"
+              style={{
+                backgroundColor: colors.surface,
+                color: colors.ink,
+                border: `1px solid ${colors.line}`,
+                borderLeft: `4px solid ${colors.mint}`,
+                borderRadius: radii.card,
+                boxShadow: shadows.soft,
+                paddingTop: spacing.md,
+                paddingBottom: spacing.md,
+                paddingLeft: spacing.md,
+                paddingRight: spacing.md,
+              }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  fontFamily: typography.heading,
+                  color: colors.ink,
+                  fontSize: 16,
+                  fontWeight: 700,
+                  margin: 0,
+                  marginBottom: spacing.sm,
+                }}
+              >
+                {w.title}
+              </strong>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: typography.body,
+                  color: colors.muted,
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                }}
+              >
+                {w.message}
+              </p>
+              {label ? (
+                <button
+                  type="button"
+                  className="pp-btn-mint"
+                  onClick={() => {
+                    if (onAction) {
+                      onAction(w);
+                    }
+                  }}
+                  style={{
+                    marginTop: spacing.sm,
+                    backgroundColor: colors.mint,
+                    color: "#06332A",
+                    border: "none",
+                    borderRadius: radii.card,
+                    paddingTop: spacing.sm,
+                    paddingBottom: spacing.sm,
+                    paddingLeft: spacing.md,
+                    paddingRight: spacing.md,
+                    fontFamily: typography.body,
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {label}
+                </button>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

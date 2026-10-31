@@ -1,16 +1,11 @@
 import * as React from "react";
 import { useState } from "react";
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { testModeMessage } from "@/modules/ui/data/demoData";
-import { formatCurrency } from "@/modules/ui/lib/format";
-import { theme, colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
+import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-void PayProxyProvider;
-void colors;
-void spacing;
-void radii;
-void shadows;
-void typography;
+void theme;
 
 function ToggleRow(props: { label: string; hint: string; on: boolean; onFlip: () => void }) {
   return (
@@ -19,48 +14,36 @@ function ToggleRow(props: { label: string; hint: string; on: boolean; onFlip: ()
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: theme.spacing.sm,
-        paddingTop: theme.spacing.sm,
-        paddingBottom: theme.spacing.sm,
+        gap: spacing.md,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.md,
+        borderTop: `1px solid ${colors.line}`,
       }}
     >
       <div style={{ flex: 1 }}>
         <div
-          style={{
-            fontFamily: theme.typography.fontFamily,
-            fontSize: theme.typography.sizeSm,
-            fontWeight: theme.typography.weightMedium,
-            color: theme.colors.text,
-          }}
+          id={`label-${props.label.replace(/\s+/g, "-").toLowerCase()}`}
+          style={{ fontFamily: typography.body, fontSize: "14px", fontWeight: 600, color: colors.ink }}
         >
           {props.label}
         </div>
-        <div
-          style={{
-            fontFamily: theme.typography.fontFamily,
-            fontSize: theme.typography.sizeSm,
-            color: theme.colors.textMuted,
-          }}
-        >
-          {props.hint}
-        </div>
+        <div style={{ fontFamily: typography.body, fontSize: "13px", color: colors.muted }}>{props.hint}</div>
       </div>
       <button
         type="button"
-        role="switch"
-        aria-checked={props.on}
+        aria-pressed={props.on}
         aria-label={props.label}
         onClick={props.onFlip}
         style={{
-          minWidth: 48,
-          height: 28,
-          borderRadius: theme.radii.pill,
-          border: `1px solid ${theme.colors.border}`,
-          backgroundColor: props.on ? theme.colors.primary : theme.colors.border,
-          color: theme.colors.white,
-          fontFamily: theme.typography.fontFamily,
-          fontSize: theme.typography.sizeSm,
-          fontWeight: theme.typography.weightBold,
+          minWidth: "56px",
+          height: "30px",
+          borderRadius: radii.pill,
+          border: `1px solid ${colors.line}`,
+          backgroundColor: props.on ? colors.mint : colors.surface,
+          color: props.on ? colors.mintDark : colors.muted,
+          fontFamily: typography.body,
+          fontSize: "13px",
+          fontWeight: 700,
           cursor: "pointer",
         }}
       >
@@ -70,199 +53,201 @@ function ToggleRow(props: { label: string; hint: string; on: boolean; onFlip: ()
   );
 }
 
-export function SettingsScreen() {
-  const { user, balance, setScreen, signOut } = usePayProxy();
+export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => void }) {
+  const proxy = usePayProxy();
+  const user = proxy.user;
+  const signOut = proxy.signOut;
+  const setScreen = proxy.setScreen;
   const [warnNearCap, setWarnNearCap] = useState<boolean>(true);
   const [warnLowBalance, setWarnLowBalance] = useState<boolean>(true);
   const [warnExpiring, setWarnExpiring] = useState<boolean>(true);
 
+  function handleSignOut(): void {
+    signOut();
+    if (typeof props.onSignOut === "function") {
+      props.onSignOut();
+    }
+  }
+
+  function handleBack(): void {
+    if (typeof props.onBack === "function") {
+      props.onBack();
+      return;
+    }
+    setScreen("dashboard");
+  }
+
+  function handleReset(): void {
+    const store = proxy as unknown as Record<string, unknown>;
+    const maybeReset = store["reset"];
+    if (typeof maybeReset === "function") {
+      (maybeReset as () => void).call(proxy);
+    }
+    const maybeResetDemo = store["resetDemoData"];
+    if (typeof maybeResetDemo === "function") {
+      (maybeResetDemo as () => void).call(proxy);
+    }
+  }
+
   const page: React.CSSProperties = {
-    backgroundColor: theme.colors.background,
+    backgroundColor: colors.page,
     minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
-    padding: theme.spacing.lg,
-    fontFamily: theme.typography.fontFamily,
+    padding: spacing.lg,
+    fontFamily: typography.body,
   };
 
   const inner: React.CSSProperties = {
     width: "100%",
-    maxWidth: 480,
+    maxWidth: "560px",
     display: "flex",
     flexDirection: "column",
-    gap: theme.spacing.md,
+    gap: spacing.lg,
   };
 
   const card: React.CSSProperties = {
-    backgroundColor: theme.colors.surface,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.radii.lg,
-    boxShadow: theme.shadows.soft,
-    padding: theme.spacing.lg,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.line}`,
+    borderRadius: radii.card,
+    boxShadow: shadows.soft,
+    padding: spacing.lg,
   };
 
-  const innerCard: React.CSSProperties = {
-    backgroundColor: theme.colors.surface,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.radii.md,
-    padding: theme.spacing.md,
-  };
-
-  const title: React.CSSProperties = {
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeLg,
-    fontWeight: theme.typography.weightBold,
-    color: theme.colors.text,
+  const h1: React.CSSProperties = {
+    fontFamily: typography.heading,
+    fontSize: "24px",
+    fontWeight: 700,
+    color: colors.ink,
     margin: 0,
   };
 
+  const h2: React.CSSProperties = {
+    fontFamily: typography.heading,
+    fontSize: "17px",
+    fontWeight: 700,
+    color: colors.ink,
+    margin: 0,
+    marginBottom: spacing.md,
+  };
+
   const sub: React.CSSProperties = {
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeSm,
-    color: theme.colors.textMuted,
+    fontFamily: typography.body,
+    fontSize: "14px",
+    color: colors.muted,
     margin: 0,
   };
 
   const body: React.CSSProperties = {
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeMd,
-    color: theme.colors.text,
+    fontFamily: typography.body,
+    fontSize: "14px",
+    color: colors.ink,
     margin: 0,
   };
 
-  const softNote: React.CSSProperties = {
-    backgroundColor: theme.colors.primarySoft,
-    borderRadius: theme.radii.md,
-    padding: theme.spacing.md,
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeSm,
-    color: theme.colors.text,
-  };
-
   const primaryBtn: React.CSSProperties = {
-    backgroundColor: theme.colors.primary,
-    color: theme.colors.white,
+    backgroundColor: colors.mint,
+    color: colors.ink,
     border: "none",
-    borderRadius: theme.radii.pill,
-    padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeMd,
-    fontWeight: theme.typography.weightMedium,
+    borderRadius: radii.pill,
+    padding: `${spacing.md} ${spacing.xl}`,
+    fontFamily: typography.body,
+    fontSize: "14px",
+    fontWeight: 700,
     cursor: "pointer",
   };
 
   const ghostBtn: React.CSSProperties = {
-    backgroundColor: theme.colors.white,
-    color: theme.colors.text,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.radii.pill,
-    padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeMd,
-    fontWeight: theme.typography.weightMedium,
+    backgroundColor: colors.surface,
+    color: colors.ink,
+    border: `1px solid ${colors.line}`,
+    borderRadius: radii.pill,
+    padding: `${spacing.md} ${spacing.xl}`,
+    fontFamily: typography.body,
+    fontSize: "14px",
+    fontWeight: 600,
     cursor: "pointer",
   };
-
-  const dangerBtn: React.CSSProperties = {
-    backgroundColor: theme.colors.white,
-    color: theme.colors.danger,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.radii.pill,
-    padding: `${theme.spacing.sm}px ${theme.spacing.md}px`,
-    fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.sizeMd,
-    fontWeight: theme.typography.weightMedium,
-    cursor: "pointer",
-  };
-
-  if (!user) {
-    return (
-      <div style={page}>
-        <div style={inner}>
-          <div style={card}>
-            <h1 style={title}>Settings</h1>
-            <p style={sub}>You are signed out.</p>
-            <div style={{ marginTop: theme.spacing.md }}>
-              <p style={body}>Please sign in to review your profile and preferences.</p>
-            </div>
-            <div style={{ display: "flex", gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
-              <button type="button" style={primaryBtn} onClick={() => setScreen("dashboard")}>
-                Back to dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const shortId = user.id.length > 8 ? user.id.slice(0, 8) + "…" : user.id;
 
   return (
     <div style={page}>
       <div style={inner}>
         <div>
-          <h1 style={title}>Settings</h1>
+          <h1 style={h1}>Settings</h1>
           <p style={sub}>A calm review of your profile and preferences.</p>
         </div>
 
-        <div style={card}>
-          <h2 style={{ ...body, fontWeight: theme.typography.weightBold }}>{user.displayName}</h2>
-          <p style={sub}>{user.email}</p>
-          <p style={sub}>ID: {shortId}</p>
-          <div style={{ ...innerCard, marginTop: theme.spacing.md }}>
-            <p style={sub}>Wallet balance</p>
-            <p style={{ ...body, fontWeight: theme.typography.weightBold }}>
-              {formatCurrency(balance.availableCents, balance.currency)}
-            </p>
-          </div>
-        </div>
+        <RevealOnScroll delayMs={0} className="pp-section-wrap">
+          <section aria-label="Account" className="pp-section">
+            <h2 style={h2}>Account</h2>
+            <div style={card} className="pp-card pp-lift">
+              <p style={body}>{user ? user.email : "Signed out"}</p>
+              {user ? <p style={sub}>{user.displayName}</p> : null}
+              <div style={{ display: "flex", gap: spacing.md, marginTop: spacing.md, flexWrap: "wrap" }}>
+                <button type="button" onClick={handleSignOut} aria-label="Sign out" style={primaryBtn}>
+                  Sign out
+                </button>
+                <button type="button" onClick={handleBack} aria-label="Back" style={ghostBtn}>
+                  Back
+                </button>
+              </div>
+            </div>
+          </section>
+        </RevealOnScroll>
 
-        <div style={card}>
-          <h2 style={{ ...body, fontWeight: theme.typography.weightBold }}>Preferences</h2>
-          <p style={sub}>Gentle reminders, on by default.</p>
-          <ToggleRow
-            label="Warn near cap"
-            hint="Heads up when a card is close to its cap."
-            on={warnNearCap}
-            onFlip={() => setWarnNearCap((v: boolean) => !v)}
-          />
-          <ToggleRow
-            label="Warn low balance"
-            hint="Heads up when wallet balance runs low."
-            on={warnLowBalance}
-            onFlip={() => setWarnLowBalance((v: boolean) => !v)}
-          />
-          <ToggleRow
-            label="Warn expiring"
-            hint="Heads up before a card reaches its end date."
-            on={warnExpiring}
-            onFlip={() => setWarnExpiring((v: boolean) => !v)}
-          />
-        </div>
+        <RevealOnScroll delayMs={80} className="pp-section-wrap">
+          <section aria-label="Notifications" className="pp-section">
+            <h2 style={h2}>Notifications</h2>
+            <div style={card} className="pp-card pp-lift">
+              <p style={sub}>Gentle reminders, on by default.</p>
+              <ToggleRow
+                label="Warn near cap"
+                hint="Heads up when a card is close to its cap."
+                on={warnNearCap}
+                onFlip={() => setWarnNearCap((v: boolean) => !v)}
+              />
+              <ToggleRow
+                label="Warn low balance"
+                hint="Heads up when wallet balance runs low."
+                on={warnLowBalance}
+                onFlip={() => setWarnLowBalance((v: boolean) => !v)}
+              />
+              <ToggleRow
+                label="Warn expiring"
+                hint="Heads up before a card reaches its end date."
+                on={warnExpiring}
+                onFlip={() => setWarnExpiring((v: boolean) => !v)}
+              />
+            </div>
+          </section>
+        </RevealOnScroll>
 
-        <div style={card}>
-          <h2 style={{ ...body, fontWeight: theme.typography.weightBold }}>Test mode</h2>
-          <div style={{ marginTop: theme.spacing.sm }}>
-            <p style={softNote}>{testModeMessage} No real money moves.</p>
-          </div>
-        </div>
+        <RevealOnScroll delayMs={160} className="pp-section-wrap">
+          <section aria-label="Test mode" className="pp-section">
+            <h2 style={h2}>Test mode</h2>
+            <div style={card} className="pp-card pp-lift">
+              <p style={body}>{testModeMessage}</p>
+              <p style={{ ...sub, marginTop: spacing.md }}>No real money moves.</p>
+              <div style={{ marginTop: spacing.md }}>
+                <button type="button" onClick={handleReset} aria-label="Reset demo data" style={ghostBtn}>
+                  Reset demo data
+                </button>
+              </div>
+            </div>
+          </section>
+        </RevealOnScroll>
 
-        <div style={card}>
-          <h2 style={{ ...body, fontWeight: theme.typography.weightBold }}>Privacy</h2>
-          <p style={{ ...sub, marginTop: theme.spacing.sm }}>
-            Each person sees only their own cards. Demo data resets and nothing leaves this demo.
-          </p>
-        </div>
-
-        <div style={{ display: "flex", gap: theme.spacing.sm }}>
-          <button type="button" style={ghostBtn} onClick={() => setScreen("dashboard")}>
-            Back to dashboard
-          </button>
-          <button type="button" style={dangerBtn} onClick={() => signOut()}>
-            Sign out
-          </button>
-        </div>
+        <RevealOnScroll delayMs={240} className="pp-section-wrap">
+          <section aria-label="About PayProxy" className="pp-section">
+            <h2 style={h2}>About PayProxy</h2>
+            <div style={card} className="pp-card pp-lift">
+              <p style={body}>PayProxy keeps one-time cards safe and simple.</p>
+              <p style={{ ...sub, marginTop: spacing.md }}>
+                Each person sees only their own cards. Demo data resets and nothing leaves this demo.
+              </p>
+            </div>
+          </section>
+        </RevealOnScroll>
       </div>
     </div>
   );
