@@ -44,7 +44,7 @@ export function EmptyState({ title, hint = "", actionLabel, onAction }: { title:
             fontSize: typography.sizeMd,
             fontWeight: typography.weightBold,
             fontFamily: typography.fontFamily,
-            margin: `0 auto ${spacing.md}px auto`,
+            margin: `0 auto ${spacing.md} auto`,
           }}
         >
           +
@@ -82,7 +82,7 @@ export function EmptyState({ title, hint = "", actionLabel, onAction }: { title:
               color: colors.white,
               border: `1px solid ${colors.primary}`,
               borderRadius: radii.lg,
-              padding: `${spacing.md / 2}px ${spacing.md}px`,
+              padding: `${spacing.sm} ${spacing.md}`,
               fontSize: typography.sizeSm,
               fontWeight: typography.weightMedium,
               fontFamily: typography.fontFamily,
