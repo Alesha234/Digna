@@ -20,6 +20,10 @@ export type VirtualCard = {
   status: 'active' | 'frozen' | 'closed';
   endDate: string;
   createdAt: string;
+  /** Practice card details, shown only to the card's owner (a real card would come from the card partner). */
+  cardNumber?: string;
+  exp?: string;
+  cvc?: string;
 };
 
 export type CardTransaction = {
@@ -55,4 +59,4 @@ export type AssistantMessage = {
   createdAt: string;
 };
 
-export type AppScreen = 'welcome' | 'auth' | 'dashboard' | 'card-detail' | 'create-card' | 'add-money' | 'snap-bill' | 'assistant' | 'settings';
+export type AppScreen = 'welcome' | 'auth' | 'signup' | 'dashboard' | 'card-detail' | 'create-card' | 'add-money' | 'snap-bill' | 'assistant' | 'settings' | 'checkout' | 'alerts' | 'demo-data' | 'privacy' | 'terms' | 'feedback' | 'new-password' | 'how-it-works';

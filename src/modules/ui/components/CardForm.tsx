@@ -65,7 +65,7 @@ export function CardForm(props: CardFormProps) {
   function handleCapBlur(_e: FocusEvent<HTMLInputElement>): void {
     const cents: number | null = parseCapDollarsToCents(capDollars);
     if (cents === null) {
-      setCapError("Enter a cap like 25 or 25.00.");
+      setCapError("Enter a limit like 25 or 25.00.");
       return;
     }
     setCapError(validateCapCents(cents));
@@ -79,7 +79,7 @@ export function CardForm(props: CardFormProps) {
     e.preventDefault();
     const nErr: string | null = validateCardName(name);
     const cents: number | null = parseCapDollarsToCents(capDollars);
-    const cErr: string | null = cents === null ? "Enter a cap like 25 or 25.00." : validateCapCents(cents);
+    const cErr: string | null = cents === null ? "Enter a limit like 25 or 25.00." : validateCapCents(cents);
     const dErr: string | null = validateEndDateString(endDate);
     setNameError(nErr);
     setCapError(cErr);
@@ -139,7 +139,7 @@ export function CardForm(props: CardFormProps) {
             name="name"
             type="text"
             autoComplete="off"
-            placeholder="Google Cloud"
+            placeholder="Hotel stay"
             value={name}
             onChange={handleNameChange}
             onBlur={handleNameBlur}
@@ -155,7 +155,7 @@ export function CardForm(props: CardFormProps) {
         </div>
         <div>
           <label htmlFor="cap" style={labelStyle}>
-            Spending cap (USD)
+            Limit (USD): the most it can ever spend
           </label>
           <input
             id="cap"
@@ -179,7 +179,7 @@ export function CardForm(props: CardFormProps) {
         </div>
         <div>
           <label htmlFor="endDate" style={labelStyle}>
-            End date
+            Stops working on
           </label>
           <input
             id="endDate"
@@ -209,7 +209,7 @@ export function CardForm(props: CardFormProps) {
           className="pp-btn-mint"
           style={{
             backgroundColor: busy ? colors.mintDark : colors.mint,
-            color: "#06332A",
+            color: "#0E1726",
             border: "none",
             borderRadius: radii.card,
             padding: `${spacing.sm} ${spacing.md}`,

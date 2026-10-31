@@ -78,8 +78,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
     if (err !== null || next === null) return;
     setSubmitting(true);
     try {
-      await Promise.resolve();
-      addMoneyCents(next);
+      await addMoneyCents(next);
       setAddedCents(next);
     } catch (err2: unknown) {
       const msg: string = err2 instanceof Error && err2.message ? err2.message : "Something went wrong. Try again.";
@@ -143,7 +142,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
               Current balance: {formatCurrency(balanceCents)}
             </p>
             <p style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "14px" }}>
-              {testModeMessage} Test mode sample money, No real money moves.
+              {testModeMessage}
             </p>
             {addedCents !== null ? (
               <section
@@ -168,7 +167,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
                     width: "100%",
                     marginTop: spacing.md,
                     backgroundColor: colors.mint,
-                    color: "#06332A",
+                    color: "#0E1726",
                     border: `1px solid ${colors.mint}`,
                     borderRadius: radii.pill,
                     padding: `${spacing.md} ${spacing.xl}`,
@@ -265,7 +264,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
                   width: "100%",
                   marginTop: spacing.md,
                   backgroundColor: colors.mint,
-                  color: "#06332A",
+                  color: "#0E1726",
                   border: `1px solid ${colors.mint}`,
                   borderRadius: radii.pill,
                   padding: `${spacing.md} ${spacing.xl}`,

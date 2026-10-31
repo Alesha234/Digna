@@ -1,5 +1,5 @@
 import { colors, spacing, radii, typography, theme } from "@/modules/ui/theme";
-import { formatCurrency, formatCapUsage } from "@/modules/ui/lib/format";
+import { formatCurrency, formatCapUsage, formatDate } from "@/modules/ui/lib/format";
 import type { VirtualCard } from "@/modules/ui/types";
 import { SpendingMeter } from "@/modules/ui/components/SpendingMeter";
 
@@ -76,7 +76,7 @@ export function LedgerBand(props: {
           className="pp-ledger-band-end"
           style={{ fontFamily: typography.body, fontSize: "14px", margin: "0", color: colors.midnightInk }}
         >
-          {"Ends " + card.endDate}
+          {"Stops working " + formatDate(card.endDate)}
         </p>
         <span
           className="pp-ledger-band-status"

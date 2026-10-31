@@ -4,5 +4,5 @@ export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
 export default function AppleIcon() {
-  return new ImageResponse((<div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#111111", color: "#ffffff", fontSize: 101, fontWeight: 700, borderRadius: 40 }}>P</div>), size);
+  return new ImageResponse((<svg width="180" height="180" viewBox="0 0 64 64"><rect width="64" height="64" rx="0" fill="#0E1726" /><path d="M14 10h16a22 22 0 0 1 0 44H14z" fill="#FFFFFF" /><rect x="26" y="26" width="26" height="17" rx="5" fill="#FFB020" /><rect x="31" y="30.5" width="6.5" height="4.5" rx="1.3" fill="#0E1726" opacity="0.85" /></svg>), size);
 }

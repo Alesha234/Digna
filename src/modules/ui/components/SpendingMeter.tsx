@@ -75,7 +75,7 @@ export function SpendingMeter(props: { spentCents: number; capCents: number }) {
         }}
       >
         {usage}
-        {near ? " · Near cap" : null}
+        {near ? " · Near its limit" : null}
       </p>
     </div>
   );

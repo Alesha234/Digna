@@ -29,8 +29,8 @@ export function buildWarnings(cards: VirtualCard[], balance: WalletBalance): App
       warnings.push({
         id: `near-cap-${card.id}`,
         kind: "near-cap",
-        title: `${card.name} near its cap`,
-        message: `${card.name} has used ${formatPercent(card.spentCents, card.capCents)} of its ${formatCurrency(card.capCents, balance.currency)} cap. Consider raising the cap or adding money.`,
+        title: `${card.name} is near its limit`,
+        message: `${card.name} has used ${formatPercent(card.spentCents, card.capCents)} of its ${formatCurrency(card.capCents, balance.currency)} limit. You can raise the limit on the card's page, as far as your money covers.`,
         cardId: card.id,
       });
     }

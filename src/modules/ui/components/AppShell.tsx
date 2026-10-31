@@ -1,20 +1,24 @@
 import * as React from "react";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 import type { AppScreen } from "@/modules/ui/types";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { Logo } from "@/modules/ui/components/Logo";
 
 void theme;
 
 type NavEntry = { value: AppScreen | string; label: string };
 
-// The pages a visitor uses. The home page is the PayProxy name at the top left.
+// The pages a visitor uses. The home page is the Digna name at the top left.
 const navEntries: NavEntry[] = [
   { value: "dashboard", label: "Dashboard" },
+  { value: "checkout", label: "Try paying" },
   { value: "add-money", label: "Add money" },
-  { value: "create-card", label: "Create card" },
-  { value: "snap-bill", label: "Snap a bill" },
+  { value: "create-card", label: "New card" },
+  { value: "snap-bill", label: "Pay a bill" },
   { value: "assistant", label: "Assistant" },
   { value: "alerts", label: "Alerts" },
   { value: "settings", label: "Settings" },
+  { value: "how-it-works", label: "How it works" },
 ];
 
 const footerLinkStyle: React.CSSProperties = {
@@ -40,6 +44,7 @@ export function AppShell(props: {
 }) {
   const { current, onNavigate, children, ledger } = props;
   const [open, setOpen] = React.useState(false);
+  const { mode, signOut } = usePayProxy();
 
   return (
     <div
@@ -72,18 +77,18 @@ export function AppShell(props: {
                 setOpen(false);
                 onNavigate("welcome");
               }}
-              aria-label="PayProxy home"
-              style={{ background: "transparent", border: 0, padding: 0, cursor: "pointer", fontFamily: typography.heading, fontWeight: 700, fontSize: "22px", letterSpacing: "-0.02em", color: colors.ink }}
+              aria-label="Digna home"
+              style={{ background: "transparent", border: 0, padding: 0, cursor: "pointer", display: "inline-flex" }}
             >
-              PayProxy
+              <Logo size={30} />
             </button>
-            <span className="pp-test-pill">Test mode</span>
+            <span className="pp-test-pill" title="Everything here uses practice money, not real money.">Practice money</span>
           </div>
           <button type="button" className="pp-menu-toggle" aria-expanded={open} aria-controls="pp-nav" onClick={(): void => setOpen(!open)}>
             {open ? "Close" : "Menu"}
           </button>
           <nav id="pp-nav" aria-label="Primary" className={open ? "pp-nav is-open" : "pp-nav"}>
-            {navEntries.map((entry: NavEntry) => {
+            {navEntries.filter((entry: NavEntry) => mode !== "guest" || entry.value === "checkout" || entry.value === "how-it-works").map((entry: NavEntry) => {
               const active: boolean = current === entry.value;
               return (
                 <button
@@ -100,6 +105,16 @@ export function AppShell(props: {
                 </button>
               );
             })}
+            {mode === "guest" ? (
+              <>
+                <button type="button" className="pp-nav-link" onClick={(): void => { setOpen(false); onNavigate("auth"); }}>Sign in</button>
+                <button type="button" className="pp-nav-link is-active" onClick={(): void => { setOpen(false); onNavigate("signup"); }}>Create account</button>
+              </>
+            ) : (
+              <button type="button" className="pp-nav-link" onClick={(): void => { setOpen(false); void signOut(); }}>
+                {mode === "demo" ? "Leave sample account" : "Sign out"}
+              </button>
+            )}
           </nav>
         </div>
       </header>
@@ -173,21 +188,30 @@ export function AppShell(props: {
               Dashboard
             </button>
             <button type="button" onClick={(): void => onNavigate("create-card")} style={footerLinkStyle}>
-              Virtual cards
+              Your cards
             </button>
             <button type="button" onClick={(): void => onNavigate("add-money")} style={footerLinkStyle}>
               Add money
             </button>
             <button type="button" onClick={(): void => onNavigate("snap-bill")} style={footerLinkStyle}>
-              Snap a bill
+              Pay a bill
+            </button>
+            <button type="button" onClick={(): void => onNavigate("checkout")} style={footerLinkStyle}>
+              Try paying
             </button>
           </div>
           <div>
             <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0`, color: "#FFFFFF" }}>
               Help
             </h2>
+            <button type="button" onClick={(): void => onNavigate("how-it-works")} style={footerLinkStyle}>
+              How Digna works
+            </button>
+            <button type="button" onClick={(): void => onNavigate("how-it-works")} style={footerLinkStyle}>
+              Why do cards get declined?
+            </button>
             <button type="button" onClick={(): void => onNavigate("assistant")} style={footerLinkStyle}>
-              Assistant
+              Money assistant
             </button>
             <button type="button" onClick={(): void => onNavigate("alerts")} style={footerLinkStyle}>
               Alerts
@@ -198,13 +222,13 @@ export function AppShell(props: {
           </div>
           <div>
             <h2 style={{ fontFamily: typography.heading, fontSize: "15px", margin: `0 0 ${spacing.sm} 0`, color: "#FFFFFF" }}>
-              Test mode
+              Practice money, for now
             </h2>
             <p style={{ fontFamily: typography.body, fontSize: "14px", lineHeight: 1.6, margin: 0, opacity: 0.9 }}>
-              PayProxy is in test mode. No real money moves here — cards, balances and bills are demos only.
+              Right now every dollar in Digna is practice money, so you can try everything without risk. Real cards are on the way.
             </p>
             <button type="button" onClick={(): void => onNavigate("demo-data")} style={footerLinkStyle}>
-              Explore demo data
+              Look around with a sample account
             </button>
           </div>
           <div>
@@ -212,10 +236,19 @@ export function AppShell(props: {
               About
             </h2>
             <p style={{ fontFamily: typography.body, fontSize: "14px", lineHeight: 1.6, margin: 0, opacity: 0.9 }}>
-              Calm, capped spending for travel and everyday checkout.
+              Cards with limits you choose, so you can pay the places that turn your card away. Your money's good here.
             </p>
             <button type="button" onClick={(): void => onNavigate("welcome")} style={footerLinkStyle}>
               Home
+            </button>
+            <button type="button" onClick={(): void => onNavigate("feedback")} style={footerLinkStyle}>
+              Send feedback
+            </button>
+            <button type="button" onClick={(): void => onNavigate("privacy")} style={footerLinkStyle}>
+              Privacy
+            </button>
+            <button type="button" onClick={(): void => onNavigate("terms")} style={footerLinkStyle}>
+              Terms
             </button>
           </div>
         </div>
@@ -236,7 +269,7 @@ export function AppShell(props: {
             opacity: 0.8,
           }}
         >
-          <span>© PayProxy · Test mode: sample money only</span>
+          <span>© Digna · Practice money for now · Not a bank · Not connected to Chime, Cash App or any business shown</span>
         </div>
       </footer>
     </div>

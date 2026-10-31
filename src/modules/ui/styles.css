@@ -1,15 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap");
 
 :root {
-  --pp-page: #F4F8F7;
+  --pp-page: #F6F7F9;
   --pp-surface: #FFFFFF;
-  --pp-ink: #10201D;
-  --pp-muted: #5E6F6C;
-  --pp-mint: #0EC49A;
-  --pp-mint-dark: #0A8F8A;
-  --pp-midnight: #0C1F2E;
-  --pp-midnight-ink: #E8F3F0;
-  --pp-line: #E1EBE9;
+  --pp-ink: #0E1726;
+  --pp-muted: #5B6475;
+  --pp-mint: #FFB020;
+  --pp-mint-dark: #8A5300;
+  --pp-midnight: #0E1726;
+  --pp-midnight-ink: #E9ECF3;
+  --pp-line: #E6E8EE;
 }
 
 * {
@@ -214,8 +214,8 @@ a {
   align-items: center;
   border-radius: 999px;
   padding: 4px 10px;
-  background: #E3F7F1;
-  color: #0A8F8A;
+  background: #FFF3D6;
+  color: #8A5300;
   font-size: 12px;
   font-weight: 700;
 }
@@ -235,11 +235,11 @@ a {
 }
 .pp-nav-link:hover {
   color: var(--pp-ink);
-  background: #EEF5F3;
+  background: #F1F2F5;
 }
 .pp-nav-link.is-active {
   color: var(--pp-ink);
-  background: #E3F7F1;
+  background: #FFF3D6;
   font-weight: 700;
 }
 .pp-menu-toggle {
@@ -340,7 +340,26 @@ a {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: #7CF2D2;
+  background: #FFC94D;
+}
+
+/* The sample card that sits over the hero picture's corner. */
+.pp-hero-float {
+  position: absolute;
+  left: -20px;
+  bottom: -28px;
+  width: min(300px, 70vw);
+  rotate: -4deg;
+}
+.pp-hero-float .pp-vcard {
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .pp-hero-float {
+    left: 8px;
+    bottom: -36px;
+    scale: 0.85;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

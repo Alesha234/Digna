@@ -86,7 +86,7 @@ export function WarningBanner(props: { warnings: AppWarning[]; onAction?: (w: Ap
                   style={{
                     marginTop: spacing.sm,
                     backgroundColor: colors.mint,
-                    color: "#06332A",
+                    color: "#0E1726",
                     border: "none",
                     borderRadius: radii.card,
                     paddingTop: spacing.sm,
