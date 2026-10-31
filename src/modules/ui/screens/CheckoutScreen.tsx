@@ -109,9 +109,9 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
 
       {last && (
         <section role="status" aria-label="Result" style={{ ...box, borderColor: last.result === "approved" ? "#12B76A" : "#F4B4AE", background: last.result === "approved" ? "#F0FBF7" : "#FFF5F4" }}>
-          <h2 style={{ fontFamily: typography.heading, fontSize: 22, margin: "0 0 6px" }}>{last.result === "approved" ? "Approved" : "Declined"}</h2>
+          <h2 style={{ fontFamily: typography.heading, fontSize: 22, margin: "0 0 6px" }}>{last.result === "approved" ? "Approved. Your money's good here." : "Declined"}</h2>
           <p style={{ margin: 0, lineHeight: 1.6 }}>
-            {money(last.amountCents)} at {last.merchant} with your {last.label}. {last.reason ?? "The payment went through."}
+            {money(last.amountCents)} at {last.merchant} with your {last.label}. {last.reason ?? "It went through."}
           </p>
           {last.result === "declined" && props.onAskAssistant && (
             <button type="button" onClick={() => props.onAskAssistant?.(`Why was my ${money(last.amountCents)} payment to ${last.merchant} with my ${last.label} declined, and what should I do?`)}

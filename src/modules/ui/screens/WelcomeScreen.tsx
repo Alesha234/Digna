@@ -242,7 +242,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
 
       {/* CTA */}
       <section className="pp-ledger-band" style={{ background: colors.midnight, color: colors.midnightInk, padding: spacing.xxl + " " + spacing.lg, textAlign: "center" }}>
-        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Your money is good here. Everywhere.</h2>
+        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Your money's good here. Everywhere.</h2>
         <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
       </section>
     </div>
