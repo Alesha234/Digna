@@ -145,3 +145,47 @@ END;
 $$;
 REVOKE ALL ON FUNCTION public.sandbox_pay(TEXT, BIGINT, TEXT, UUID) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.sandbox_pay(TEXT, BIGINT, TEXT, UUID) TO authenticated;
+
+-- 7. Delete my account: the person's sign-in and, through the tables' ON DELETE CASCADE, everything of theirs.
+CREATE OR REPLACE FUNCTION public.delete_my_account() RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+BEGIN
+  IF v_uid IS NULL THEN RAISE EXCEPTION 'Sign in first.'; END IF;
+  DELETE FROM public.profiles WHERE id = v_uid;
+  DELETE FROM auth.users WHERE id = v_uid;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.delete_my_account() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.delete_my_account() TO authenticated;
+
+-- 8. Feedback from the people trying PayProxy, read by the owner in Supabase's Table Editor. Anyone may send some
+--    (signed in or not), at most 10 a day per person; nobody can read anyone's through the app.
+CREATE TABLE IF NOT EXISTS public.feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  email TEXT CHECK (email IS NULL OR char_length(email) <= 320),
+  message TEXT NOT NULL CHECK (char_length(message) BETWEEN 1 AND 2000),
+  page TEXT CHECK (page IS NULL OR char_length(page) <= 40),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.feedback FROM anon, authenticated;
+CREATE OR REPLACE FUNCTION public.send_feedback(p_message TEXT, p_email TEXT DEFAULT NULL, p_page TEXT DEFAULT NULL) RETURNS VOID LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE
+  v_uid UUID := auth.uid();
+  v_message TEXT := btrim(COALESCE(p_message, ''));
+BEGIN
+  IF char_length(v_message) < 1 OR char_length(v_message) > 2000 THEN RAISE EXCEPTION 'Write between 1 and 2,000 characters.'; END IF;
+  IF v_uid IS NOT NULL AND (SELECT count(*) FROM public.feedback WHERE user_id = v_uid AND created_at > NOW() - INTERVAL '1 day') >= 10 THEN
+    RAISE EXCEPTION 'Thanks! You''ve sent a lot today. Try again tomorrow.';
+  END IF;
+  IF v_uid IS NULL AND (SELECT count(*) FROM public.feedback WHERE user_id IS NULL AND created_at > NOW() - INTERVAL '1 hour') >= 30 THEN
+    RAISE EXCEPTION 'Lots of feedback just now. Try again in a little while.';
+  END IF;
+  INSERT INTO public.feedback (user_id, email, message, page)
+  VALUES (v_uid, NULLIF(left(btrim(COALESCE(p_email, auth.jwt() ->> 'email', '')), 320), ''), v_message, left(p_page, 40));
+END;
+$$;
+REVOKE ALL ON FUNCTION public.send_feedback(TEXT, TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.send_feedback(TEXT, TEXT, TEXT) TO anon, authenticated;

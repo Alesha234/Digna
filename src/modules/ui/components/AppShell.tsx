@@ -2,6 +2,7 @@ import * as React from "react";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 import type { AppScreen } from "@/modules/ui/types";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { Logo } from "@/modules/ui/components/Logo";
 
 void theme;
 
@@ -76,9 +77,9 @@ export function AppShell(props: {
                 onNavigate("welcome");
               }}
               aria-label="PayProxy home"
-              style={{ background: "transparent", border: 0, padding: 0, cursor: "pointer", fontFamily: typography.heading, fontWeight: 700, fontSize: "22px", letterSpacing: "-0.02em", color: colors.ink }}
+              style={{ background: "transparent", border: 0, padding: 0, cursor: "pointer", display: "inline-flex" }}
             >
-              PayProxy
+              <Logo size={30} />
             </button>
             <span className="pp-test-pill">Test mode</span>
           </div>
@@ -86,7 +87,7 @@ export function AppShell(props: {
             {open ? "Close" : "Menu"}
           </button>
           <nav id="pp-nav" aria-label="Primary" className={open ? "pp-nav is-open" : "pp-nav"}>
-            {navEntries.map((entry: NavEntry) => {
+            {navEntries.filter((entry: NavEntry) => mode !== "guest" || entry.value === "checkout").map((entry: NavEntry) => {
               const active: boolean = current === entry.value;
               return (
                 <button
@@ -233,6 +234,15 @@ export function AppShell(props: {
             <button type="button" onClick={(): void => onNavigate("welcome")} style={footerLinkStyle}>
               Home
             </button>
+            <button type="button" onClick={(): void => onNavigate("feedback")} style={footerLinkStyle}>
+              Send feedback
+            </button>
+            <button type="button" onClick={(): void => onNavigate("privacy")} style={footerLinkStyle}>
+              Privacy
+            </button>
+            <button type="button" onClick={(): void => onNavigate("terms")} style={footerLinkStyle}>
+              Terms
+            </button>
           </div>
         </div>
         <div
@@ -252,7 +262,7 @@ export function AppShell(props: {
             opacity: 0.8,
           }}
         >
-          <span>© PayProxy · Test mode: sample money only</span>
+          <span>© PayProxy · Sample money only · Not a bank · Not affiliated with Chime, Cash App or any merchant shown</span>
         </div>
       </footer>
     </div>

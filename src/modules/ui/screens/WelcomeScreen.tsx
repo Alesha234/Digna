@@ -73,6 +73,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         <RevealOnScroll delayMs={0}>
           <div className="pp-hero-grid">
             <div>
+              <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#E3F7F1", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Capped virtual cards · Free to try with sample money</p>
               <h1 className="pp-hero-title">Pay where your card gets declined.</h1>
               <p style={{ ...lead, fontSize: 18 }}>
                 Cloud billing, hotels and car rentals often turn away Cash App, Chime and prepaid cards. PayProxy gives you a virtual card for each one, with its own spending cap, so you pay with confidence and never overspend.
@@ -95,6 +96,22 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             </div>
           </div>
         </RevealOnScroll>
+      </section>
+
+      {/* What it is */}
+      <section aria-label="PayProxy in 30 seconds" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
+        <div style={{ ...inner, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md }}>
+          {[
+            { t: "The problem", b: "Cash App, Chime, debit and prepaid cards get turned away by many cloud bills, hotels and car rentals that want a credit card." },
+            { t: "What PayProxy does", b: "Gives you a virtual card for each of those services. It runs like a credit card, pays from your PayProxy wallet, and can never spend past the cap you set." },
+            { t: "What you can do today", b: "Make an account, get $250 of sample money, create capped cards, and see what real-style checkouts say to your everyday card versus a PayProxy card." },
+          ].map((f) => (
+            <article key={f.t} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg }}>
+              <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 8px", color: colors.ink }}>{f.t}</h2>
+              <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{f.b}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       {/* Stories */}

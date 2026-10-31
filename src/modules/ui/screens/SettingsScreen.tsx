@@ -77,15 +77,18 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
     setScreen("dashboard");
   }
 
-  function handleReset(): void {
-    const store = proxy as unknown as Record<string, unknown>;
-    const maybeReset = store["reset"];
-    if (typeof maybeReset === "function") {
-      (maybeReset as () => void).call(proxy);
-    }
-    const maybeResetDemo = store["resetDemoData"];
-    if (typeof maybeResetDemo === "function") {
-      (maybeResetDemo as () => void).call(proxy);
+  const [deleting, setDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  async function handleDelete(): Promise<void> {
+    if (!window.confirm("Delete your PayProxy account? Your sign-in, wallet, cards and history are removed for good.")) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await proxy.deleteAccount();
+    } catch (e: unknown) {
+      setDeleteError(e instanceof Error ? e.message : "Couldn't delete the account. Try again.");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -223,16 +226,19 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
         </RevealOnScroll>
 
         <RevealOnScroll delayMs={160} className="pp-section-wrap">
-          <section aria-label="Test mode" className="pp-section">
-            <h2 style={h2}>Test mode</h2>
+          <section aria-label="Your account and data" className="pp-section">
+            <h2 style={h2}>Your account and data</h2>
             <div style={card} className="pp-card pp-lift">
               <p style={body}>{testModeMessage}</p>
               <p style={{ ...sub, marginTop: spacing.md }}>No real money moves.</p>
-              <div style={{ marginTop: spacing.md }}>
-                <button type="button" onClick={handleReset} aria-label="Reset demo data" style={ghostBtn}>
-                  Reset demo data
-                </button>
-              </div>
+              {proxy.mode === "live" && (
+                <div style={{ marginTop: spacing.md }}>
+                  <button type="button" onClick={() => void handleDelete()} disabled={deleting} style={{ ...ghostBtn, color: "#B42318", borderColor: "#F4B4AE" }}>
+                    {deleting ? "Deleting…" : "Delete my account"}
+                  </button>
+                  {deleteError && <p role="alert" style={{ ...sub, color: "#B42318", marginTop: spacing.sm }}>{deleteError}</p>}
+                </div>
+              )}
             </div>
           </section>
         </RevealOnScroll>
@@ -241,9 +247,9 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
           <section aria-label="About PayProxy" className="pp-section">
             <h2 style={h2}>About PayProxy</h2>
             <div style={card} className="pp-card pp-lift">
-              <p style={body}>PayProxy keeps one-time cards safe and simple.</p>
+              <p style={body}>PayProxy gives each service that turns your card away its own capped virtual card, paid from your PayProxy wallet.</p>
               <p style={{ ...sub, marginTop: spacing.md }}>
-                Each person sees only their own cards. Demo data resets and nothing leaves this demo.
+                Each person sees only their own cards. A sandbox with sample money: not a bank, and not affiliated with Chime, Cash App or any merchant shown.
               </p>
             </div>
           </section>

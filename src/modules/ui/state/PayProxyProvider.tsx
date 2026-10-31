@@ -40,6 +40,14 @@ type PayProxyContextValue = {
   unfreezeCard(id: string): Promise<void>;
   closeCard(id: string): Promise<void>;
   pay(merchantId: string, amountCents: number, method: PayMethod, cardId?: string | null): Promise<{ result: "approved" | "declined"; reason: string | null }>;
+  /** Emails a link to set a new password (Supabase sends it; it reaches people once the project has an email service). */
+  requestPasswordReset(email: string): Promise<void>;
+  /** Sets a new password for the person who opened that link (or who is signed in). */
+  updatePassword(password: string): Promise<void>;
+  /** Deletes the person's account and everything in it, then signs them out. */
+  deleteAccount(): Promise<void>;
+  /** Sends feedback to the owner, signed in or not. */
+  sendFeedback(message: string, email?: string, page?: string): Promise<void>;
   setLastScan(s: BillScanResult | null): void;
 };
 
@@ -163,6 +171,8 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         setUser(null);
       }
       if (event === "SIGNED_IN" && session) enter(session).catch((e: unknown) => setNotice(plainError(e)));
+      // Opened from a "reset your password" email: ask for the new password first.
+      if (event === "PASSWORD_RECOVERY") setScreen("new-password");
     });
     return () => {
       alive = false;
@@ -293,6 +303,35 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         }
         setPayments((prev) => [{ id: `demo-pay-${Date.now()}`, merchantId, merchant: merchant.name, amountCents, method, cardId: card?.id ?? null, result: out.result, reason: out.reason, createdAt: at }, ...prev]);
         return out;
+      },
+      async requestPasswordReset(email) {
+        if (!sb) throw new Error("Accounts aren't set up on this site yet.");
+        const { error } = await sb.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+        if (error) throw new Error(plainError(error));
+      },
+      async updatePassword(password) {
+        if (!sb) throw new Error("Accounts aren't set up on this site yet.");
+        const { error } = await sb.auth.updateUser({ password });
+        if (error) throw new Error(plainError(error));
+        setScreen("dashboard");
+      },
+      async deleteAccount() {
+        if (!sb || !live) throw new Error("Sign in to delete your account.");
+        const { error } = await sb.rpc("delete_my_account");
+        if (error) throw new Error(plainError(error));
+        await sb.auth.signOut();
+        setMode("guest");
+        setUser(null);
+        setBalance(EMPTY_BALANCE);
+        setCards([]);
+        setTransactions([]);
+        setPayments([]);
+        setScreen("welcome");
+      },
+      async sendFeedback(message, email, page) {
+        if (!sb) throw new Error("Feedback isn't set up on this site yet.");
+        const { error } = await sb.rpc("send_feedback", { p_message: message, p_email: email?.trim() || null, p_page: page ?? null });
+        if (error) throw new Error(plainError(error));
       },
       setLastScan,
     };

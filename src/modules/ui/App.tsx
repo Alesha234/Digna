@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { AppShell } from "@/modules/ui/components/AppShell";
 import { WelcomeScreen } from "@/modules/ui/screens/WelcomeScreen";
-import { AuthScreen } from "@/modules/ui/screens/AuthScreen";
+import { AuthScreen, NewPasswordScreen } from "@/modules/ui/screens/AuthScreen";
 import { DashboardScreen } from "@/modules/ui/screens/DashboardScreen";
 import { CardDetailScreen } from "@/modules/ui/screens/CardDetailScreen";
 import { CreateCardScreen } from "@/modules/ui/screens/CreateCardScreen";
@@ -14,10 +14,11 @@ import { SettingsScreen } from "@/modules/ui/screens/SettingsScreen";
 import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
 import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
 import { CheckoutScreen } from "@/modules/ui/screens/CheckoutScreen";
+import { FeedbackScreen, PrivacyScreen, TermsScreen } from "@/modules/ui/screens/InfoScreens";
 import type { AppScreen } from "@/modules/ui/types";
 
 /** The pages anyone can see; every other page needs an account or the demo. */
-const OPEN: AppScreen[] = ["welcome", "auth", "signup"];
+const OPEN: AppScreen[] = ["welcome", "auth", "signup", "privacy", "terms", "feedback"];
 
 function InnerApp() {
   const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard } = usePayProxy();
@@ -39,7 +40,11 @@ function InnerApp() {
 
   function page() {
     if (screen === "welcome") return <WelcomeScreen onGetStarted={() => go("signup")} onSignIn={() => go("auth")} onTryDemo={signInDemo} />;
+    if (screen === "privacy") return <PrivacyScreen />;
+    if (screen === "terms") return <TermsScreen />;
+    if (screen === "feedback") return <FeedbackScreen />;
     if (!ready) return <p style={{ padding: 24 }}>Loading your account…</p>;
+    if (screen === "new-password") return <NewPasswordScreen />;
     if (screen === "auth" || screen === "signup") return <AuthScreen key={screen} startWith={screen === "signup" ? "signup" : "signin"} />;
     if (mode === "guest" && !OPEN.includes(screen)) return <AuthScreen startWith="signin" />;
     switch (screen) {

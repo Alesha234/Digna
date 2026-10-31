@@ -16,8 +16,8 @@ const field: React.CSSProperties = {
 
 /** Sign in, or create an account: email and a password. New accounts start with $250 of sample money. */
 export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
-  const { signIn, signUp, signInDemo } = usePayProxy();
-  const [mode, setMode] = useState<"signin" | "signup">(props.startWith ?? "signin");
+  const { signIn, signUp, signInDemo, requestPasswordReset } = usePayProxy();
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(props.startWith ?? "signin");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
@@ -30,10 +30,13 @@ export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
     const password = String(form.get("password") ?? "");
     setError(null);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setError("Enter your email address, like name@example.com.");
-    if (password.length < 6) return setError("Use a password of at least 6 characters.");
+    if (mode !== "forgot" && password.length < 6) return setError("Use a password of at least 6 characters.");
     setBusy(true);
     try {
-      if (signingIn) await signIn(email, password);
+      if (mode === "forgot") {
+        await requestPasswordReset(email);
+        setSent(email);
+      } else if (signingIn) await signIn(email, password);
       else if ((await signUp(email, password)) === "check-email") setSent(email);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
@@ -44,13 +47,13 @@ export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
 
   return (
     <section style={{ maxWidth: 440, margin: "24px auto", background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.xl }}>
-      <h1 style={{ fontFamily: typography.heading, fontSize: 28, margin: "0 0 6px", color: colors.ink }}>{signingIn ? "Sign in to PayProxy" : "Create your PayProxy account"}</h1>
+      <h1 style={{ fontFamily: typography.heading, fontSize: 28, margin: "0 0 6px", color: colors.ink }}>{mode === "forgot" ? "Reset your password" : signingIn ? "Sign in to PayProxy" : "Create your PayProxy account"}</h1>
       <p style={{ margin: "0 0 20px", color: colors.muted, fontSize: 15, lineHeight: 1.5 }}>
-        {signingIn ? "Welcome back." : "Free, with $250 of sample money to try capped cards and the test checkout."} Sample money only: no real card or bank is used.
+        {mode === "forgot" ? "Enter your account's email and we'll send you a link to set a new password." : signingIn ? "Welcome back." : "Free, with $250 of sample money to try capped cards and the test checkout."}{mode === "forgot" ? "" : " Sample money only: no real card or bank is used."}
       </p>
       {sent ? (
         <div role="status" style={{ background: "#E3F7F1", borderRadius: 10, padding: 16, color: colors.ink, lineHeight: 1.5 }}>
-          Check <strong>{sent}</strong> for a link from PayProxy. Open it, then sign in here.
+          Check <strong>{sent}</strong> for a link from PayProxy. {mode === "forgot" ? "Open it to set a new password." : "Open it, then sign in here."} It can take a minute; check spam too.
           <div style={{ marginTop: 12 }}>
             <button type="button" onClick={() => { setSent(null); setMode("signin"); }} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 15 }}>
               Go to sign in
@@ -63,17 +66,24 @@ export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
             Email
             <input name="email" type="email" autoComplete="email" required style={field} />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14, color: colors.ink }}>
-            Password
-            <input name="password" type="password" autoComplete={signingIn ? "current-password" : "new-password"} minLength={6} required style={field} />
-          </label>
+          {mode !== "forgot" && (
+            <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14, color: colors.ink }}>
+              Password
+              <input name="password" type="password" autoComplete={signingIn ? "current-password" : "new-password"} minLength={6} required style={field} />
+            </label>
+          )}
+          {signingIn && (
+            <button type="button" onClick={() => { setMode("forgot"); setError(null); }} style={{ alignSelf: "flex-start", background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 600, cursor: "pointer", fontSize: 14 }}>
+              Forgot password?
+            </button>
+          )}
           {error && (
             <p role="alert" style={{ margin: 0, color: "#B42318", fontSize: 14, lineHeight: 1.5 }}>
               {error}
             </p>
           )}
           <button type="submit" disabled={busy} style={{ background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "14px 20px", fontWeight: 700, fontSize: 16, cursor: busy ? "wait" : "pointer", fontFamily: typography.body }}>
-            {busy ? "One moment…" : signingIn ? "Sign in" : "Create account"}
+            {busy ? "One moment…" : mode === "forgot" ? "Send reset link" : signingIn ? "Sign in" : "Create account"}
           </button>
         </form>
       )}
@@ -91,6 +101,49 @@ export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
           </button>
         </span>
       </div>
+    </section>
+  );
+}
+
+/** Opened from a "reset your password" email: the person picks a new password, then goes to their dashboard. */
+export function NewPasswordScreen() {
+  const { updatePassword } = usePayProxy();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function onSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const a = String(form.get("password") ?? "");
+    const b = String(form.get("again") ?? "");
+    setError(null);
+    if (a.length < 6) return setError("Use a password of at least 6 characters.");
+    if (a !== b) return setError("The two passwords don't match.");
+    setBusy(true);
+    try {
+      await updatePassword(a);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section style={{ maxWidth: 440, margin: "24px auto", background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.xl }}>
+      <h1 style={{ fontFamily: typography.heading, fontSize: 28, margin: "0 0 16px", color: colors.ink }}>Set a new password</h1>
+      <form onSubmit={onSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 }}>
+          New password
+          <input name="password" type="password" autoComplete="new-password" style={field} />
+        </label>
+        <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 }}>
+          New password again
+          <input name="again" type="password" autoComplete="new-password" style={field} />
+        </label>
+        {error && <p role="alert" style={{ margin: 0, color: "#B42318", fontSize: 14 }}>{error}</p>}
+        <button type="submit" disabled={busy} style={{ background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "14px 20px", fontWeight: 700, fontSize: 16, cursor: "pointer" }}>
+          {busy ? "Saving…" : "Save new password"}
+        </button>
+      </form>
     </section>
   );
 }
