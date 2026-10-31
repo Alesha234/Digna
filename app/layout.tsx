@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import "./shell/fonts.css";
 
-export const metadata = { description: "Digna gives Cash App, Chime and prepaid card users a capped virtual card for each service that turns their card away. A working sandbox with sample money.", title: "Digna: dignity at every checkout", appleWebApp: { capable: true, title: "Digna: dignity at every checkout" } };
+export const metadata = { description: "Digna gives Cash App, Chime and prepaid card users a card for each place that turns their card away, with a limit they choose. Free to try with practice money.", title: "Digna: dignity at every checkout", appleWebApp: { capable: true, title: "Digna: dignity at every checkout" } };
 export const viewport = { themeColor: "#0E1726" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

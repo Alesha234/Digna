@@ -142,7 +142,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
               Current balance: {formatCurrency(balanceCents)}
             </p>
             <p style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "14px" }}>
-              {testModeMessage} Test mode sample money, No real money moves.
+              {testModeMessage}
             </p>
             {addedCents !== null ? (
               <section

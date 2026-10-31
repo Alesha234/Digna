@@ -311,7 +311,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
           return { result: str(out.result) as "approved" | "declined", reason: out.reason ? str(out.reason) : null, code: out.code ? str(out.code) : null };
         }
         const merchant = MERCHANTS.find((m) => m.id === merchantId);
-        if (!merchant) throw new Error("Pick one of the sandbox merchants.");
+        if (!merchant) throw new Error("Pick one of the places to pay.");
         const card = method === "payproxy" ? (cards.find((c) => c.id === cardId) ?? null) : null;
         const out = decide(merchant, amountCents, method, card, balance.availableCents);
         const at = new Date().toISOString();

@@ -58,7 +58,7 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
             Dashboard
           </h1>
           <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 14, margin: 0 }}>
-            Test mode — sample money only.
+            Practice money for now: nothing real is charged.
           </p>
         </header>
 
@@ -133,7 +133,7 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
             >
               <EmptyState
                 title="No cards yet"
-                hint="Create a capped card to spend safely."
+                hint="Make a card for one thing, like a hotel stay or a cloud bill, with a limit you choose."
                 actionLabel="New card"
                 onAction={onCreateCard}
               />

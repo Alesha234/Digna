@@ -82,7 +82,7 @@ export function VirtualCardView(props: { card: VirtualCard; selected?: boolean; 
       </div>
       <p style={{ fontFamily: typography.body, color: colors.ink, marginTop: spacing.sm, marginBottom: "0" }}>{maskCardNumber(card.last4)}</p>
       <p style={{ fontFamily: typography.body, color: colors.muted, marginTop: spacing.sm, marginBottom: "0", fontSize: "14px" }}>
-        Cap {formatCurrency(card.capCents)} · Ends {formatDate(card.endDate)}
+        Limit {formatCurrency(card.capCents)} · Stops {formatDate(card.endDate)}
       </p>
       <div style={{ marginTop: spacing.md }}>
         <SpendingMeter spentCents={card.spentCents} capCents={card.capCents} />

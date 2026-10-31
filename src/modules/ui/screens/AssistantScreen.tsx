@@ -47,13 +47,13 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
   const q: string = input.toLowerCase();
   if (!txn) {
     if (q.includes("unfreeze") || q.includes("frozen") || q.includes("freeze")) {
-      return "To unfreeze a card, open it from your dashboard, tap Unfreeze, and try the payment again. This is test mode, so nothing real moves.";
+      return "To turn a paused card back on, open it from your dashboard, tap Unfreeze, and try the payment again.";
     }
     if (q.includes("cap") || q.includes("limit") || q.includes("raise")) {
-      return "If a payment is near your card cap, you can raise the cap, add demo money, or make a new card for that store. Tell me which store was declined and I will walk through it.";
+      return "If a payment is more than a card's limit, open the card and use Change limit. You can raise it as far as the money in your wallet covers; if that's not enough, add money first. Tell me which place turned you down and I'll walk you through it.";
     }
     if (q.includes("balance") || q.includes("add money")) {
-      return "If your wallet balance is low, add some demo money from the dashboard, then try the payment again. No real money moves in test mode.";
+      return "If your wallet is low, add money from the dashboard, then try the payment again.";
     }
     return "I can explain a decline in simple words. Pick one of the declined payments above, or tell me the store name and amount, and I will suggest a calm next step.";
   }
@@ -61,7 +61,7 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
   const reason: string = (txn.reason || "").toLowerCase();
   const status: string = card ? card.status : "active";
   let cause: string = "it went over a limit";
-  let next: string = "You can raise the cap on the \"" + label + "\" card, add demo money, or make a new card just for " + txn.storeName + ".";
+  let next: string = "You can raise the limit on the \"" + label + "\" card (as far as your wallet covers), add money, or make a new card just for " + txn.storeName + ".";
   if (status === "frozen" || reason.includes("frozen")) {
     cause = "the \"" + label + "\" card is frozen";
     next = "Unfreeze the \"" + label + "\" card from your dashboard, then try the " + amount + " payment at " + txn.storeName + " again.";
@@ -72,22 +72,22 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
     if (card) {
       const remaining: number = card.capCents - card.spentCents;
       if (remaining < txn.amountCents) {
-        cause = "it was over the spending cap on \"" + label + "\" — only " + cents(Math.max(0, remaining)) + " was left under the " + cents(card.capCents) + " cap";
+        cause = "it was more than the limit on \"" + label + "\" allows: only " + cents(Math.max(0, remaining)) + " was left of its " + cents(card.capCents) + " limit";
       } else {
-        cause = "it was near the " + cents(card.capCents) + " cap on \"" + label + "\"";
+        cause = "it was close to the " + cents(card.capCents) + " limit on \"" + label + "\"";
       }
     } else {
-      cause = "it was over the card spending cap";
+      cause = "it was more than the card's limit allows";
     }
-    next = "You can raise the cap on \"" + label + "\", add demo money, or make a new card for " + txn.storeName + ".";
+    next = "You can raise the limit on \"" + label + "\" (as far as your wallet covers), add money, or make a new card for " + txn.storeName + ".";
   } else if (q.includes("balance") || reason.includes("balance")) {
     cause = "your wallet balance was too low for the " + amount + " payment";
-    next = "Add some demo money from the dashboard, then try " + txn.storeName + " again.";
+    next = "Add money from the dashboard, then try " + txn.storeName + " again.";
   } else if (q.includes("expir") || reason.includes("expir")) {
     cause = "the card may have expired";
     next = "Make a new card for " + txn.storeName + " with a later date and try again.";
   }
-  return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". In calm words: the store asked, and Digna said no to protect you. Next step: " + next + " This is test mode, so nothing real moves.";
+  return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". Digna said no to protect you from spending more than you planned. Next step: " + next;
 }
 
 export function AssistantScreen(props: { initialPrompt?: string }) {
@@ -148,15 +148,15 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
     }) : undefined;
     const label: string = snapTxn ? cardLabelFor(snapTxn.cardId) : "your card";
     let reply: string = buildLocalReply(trimmed, snapTxn, snapCard, label);
-    // What Muse Spark is told: what Digna is, the sandbox merchants' rules, and this person's own cards and tries.
+    // What Muse Spark is told: what Digna is, the sample businesses' rules, and this person's own cards and payments.
     const system: string = [
-      "You are Digna's money assistant. Digna is a sandbox with sample money only: no real card, bank or merchant is involved.",
-      "Digna gives people whose Cash App, Chime, debit or prepaid cards get declined a virtual card per service, with its own spending cap, that runs as a credit card and is paid from their Digna wallet.",
-      "Answer in plain, friendly words, in 2 to 5 short sentences: why it happened and the one or two things to do next. Never invent rules beyond the ones below.",
-      "Merchant rules: " + MERCHANTS.map(function (m) { return m.name + " (" + m.kind + "): " + m.rule; }).join(" "),
-      "Wallet: " + cents(balance.availableCents) + " sample money.",
-      "Cards: " + (cards.length ? cards.slice(0, 8).map(function (c) { return c.name + " cap " + cents(c.capCents) + ", spent " + cents(c.spentCents) + ", " + c.status; }).join("; ") : "none yet") + ".",
-      "Recent tries: " + (payments.length ? payments.slice(0, 6).map(function (p) { return cents(p.amountCents) + " at " + p.merchant + " with " + methodLabel(p.method) + ": " + p.result + (p.reason ? " (" + p.reason + ")" : ""); }).join("; ") : "none") + ".",
+      "You are Digna's money assistant. For now Digna uses practice money only: no real card, bank or business is involved. Never use words like sandbox, test mode or merchant; say practice money and place or business.",
+      "Digna gives people whose Cash App, Chime, debit or prepaid cards get declined a card for each place, with a limit they choose, that works like a credit card and is paid from their Digna wallet. A card's limit can be raised on its page, but only as far as the money in the wallet covers.",
+      "Answer in plain, friendly, everyday words, in 2 to 5 short sentences: why it happened and the one or two things to do next. Explain the reason behind a place's rule (for example, hotels hold a deposit). Never invent rules beyond the ones below.",
+      "Sample businesses and what they accept: " + MERCHANTS.map(function (m) { return m.name + " (" + m.kind + "): " + m.rule; }).join(" "),
+      "Wallet: " + cents(balance.availableCents) + " in practice money.",
+      "Cards: " + (cards.length ? cards.slice(0, 8).map(function (c) { return c.name + " limit " + cents(c.capCents) + ", spent " + cents(c.spentCents) + ", " + c.status; }).join("; ") : "none yet") + ".",
+      "Recent payments: " + (payments.length ? payments.slice(0, 6).map(function (p) { return cents(p.amountCents) + " at " + p.merchant + " with " + methodLabel(p.method) + ": " + p.result + (p.reason ? " (" + p.reason + ")" : ""); }).join("; ") : "none") + ".",
     ].join(" ").slice(0, 2000);
     const history = messages.slice(-6).map(function (m) { return { role: m.role, content: m.text.slice(0, 1000) }; });
     try {
@@ -205,7 +205,7 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
           <div className="pp-card pp-lift" style={{ backgroundColor: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg }}>
             <h1 style={{ fontFamily: typography.heading, color: colors.ink, margin: 0, marginBottom: spacing.sm }}>Money assistant</h1>
             <p style={{ color: colors.muted, margin: 0, fontFamily: typography.body }}>Explains why a payment declined and what to do next, in plain words.</p>
-            <p style={{ color: colors.muted, margin: 0, marginTop: spacing.sm, fontSize: 13 }}>Test mode: sample money, no real money moves.</p>
+            <p style={{ color: colors.muted, margin: 0, marginTop: spacing.sm, fontSize: 13 }}>Practice money for now: nothing real is charged.</p>
           </div>
         </RevealOnScroll>
         <RevealOnScroll delayMs={80}>

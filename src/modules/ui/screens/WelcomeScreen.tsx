@@ -20,19 +20,19 @@ function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: strin
   );
 }
 
-/** One capped virtual card, as the app shows them. Sample card. */
+/** One Digna card, as the app shows them. Sample card. */
 function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent: number; cap: number; last: string; bg: string; style?: React.CSSProperties }) {
   return (
     <div className="pp-vcard" style={{ background: bg, position: "relative", left: "auto", top: "auto", margin: 0, ...style }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontFamily: typography.heading, fontWeight: 700 }}>Digna</span>
-        <span style={{ fontSize: 12, opacity: 0.85 }}>Virtual · Sample</span>
+        <span style={{ fontSize: 12, opacity: 0.85 }}>Digna card · Example</span>
       </div>
       <div className="pp-vcard-chip" />
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
           <span style={{ fontWeight: 700 }}>{name}</span>
-          <span style={{ opacity: 0.9 }}>${spent} of ${cap} cap</span>
+          <span style={{ opacity: 0.9 }}>${spent} of ${cap} limit</span>
         </div>
         <div className="pp-vcard-meter">
           <span style={{ width: `${Math.round((spent / cap) * 100)}%` }} />
@@ -44,20 +44,21 @@ function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent
 }
 
 const STORIES = [
-  { picture: "cloud", alt: "A developer setting up hosting on a laptop", title: "Cloud bills", text: "Hosting and cloud billing pages often take credit cards only. Make a capped Digna card just for that bill, so it goes through and never runs over." },
-  { picture: "hotel", alt: "A traveler checking in at a hotel desk", title: "Hotel check-in", text: "Hotels hold a deposit at check-in and many turn away prepaid cards. Give the hotel its own card with a cap that covers the stay and nothing more." },
-  { picture: "rental", alt: "Friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters ask for a credit card for the security deposit. A Digna card covers the deposit and freezes in one tap when you return the car." },
+  { picture: "cloud", alt: "A developer setting up hosting on a laptop", title: "Cloud bills", text: "Cloud services bill you after you use them, so many take credit cards only. Make a Digna card just for that bill, with a limit, so it can never run over." },
+  { picture: "hotel", alt: "A traveler checking in at a hotel desk", title: "Hotel check-in", text: "Hotels set money aside at check-in for damage or extras, and many turn away prepaid cards for it. Give the hotel its own card, with a limit that covers the stay and nothing more." },
+  { picture: "rental", alt: "Friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna card covers the deposit, and you can pause it in one tap when you bring the car back." },
 ];
 
 const FAQS = [
-  { q: "Is this real money?", a: "No. Digna is a working sandbox: your account, wallet, cards and payments are real records, but every dollar is sample money. No real card, bank or merchant is ever contacted." },
-  { q: "What can I try?", a: "Create an account and you start with $250 of sample money. Make capped virtual cards, freeze or close them, and use the test checkout to pay sample merchants with your everyday cards or your Digna cards and see what each would say." },
-  { q: "Why do some checkouts decline Cash App, Chime or prepaid cards?", a: "Some merchants, like many cloud billing pages and rental counters, only take credit cards for billing or deposits. The test checkout's sample merchants follow rules like these so you can see the difference a capped card makes." },
-  { q: "What does the money assistant use?", a: "Meta's Muse Spark model. It reads your cards and recent tries and explains a decline in plain words, with what to do next. It also reads photos of bills in Snap a bill." },
+  { q: "Is this real money?", a: "Not yet. Your account, cards and history are real and saved, but for now every dollar is practice money, so you can try everything without risk. Real cards are on the way, and we'll say so clearly here when they arrive." },
+  { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Try paying to pay sample businesses with an everyday card or a Digna card and see what each would say, and why." },
+  { q: "Why do hotels, car rentals and cloud services turn down Cash App, Chime or prepaid cards?", a: "Usually it isn't about you or your money. Places that hold a deposit, or bill you after you use something, want a card that can't come up empty, so many only trust credit cards. The businesses on Try paying follow rules like these, so you can see exactly why a card gets turned down." },
+  { q: "What does the money assistant use?", a: "Meta's Muse Spark AI. It looks at your cards and recent payments and explains a decline in plain words, with what to do next. It also reads your bills on Pay a bill." },
+  { q: "Is Digna a bank?", a: "No. Digna is not a bank. When real cards arrive, they'll come through a licensed card partner." },
   { q: "Who drew the pictures on this page?", a: "Meta's Muse Image model. The people in them are invented." },
 ];
 
-export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void; onTryDemo?: () => void }) {
+export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void; onTryDemo?: () => void; onHowItWorks?: () => void }) {
   const { onGetStarted, onSignIn, onTryDemo } = props;
   const section: React.CSSProperties = { padding: `${spacing.xxl} ${spacing.lg}` };
   const inner: React.CSSProperties = { maxWidth: 1080, margin: "0 auto" };
@@ -73,19 +74,19 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         <RevealOnScroll delayMs={0}>
           <div className="pp-hero-grid">
             <div>
-              <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Capped virtual cards · Free to try with sample money</p>
+              <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Cards with limits you choose · Free to try</p>
               <h1 className="pp-hero-title">Dignity at every checkout.</h1>
               <p style={{ ...lead, fontSize: 18 }}>
-                Cloud billing, hotels and car rentals often turn away Cash App, Chime and prepaid cards. Digna gives you a virtual card for each one, paid from your own money, with a cap you set. No credit check, no debt, no declines at the counter.
+                Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
                 <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
-                <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Try the demo</button>
+                <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
               </div>
               <p style={{ color: colors.muted, fontSize: 14, margin: spacing.md + " 0 0" }}>
                 Already have an account?{" "}
                 <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 14, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
-                {" · "}Starts with $250 of sample money.
+                {" · "}Starts with $250 in practice money.
               </p>
             </div>
             <div style={{ position: "relative", maxWidth: 480, width: "100%", margin: "0 auto" }}>
@@ -102,9 +103,9 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section aria-label="Digna in 30 seconds" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
         <div style={{ ...inner, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md }}>
           {[
-            { t: "The problem", b: "Cash App, Chime, debit and prepaid cards get turned away by many cloud bills, hotels and car rentals that want a credit card." },
-            { t: "What Digna does", b: "Gives you a virtual card for each of those services. It runs like a credit card, pays from your Digna wallet, and can never spend past the cap you set." },
-            { t: "What you can do today", b: "Make an account, get $250 of sample money, create capped cards, and see what real-style checkouts say to your everyday card versus a Digna card." },
+            { t: "The problem", b: "Cash App, Chime, debit and prepaid cards get turned away by many hotels, car rentals and cloud services, and nobody explains why." },
+            { t: "What Digna does", b: "Gives you a card for each of those places. It works like a credit card, pays from your Digna wallet, and can never spend past the limit you choose." },
+            { t: "What you can do today", b: "Make an account, get $250 in practice money, make cards, and see what real-world checkouts say to your everyday card versus a Digna card. Real cards are coming." },
           ].map((f) => (
             <article key={f.t} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg }}>
               <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 8px", color: colors.ink }}>{f.t}</h2>
@@ -117,15 +118,15 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       {/* Dignity by design */}
       <section aria-label="Dignity by design" className="pp-section" style={{ ...section, background: colors.midnight, color: "#FFFFFF" }}>
         <div style={inner}>
-          <p style={{ margin: "0 0 10px", color: "#FFC94D", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: 13 }}>Dignity by design</p>
+          <p style={{ margin: "0 0 10px", color: "#FFC94D", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: 13 }}>Dignity · Convenience · Efficiency</p>
           <h2 style={{ ...h2, color: "#FFFFFF" }}>A declined card isn't just a failed payment.</h2>
           <p style={{ ...lead, color: "#C9CFDB" }}>It's being told, in public, that your money doesn't count. Digna is built so that never happens to you, and every feature keeps that promise.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
             {[
-              { t: "No public declines", b: "Know before you pay. The test checkout and the money assistant tell you whether a card will work, so you're never caught out at the counter." },
+              { t: "No public declines", b: "Know before you pay. Try paying and the money assistant show you whether a card will work, and why, so you're not caught out at the counter." },
               { t: "No credit check, no judgment", b: "Sign up with an email. Your history doesn't decide your access." },
               { t: "Your money, not a loan", b: "Every card spends only your own money. No debt, no interest, no traps." },
-              { t: "Caps that protect you", b: "No service can take more than you allowed, so a surprise charge never costs you rent." },
+              { t: "Limits that protect you", b: "No place can take more than you allowed, so a surprise charge never costs you rent. Need more? Raise it, as far as your money covers." },
               { t: "Plain words", b: "Banks speak in codes. Digna's assistant, built on Meta's Muse Spark, speaks like a person and tells you what to do next." },
               { t: "Private by default", b: "We keep only what's needed, never sell your data, and you can delete everything in one tap." },
             ].map((f) => (
@@ -143,7 +144,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         <RevealOnScroll delayMs={60}>
           <div style={inner}>
             <h2 style={h2}>Made for the moments your card gets turned away</h2>
-            <p style={lead}>One card per service, each with its own cap. Paid from your Digna wallet, accepted like a credit card.</p>
+            <p style={lead}>One card for each place, each with its own limit. Paid from your Digna wallet, and works like a credit card.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
               {STORIES.map((s) => (
                 <article key={s.title}>
@@ -164,9 +165,9 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <h2 style={h2}>How it works</h2>
             <ol style={{ listStyle: "none", margin: "24px 0 0", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: spacing.md }}>
               {[
-                { t: "Create your account", b: "Email and a password. You start with $250 of sample money in your wallet." },
-                { t: "Make a capped card", b: "One per service: name it, set its cap and an end date." },
-                { t: "Pay and stay in control", b: "Use it at checkout. Freeze it in one tap; it can never go over its cap." },
+                { t: "Create your account", b: "Email and a password. You start with $250 in practice money." },
+                { t: "Make a card", b: "One for each place: name it, choose its limit and the day it stops." },
+                { t: "Pay and stay in control", b: "Use it at checkout. Pause it in one tap; it can never spend past its limit." },
               ].map((s, i) => (
                 <li key={s.t} className="pp-card" style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg, boxShadow: shadows.soft }}>
                   <div style={{ fontFamily: typography.heading, background: colors.mint, color: colors.midnight, width: 34, height: 34, borderRadius: radii.pill, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: spacing.md }}>{i + 1}</div>
@@ -179,22 +180,22 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
-      {/* Test checkout */}
+      {/* Try paying */}
       <section className="pp-section" style={{ ...section, background: colors.surface, borderTop: "1px solid " + colors.line, borderBottom: "1px solid " + colors.line }}>
         <RevealOnScroll delayMs={0}>
           <div className="pp-hero-grid" style={{ alignItems: "center" }}>
             <div>
               <h2 style={h2}>Try it before you need it</h2>
               <p style={lead}>
-                The test checkout has sample merchants with real-world rules: a cloud host that takes credit cards only, a hotel that turns away prepaid cards, a rental counter, a streaming service. Pay with a sample Chime debit card, a Cash App Card or a prepaid card, then with a Digna card, and see exactly what each checkout says.
+                Try paying has sample businesses that follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards, a car rental counter and a streaming service. Pay with an example Chime debit card, Cash App Card or prepaid card, then with a Digna card, and see what each one says, and why.
               </p>
-              <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Open the test checkout</button>
+              <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Try paying</button>
             </div>
-            <div aria-label="An example of the test checkout" role="img" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div aria-label="An example from Try paying" role="img" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
-                { who: "Chime debit card (sample)", at: "Nimbus Cloud · $32.00", out: "Declined: credit cards only", ok: false },
-                { who: "Prepaid card (sample)", at: "Harborview Hotel · $150.00", out: "Declined: no prepaid cards", ok: false },
-                { who: "Digna card: Cloud hosting", at: "Nimbus Cloud · $32.00", out: "Approved · $18.00 left of cap", ok: true },
+                { who: "Chime debit card (example)", at: "Nimbus Cloud · $32.00", out: "Declined: credit cards only", ok: false },
+                { who: "Prepaid card (example)", at: "Harborview Hotel · $150.00", out: "Declined: no prepaid cards", ok: false },
+                { who: "Digna card: Cloud hosting", at: "Nimbus Cloud · $32.00", out: "Approved · $18.00 left of its limit", ok: true },
               ].map((r) => (
                 <div key={r.who} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "14px 16px", borderRadius: 12, background: r.ok ? "#F0FBF7" : "#FFF5F4", border: `1px solid ${r.ok ? "#12B76A" : "#F4B4AE"}` }}>
                   <span><strong>{r.who}</strong><span style={{ display: "block", fontSize: 13, color: colors.muted }}>{r.at}</span></span>
@@ -213,8 +214,8 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <h2 style={h2}>Built on Meta's AI</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md, marginTop: 20 }}>
               {[
-                { t: "Money assistant", b: "Muse Spark explains why a payment was declined, in plain words, using your own cards and tries." },
-                { t: "Snap a bill", b: "Muse Spark reads a photo of a bill: who it's from, how much, and when it's due." },
+                { t: "Money assistant", b: "Muse Spark explains why a payment was declined, in plain words, using your own cards and payments." },
+                { t: "Pay a bill", b: "Show Digna a bill (a photo, a screenshot or pasted text) and Muse Spark reads who it's from, how much and when it's due, then sets up a card for it." },
                 { t: "This page's pictures", b: "Drawn by Muse Image. The people in them are invented." },
               ].map((f) => (
                 <article key={f.t} className="pp-card" style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg }}>
@@ -237,12 +238,20 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               <p style={{ margin: "10px 0 0", color: colors.muted, lineHeight: 1.6 }}>{f.a}</p>
             </details>
           ))}
+          {props.onHowItWorks && (
+            <p style={{ borderTop: "1px solid " + colors.line, margin: 0, paddingTop: 16 }}>
+              <button type="button" onClick={props.onHowItWorks} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 16, cursor: "pointer", textDecoration: "underline" }}>
+                Read how Digna works, and why cards get declined
+              </button>
+            </p>
+          )}
         </div>
       </section>
 
       {/* CTA */}
       <section className="pp-ledger-band" style={{ background: colors.midnight, color: colors.midnightInk, padding: spacing.xxl + " " + spacing.lg, textAlign: "center" }}>
-        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Your money's good here. Everywhere.</h2>
+        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Your money's good here.</h2>
+        <p style={{ margin: "0 auto " + spacing.lg, maxWidth: 560, color: "#C9CFDB", lineHeight: 1.6 }}>Make a free account, get $250 in practice money, and see how it feels when a checkout finally says yes.</p>
         <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
       </section>
     </div>

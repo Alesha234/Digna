@@ -60,7 +60,7 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
           marginTop: spacing.md,
         }}
       >
-        Test mode sample money
+        Practice money
       </div>
       <button
         type="button"

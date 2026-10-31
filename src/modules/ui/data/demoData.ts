@@ -2,7 +2,7 @@ import type { PayProxyUser, WalletBalance, VirtualCard, CardTransaction } from "
 
 export const demoUser: PayProxyUser = {
   id: "demo-user-1",
-  email: "demo@payproxy.test",
+  email: "demo@digna.dev",
   displayName: "Demo User",
 };
 
@@ -16,7 +16,7 @@ export const demoCards: VirtualCard[] = [
   {
     id: "demo-card-google-cloud",
     userId: "demo-user-1",
-    name: "Google Cloud",
+    name: "Cloud bill",
     last4: "4242",
     status: "active",
     capCents: 5000,
@@ -38,7 +38,7 @@ export const demoCards: VirtualCard[] = [
   {
     id: "demo-card-netflix",
     userId: "demo-user-1",
-    name: "Netflix",
+    name: "Streaming",
     last4: "7769",
     status: "active",
     capCents: 2000,
@@ -52,7 +52,7 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-1",
     cardId: "demo-card-google-cloud",
-    storeName: "Google Cloud",
+    storeName: "Nimbus Cloud",
     amountCents: 1200,
     occurredAt: "2026-10-28T14:00:00.000Z",
     result: "approved",
@@ -60,7 +60,7 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-2",
     cardId: "demo-card-google-cloud",
-    storeName: "Google Cloud",
+    storeName: "Nimbus Cloud",
     amountCents: 2000,
     occurredAt: "2026-10-27T10:30:00.000Z",
     result: "approved",
@@ -68,16 +68,16 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-3",
     cardId: "demo-card-google-cloud",
-    storeName: "Google Cloud",
+    storeName: "Nimbus Cloud",
     amountCents: 2500,
     occurredAt: "2026-10-26T09:00:00.000Z",
     result: "declined",
-    reason: "Over spending cap",
+    reason: "Over the card's limit",
   },
   {
     id: "demo-txn-4",
     cardId: "demo-card-hotel-trip",
-    storeName: "Marriott Hotels",
+    storeName: "Harborview Hotel",
     amountCents: 5000,
     occurredAt: "2026-10-25T18:00:00.000Z",
     result: "approved",
@@ -85,7 +85,7 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-5",
     cardId: "demo-card-hotel-trip",
-    storeName: "Delta Airlines",
+    storeName: "SkyHop Airlines",
     amountCents: 8000,
     occurredAt: "2026-10-24T12:00:00.000Z",
     result: "declined",
@@ -94,7 +94,7 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-6",
     cardId: "demo-card-netflix",
-    storeName: "Netflix",
+    storeName: "StreamBox",
     amountCents: 1599,
     occurredAt: "2026-10-23T08:00:00.000Z",
     result: "approved",
@@ -102,7 +102,7 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-7",
     cardId: "demo-card-netflix",
-    storeName: "Netflix",
+    storeName: "StreamBox",
     amountCents: 301,
     occurredAt: "2026-10-22T08:00:00.000Z",
     result: "approved",
@@ -110,18 +110,18 @@ export const demoTransactions: CardTransaction[] = [
   {
     id: "demo-txn-8",
     cardId: "demo-card-netflix",
-    storeName: "Netflix",
+    storeName: "StreamBox",
     amountCents: 500,
     occurredAt: "2026-10-21T08:00:00.000Z",
     result: "declined",
-    reason: "Over spending cap",
+    reason: "Over the card's limit",
   },
 ];
 
 export const assistantStarters: string[] = [
   "Why was my Netflix payment declined?",
-  "Why was my Google Cloud payment declined?",
+  "Why was my cloud bill payment declined?",
   "How do I unfreeze my hotel trip card?",
 ];
 
-export const testModeMessage: string = "Test mode: sample money, no real money moves.";
+export const testModeMessage: string = "Practice money for now: nothing real is charged.";

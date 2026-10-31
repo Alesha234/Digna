@@ -65,10 +65,10 @@ DECLARE
 BEGIN
   IF v_uid IS NULL THEN RAISE EXCEPTION 'Sign in first.'; END IF;
   IF p_amount_cents IS NULL OR p_amount_cents <= 0 OR p_amount_cents > 500000 THEN RAISE EXCEPTION 'Add between $0.01 and $5,000 at a time.'; END IF;
-  IF p_source NOT IN ('cash_app', 'chime', 'prepaid', 'other') THEN RAISE EXCEPTION 'Pick where the sample money comes from.'; END IF;
+  IF p_source NOT IN ('cash_app', 'chime', 'prepaid', 'other') THEN RAISE EXCEPTION 'Pick where the money comes from.'; END IF;
   SELECT id, balance_cents INTO v_wallet, v_balance FROM public.wallets WHERE user_id = v_uid FOR UPDATE;
   IF v_wallet IS NULL THEN RAISE EXCEPTION 'Your wallet isn''t set up yet. Sign in again.'; END IF;
-  IF v_balance + p_amount_cents > 100000000 THEN RAISE EXCEPTION 'That would put more than $1,000,000 of sample money in your wallet.'; END IF;
+  IF v_balance + p_amount_cents > 100000000 THEN RAISE EXCEPTION 'That would put more than $1,000,000 in your wallet.'; END IF;
   UPDATE public.wallets SET balance_cents = balance_cents + p_amount_cents WHERE id = v_wallet RETURNING balance_cents INTO v_balance;
   INSERT INTO public.deposits (user_id, wallet_id, amount_cents, source) VALUES (v_uid, v_wallet, p_amount_cents, p_source);
   RETURN jsonb_build_object('balance_cents', v_balance);
@@ -81,10 +81,10 @@ GRANT EXECUTE ON FUNCTION public.add_money(BIGINT, TEXT) TO authenticated;
 --    Digna's virtual cards run as credit cards, paid from the wallet's sample money and held to their caps.
 CREATE OR REPLACE FUNCTION public.sandbox_merchants() RETURNS JSONB LANGUAGE sql IMMUTABLE AS $$
   SELECT '[
-    {"id": "nimbus_cloud", "name": "Nimbus Cloud", "kind": "Cloud hosting billing", "accepts": ["credit"], "rule": "Cloud billing accounts take credit cards only: debit and prepaid cards are declined."},
-    {"id": "harborview_hotel", "name": "Harborview Hotel", "kind": "Hotel check-in hold", "accepts": ["credit", "debit"], "rule": "The hotel holds a deposit at check-in and turns away prepaid cards."},
-    {"id": "roadready_rentals", "name": "RoadReady Car Rental", "kind": "Car rental deposit", "accepts": ["credit"], "rule": "The rental counter takes credit cards only for the security deposit."},
-    {"id": "streambox", "name": "StreamBox", "kind": "Streaming subscription", "accepts": ["credit", "debit", "prepaid"], "rule": "Takes any card."}
+    {"id": "nimbus_cloud", "name": "Nimbus Cloud", "kind": "Cloud service bill", "accepts": ["credit"], "rule": "Credit cards only. Cloud services bill you after you use them, so they want a card that can''t come up empty."},
+    {"id": "harborview_hotel", "name": "Harborview Hotel", "kind": "Hotel check-in hold", "accepts": ["credit", "debit"], "rule": "Credit or debit, no prepaid. The hotel puts a hold on money at check-in for damage or extras, and a prepaid card can''t guarantee it."},
+    {"id": "roadready_rentals", "name": "RoadReady Car Rental", "kind": "Car rental deposit", "accepts": ["credit"], "rule": "Credit cards only. The rental counter holds a security deposit, and most rental companies only trust a credit card for it."},
+    {"id": "streambox", "name": "StreamBox", "kind": "Streaming subscription", "accepts": ["credit", "debit", "prepaid"], "rule": "Any card works here."}
   ]'::JSONB
 $$;
 GRANT EXECUTE ON FUNCTION public.sandbox_merchants() TO anon, authenticated;
@@ -106,7 +106,7 @@ BEGIN
   IF v_uid IS NULL THEN RAISE EXCEPTION 'Sign in first.'; END IF;
   IF p_amount_cents IS NULL OR p_amount_cents <= 0 OR p_amount_cents > 500000 THEN RAISE EXCEPTION 'Pay between $0.01 and $5,000.'; END IF;
   SELECT m INTO v_merchant FROM jsonb_array_elements(public.sandbox_merchants()) AS m WHERE m ->> 'id' = p_merchant_id;
-  IF v_merchant IS NULL THEN RAISE EXCEPTION 'Pick one of the sandbox merchants.'; END IF;
+  IF v_merchant IS NULL THEN RAISE EXCEPTION 'Pick one of the places to pay.'; END IF;
   v_kind := CASE p_method WHEN 'payproxy' THEN 'credit' WHEN 'chime_credit_builder' THEN 'credit' WHEN 'chime_debit' THEN 'debit' WHEN 'cash_app_card' THEN 'debit' WHEN 'prepaid_card' THEN 'prepaid' END;
   IF v_kind IS NULL THEN RAISE EXCEPTION 'Pick a card to pay with.'; END IF;
 
@@ -114,12 +114,12 @@ BEGIN
     SELECT * INTO v_card FROM public.virtual_cards WHERE id = p_card_id AND user_id = v_uid FOR UPDATE;
     IF NOT FOUND THEN RAISE EXCEPTION 'Pick one of your Digna cards.'; END IF;
     SELECT balance_cents INTO v_balance FROM public.wallets WHERE user_id = v_uid FOR UPDATE;
-    IF v_card.status = 'frozen' THEN v_result := 'declined'; v_code := 'frozen'; v_reason := 'This card is frozen. Unfreeze it to pay.';
-    ELSIF v_card.status = 'closed' THEN v_result := 'declined'; v_code := 'closed'; v_reason := 'This card is closed.';
-    ELSIF v_card.end_date < CURRENT_DATE THEN v_result := 'declined'; v_code := 'expired'; v_reason := 'This card has passed its end date.';
+    IF v_card.status = 'frozen' THEN v_result := 'declined'; v_code := 'frozen'; v_reason := 'This card is paused. Turn it back on to pay.';
+    ELSIF v_card.status = 'closed' THEN v_result := 'declined'; v_code := 'closed'; v_reason := 'This card is closed, so it can''t be used again. Make a new one.';
+    ELSIF v_card.end_date < CURRENT_DATE THEN v_result := 'declined'; v_code := 'expired'; v_reason := 'This card has passed the day you set for it to stop.';
     ELSIF v_card.spent_cents + p_amount_cents > v_card.spending_cap_cents THEN v_result := 'declined'; v_code := 'over_cap';
-      v_reason := format('This would go over the card''s cap: $%s left of $%s.', to_char((v_card.spending_cap_cents - v_card.spent_cents) / 100.0, 'FM999999990.00'), to_char(v_card.spending_cap_cents / 100.0, 'FM999999990.00'));
-    ELSIF COALESCE(v_balance, 0) < p_amount_cents THEN v_result := 'declined'; v_code := 'insufficient_balance'; v_reason := 'Not enough sample money in your wallet. Add money first.';
+      v_reason := format('This is more than the card''s limit allows: $%s left of $%s.', to_char((v_card.spending_cap_cents - v_card.spent_cents) / 100.0, 'FM999999990.00'), to_char(v_card.spending_cap_cents / 100.0, 'FM999999990.00'));
+    ELSIF COALESCE(v_balance, 0) < p_amount_cents THEN v_result := 'declined'; v_code := 'insufficient_balance'; v_reason := 'There isn''t enough money in your wallet for this. Add money first.';
     END IF;
   ELSE
     p_card_id := NULL;
@@ -127,7 +127,7 @@ BEGIN
 
   IF v_result = 'approved' AND NOT (v_merchant -> 'accepts') ? v_kind THEN
     v_result := 'declined'; v_code := 'other';
-    v_reason := format('%s doesn''t accept %s cards here. %s', v_merchant ->> 'name', v_kind, v_merchant ->> 'rule');
+    v_reason := format('%s doesn''t take %s cards. %s', v_merchant ->> 'name', v_kind, v_merchant ->> 'rule');
   END IF;
 
   IF p_method = 'payproxy' THEN

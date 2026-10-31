@@ -41,7 +41,7 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
     warnings.push({
       id: "near-cap-" + found.id,
       kind: "near-cap",
-      title: found.name + " is near its cap",
+      title: found.name + " is near its limit",
       message: formatCapUsage(found.spentCents, found.capCents) + " used.",
       cardId: found.id,
     });
@@ -51,7 +51,7 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
       id: "expiring-" + found.id,
       kind: "expiring",
       title: found.name + " ends soon",
-      message: "Ends " + formatDate(found.endDate) + ".",
+      message: "It stops working " + formatDate(found.endDate) + ".",
       cardId: found.id,
     });
   }
@@ -143,7 +143,7 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
         >
           <div style={{ display: "grid", gap: spacing.md }}>
             <div>
-              <span style={{ color: colors.muted, fontSize: 13 }}>Cap </span>
+              <span style={{ color: colors.muted, fontSize: 13 }}>Limit </span>
               <span>{formatCurrency(found.capCents)}</span>
             </div>
             <div>
@@ -151,7 +151,7 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
               <span>{formatCapUsage(found.spentCents, found.capCents)}</span>
             </div>
             <div>
-              <span style={{ color: colors.muted, fontSize: 13 }}>Ends </span>
+              <span style={{ color: colors.muted, fontSize: 13 }}>Stops working </span>
               <span>{formatDate(found.endDate)}</span>
             </div>
             <div>

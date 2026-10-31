@@ -31,8 +31,8 @@ function shrink(file: File): Promise<string> {
 }
 
 /**
- * Add a bill: a photo on a phone, a screenshot or saved picture on any device, or the bill's text pasted from an email.
- * Meta's Muse Spark reads who it's from, how much, and when it's due; then one tap makes a capped card for it.
+ * Pay a bill: a photo on a phone, a screenshot or saved picture on any device, or the bill's text pasted from an email.
+ * Meta's Muse Spark reads who it's from, how much, and when it's due; then one tap makes a card with that limit.
  */
 export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => void }) {
   const { setLastScan, mode } = usePayProxy();
@@ -58,7 +58,7 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
         const sample: BillScanResult = { id: `scan_${Date.now()}`, storeName: "Nimbus Cloud", amountCents: 3200, dueDate: new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10), confidence: "low" };
         setResult(sample);
         setLastScan(sample);
-        setError("The AI reads bills for signed-in people. Here's a sample result; create a free account to read your own.");
+        setError("The AI reads bills for people with an account. Here's an example of what it finds; create a free account to read your own.");
         return;
       }
       const res = await fetch("/api/ai", {
@@ -106,8 +106,8 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18, fontFamily: typography.body, color: colors.ink, maxWidth: 760 }}>
       <header>
-        <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Add a bill</h1>
-        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>Give Digna a bill and Meta's Muse Spark reads who it's from, how much, and when it's due. Then make a capped card for it in one tap.</p>
+        <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Pay a bill</h1>
+        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>Got a bill, like a cloud service, phone or hotel invoice? Show it to Digna. Meta's AI reads who it's from, how much you owe and when it's due, then makes a card just for it, with the bill's amount as its limit. No typing it all in.</p>
       </header>
 
       <section aria-label="Picture of the bill" style={box}>
@@ -130,7 +130,7 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
 
       <section aria-label="Bill text" style={box}>
         <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>Or paste the bill's text</h2>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder="Paste the bill or its email here, e.g. from Google Cloud billing" style={{ width: "100%", boxSizing: "border-box", padding: 12, borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 15, fontFamily: typography.body }} />
+        <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} placeholder="Paste the bill or its email here" style={{ width: "100%", boxSizing: "border-box", padding: 12, borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 15, fontFamily: typography.body }} />
         <button type="button" disabled={busy || text.trim().length < 10} onClick={() => void read({ text })} style={{ ...pick, marginTop: 10, background: colors.mint, borderColor: colors.mint, opacity: busy || text.trim().length < 10 ? 0.6 : 1 }}>
           Read this text
         </button>
@@ -139,14 +139,14 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
       {busy && <p role="status" style={{ margin: 0 }}>Reading the bill…</p>}
       {error && <p role="alert" style={{ margin: 0, color: "#B42318" }}>{error}</p>}
       {result && (
-        <section role="status" aria-label="What the AI read" style={{ ...box, borderColor: colors.mint }}>
+        <section role="status" aria-label="What the AI found" style={{ ...box, borderColor: colors.mint }}>
           <h2 style={{ fontFamily: typography.heading, fontSize: 20, margin: "0 0 8px" }}>{result.storeName}</h2>
           <p style={{ margin: 0, lineHeight: 1.7 }}>
             <strong>{money(result.amountCents)}</strong>
-            {result.dueDate ? ` · due ${result.dueDate}` : ""} · {result.confidence} confidence
+            {result.dueDate ? ` · due ${result.dueDate}` : ""} · {result.confidence === "high" ? "read clearly" : result.confidence === "medium" ? "mostly clear, worth a check" : "hard to read, please check"}
           </p>
           <button type="button" onClick={() => props.onMakeCard?.(result)} style={{ ...pick, marginTop: 14, background: colors.mint, borderColor: colors.mint }}>
-            Make a capped card for this bill
+            Make a card for this bill
           </button>
         </section>
       )}

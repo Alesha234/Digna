@@ -65,7 +65,7 @@ export function AlertsScreen() {
               color: colors.muted,
             }}
           >
-            Test mode
+            Practice money
           </p>
           <h1
             style={{
@@ -90,7 +90,7 @@ export function AlertsScreen() {
               maxWidth: 560,
             }}
           >
-            Quiet warnings when balance runs low or card nears cap.
+            A quiet heads-up when your wallet runs low or a card is close to its limit.
           </p>
           <p
             style={{
@@ -194,8 +194,8 @@ export function AlertsScreen() {
                   color: colors.muted,
                 }}
               >
-                We check your balance with isLowBalance and surface a gentle nudge when funds dip
-                below the test threshold{lowBalance ? " — your demo balance is low right now." : "."}
+                We'll give you a gentle heads-up when your wallet gets low, before a payment gets turned down
+                {lowBalance ? ". Your wallet is low right now." : "."}
               </p>
             </article>
           </div>
@@ -221,7 +221,7 @@ export function AlertsScreen() {
               color: colors.ink,
             }}
           >
-            Close to cap
+            Close to the limit
           </h2>
           <div className="pp-grid" style={{ display: "grid", gap: spacing.md }}>
             <article
@@ -254,10 +254,10 @@ export function AlertsScreen() {
                   color: colors.muted,
                 }}
               >
-                We use isNearCap and isExpiringSoon to flag cards at 80% of cap or expiring within
-                7 days{nearCapCount > 0 ? ` — ${nearCapCount} demo card${nearCapCount === 1 ? " is" : "s are"} near cap` : ""}
-                {expiringCount > 0 ? ` and ${expiringCount} expiring soon` : ""}. Turn on warnings
-                to see them above via {theme.spacing.sm} rhythm.
+                We'll tell you when a card has used 80% of its limit, or stops working within 7 days
+                {nearCapCount > 0 ? `. Right now ${nearCapCount} card${nearCapCount === 1 ? " is" : "s are"} near the limit` : ""}
+                {expiringCount > 0 ? `${nearCapCount > 0 ? " and" : ". Right now"} ${expiringCount} ${expiringCount === 1 ? "stops" : "stop"} soon` : ""}. Turn on warnings
+                to see them at the top of this page.
               </p>
             </article>
           </div>

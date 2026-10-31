@@ -204,8 +204,8 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
             <div style={card} className="pp-card pp-lift">
               <p style={sub}>Gentle reminders, on by default.</p>
               <ToggleRow
-                label="Warn near cap"
-                hint="Heads up when a card is close to its cap."
+                label="Warn me near a card's limit"
+                hint="A heads-up when a card has almost reached its limit."
                 on={warnNearCap}
                 onFlip={() => setWarnNearCap((v: boolean) => !v)}
               />
@@ -247,9 +247,9 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
           <section aria-label="About Digna" className="pp-section">
             <h2 style={h2}>About Digna</h2>
             <div style={card} className="pp-card pp-lift">
-              <p style={body}>Digna gives each service that turns your card away its own capped virtual card, paid from your Digna wallet.</p>
+              <p style={body}>Digna gives you a card for each place that turns your card away, with a limit you choose, paid from your Digna wallet.</p>
               <p style={{ ...sub, marginTop: spacing.md }}>
-                Each person sees only their own cards. A sandbox with sample money: not a bank, and not affiliated with Chime, Cash App or any merchant shown.
+                Only you can see your cards. For now everything uses practice money. Digna is not a bank, and isn't connected to Chime, Cash App or any business shown.
               </p>
             </div>
           </section>

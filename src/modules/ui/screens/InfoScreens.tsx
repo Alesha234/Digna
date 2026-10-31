@@ -14,24 +14,24 @@ export function PrivacyScreen() {
       <h1 style={h1}>Privacy</h1>
       <p style={{ color: colors.muted, margin: 0 }}>Last updated {UPDATED}</p>
       <h2 style={h2}>What Digna is</h2>
-      <p>Digna is a working sandbox: your account, wallet, cards and payments are real records, but every dollar is sample money. Digna is not a bank and never touches real cards, bank accounts or money.</p>
+      <p>Digna gives you cards with limits you choose, for the places that turn your card away. Your account, cards and history are real and saved, but for now every dollar is practice money. Digna is not a bank, and today it never touches real cards, bank accounts or money.</p>
       <h2 style={h2}>What we keep</h2>
       <ul>
         <li>Your email address and a password (stored scrambled by our sign-in provider, Supabase; we never see it).</li>
-        <li>Your sample-money activity: wallet balance, the cards you make, and your test-checkout tries.</li>
+        <li>Your Digna activity: your wallet, the cards you make, and the payments you try.</li>
         <li>Feedback you choose to send, with the email you give.</li>
-        <li>Photos you send to Snap a bill are read once by the AI and not kept.</li>
+        <li>Bills you add on Pay a bill (photos, screenshots or pasted text) are read once by the AI and not kept.</li>
       </ul>
       <h2 style={h2}>Who processes it</h2>
       <ul>
-        <li><strong>Supabase</strong> stores your account and sample data.</li>
-        <li><strong>Meta's Model API</strong> answers the money assistant (Muse Spark) and reads bill photos. We send your question with your sample cards and tries, nothing else. Meta doesn't train on it in this mode.</li>
+        <li><strong>Supabase</strong> stores your account and your Digna activity.</li>
+        <li><strong>Meta's Model API</strong> answers the money assistant (Muse Spark) and reads bill photos. We send your question with your Digna cards and recent payments, nothing else.</li>
         <li><strong>Northflank</strong> hosts the website.</li>
       </ul>
       <h2 style={h2}>What we never do</h2>
       <p>Sell or share your data for advertising, ask for real card or bank numbers, or contact you for marketing.</p>
       <h2 style={h2}>Your choices</h2>
-      <p>You can delete your account at any time in Settings: it removes your sign-in and all your sample data right away. Questions? Use Send feedback at the bottom of any page.</p>
+      <p>You can delete your account at any time in Settings: it removes your sign-in and everything in your account right away. Questions? Use Send feedback at the bottom of any page.</p>
     </article>
   );
 }
@@ -42,16 +42,16 @@ export function TermsScreen() {
     <article style={page}>
       <h1 style={h1}>Terms</h1>
       <p style={{ color: colors.muted, margin: 0 }}>Last updated {UPDATED}</p>
-      <h2 style={h2}>A sandbox with sample money</h2>
-      <p>Digna shows how capped virtual cards would work. Balances, cards, merchants and payments are samples: nothing you do here moves real money, and Digna cards can't be used anywhere else.</p>
+      <h2 style={h2}>Practice money, for now</h2>
+      <p>Today, every dollar in Digna is practice money, and the businesses on Try paying are samples. Nothing you do here moves real money, and Digna cards can't be used at real stores yet. We'll say clearly on the site when that changes.</p>
       <h2 style={h2}>Not a bank, not affiliated</h2>
-      <p>Digna is not a bank or a payment company. Chime, Cash App and any card or merchant named here are examples only; Digna isn't affiliated with or endorsed by them. The sample merchants' rules are illustrations, and real checkouts' rules vary.</p>
+      <p>Digna is not a bank. Chime, Cash App and any card or business named here are examples only; Digna isn't connected to or endorsed by them. The sample businesses' rules show common real-world rules, but every real place sets its own.</p>
       <h2 style={h2}>AI answers</h2>
-      <p>The money assistant and Snap a bill use Meta's AI. Their answers can be wrong, and they are not financial advice.</p>
+      <p>The money assistant and Pay a bill use Meta's AI. Their answers can be wrong, and they are not financial advice.</p>
       <h2 style={h2}>Fair use</h2>
       <p>One account per person, please. Don't try to break, overload or misuse the service; we may limit or remove accounts that do. The AI has daily limits so it stays available for everyone.</p>
       <h2 style={h2}>As is</h2>
-      <p>Digna is provided as is, while it's being built and tested. It may change, pause or lose sample data.</p>
+      <p>Digna is provided as is while it's being built. Features may change or pause, and practice money may be reset.</p>
     </article>
   );
 }

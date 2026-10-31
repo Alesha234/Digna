@@ -7,8 +7,8 @@ const box: React.CSSProperties = { background: colors.surface, border: `1px soli
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
 /**
- * The test checkout: pick a sandbox merchant, an amount and a card, and see what a real checkout would say. Outside
- * cards are sample cards checked against the merchant's rule; Digna cards also follow their caps and the wallet.
+ * "Try paying": pick a place, an amount and a card, and see what a real checkout would say. Everyday cards are samples
+ * checked against the place's rule; Digna cards also follow their limits and the wallet.
  */
 export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void; onAddMoney?: () => void }) {
   const { cards, payments, pay, balance, mode, setCardLimit } = usePayProxy();
@@ -39,7 +39,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
       const out = await pay(merchantId, cents, payMethod, cardId);
       setLast({ ...out, cardId, merchant: merchant.name, amountCents: cents, label: methodLabel(payMethod, cards.find((c) => c.id === cardId)?.name) });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "The payment couldn't be tried. Try again.");
+      setError(e instanceof Error ? e.message : "That payment didn't go through on our side. Try again.");
     } finally {
       setBusy(false);
     }
@@ -68,13 +68,13 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20, fontFamily: typography.body, color: colors.ink }}>
       <header>
-        <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Test checkout</h1>
+        <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Try paying</h1>
         <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6, maxWidth: 680 }}>
-          Try paying the kinds of places that turn away debit and prepaid cards. Pick a merchant, an amount and a card, then press Pay. Sample money only: no real card, bank or merchant is contacted.
+          Pay the kinds of places that often turn away debit and prepaid cards, and see exactly what they'd say and why. Pick a place, an amount and a card, then press Pay. It's all practice money: nothing real is charged.
         </p>
       </header>
 
-      <section aria-label="Merchant" style={box}>
+      <section aria-label="Where you're paying" style={box}>
         <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>1. Where are you paying?</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
           {MERCHANTS.map((m) => (
@@ -86,7 +86,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
           ))}
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>
-          <strong style={{ color: colors.ink }}>Its rule:</strong> {merchant.rule} Sample merchant; real checkouts' rules vary.
+          <strong style={{ color: colors.ink }}>What it accepts:</strong> {merchant.rule} This is a sample business; real places' rules vary.
         </p>
       </section>
 
@@ -100,12 +100,12 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
           <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14 }}>
             Card
             <select value={method} onChange={(e) => setMethod(e.target.value)} style={{ padding: "12px 14px", borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 16, background: colors.surface }}>
-              <optgroup label="Your everyday cards (samples)">
+              <optgroup label="Everyday cards (examples)">
                 {OUTSIDE_METHODS.map((m) => (
                   <option key={m.id} value={m.id}>{m.label} · {m.kind}</option>
                 ))}
               </optgroup>
-              <optgroup label="Your Digna capped cards">
+              <optgroup label="Your Digna cards">
                 {usable.map((c) => (
                   <option key={c.id} value={`card:${c.id}`}>{c.name} ···· {c.last4} · {money(c.capCents - c.spentCents)} left{c.status === "frozen" ? " · frozen" : ""}</option>
                 ))}
@@ -116,11 +116,11 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         {usable.length === 0 && (
           <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>
             You have no Digna cards yet.{" "}
-            <button type="button" onClick={props.onCreateCard} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Make a capped card</button>
+            <button type="button" onClick={props.onCreateCard} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Make a Digna card</button>
             , then come back.
           </p>
         )}
-        <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>Wallet: {money(balance.availableCents)} sample money{mode === "demo" ? " (demo)" : ""}.</p>
+        <p style={{ margin: "12px 0 0", fontSize: 14, color: colors.muted }}>Your wallet: {money(balance.availableCents)} in practice money{mode === "demo" ? " (sample account)" : ""}.</p>
         {error && <p role="alert" style={{ color: "#B42318", margin: "12px 0 0" }}>{error}</p>}
         <button type="button" onClick={onPay} disabled={busy} style={{ marginTop: 16, background: colors.mint, color: colors.midnight, border: 0, borderRadius: radii.pill, padding: "14px 28px", fontWeight: 700, fontSize: 16, cursor: busy ? "wait" : "pointer" }}>
           {busy ? "Paying…" : `Pay ${merchant.name}`}
@@ -129,7 +129,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
 
       {last && (
         <section role="status" aria-label="Result" style={{ ...box, borderColor: last.result === "approved" ? "#12B76A" : "#F4B4AE", background: last.result === "approved" ? "#F0FBF7" : "#FFF5F4" }}>
-          <h2 style={{ fontFamily: typography.heading, fontSize: 22, margin: "0 0 6px" }}>{last.result === "approved" ? "Approved. Your money's good here." : "Declined"}</h2>
+          <h2 style={{ fontFamily: typography.heading, fontSize: 22, margin: "0 0 6px" }}>{last.result === "approved" ? "Approved. Your money's good here." : "Declined. Here's why."}</h2>
           <p style={{ margin: 0, lineHeight: 1.6 }}>
             {money(last.amountCents)} at {last.merchant} with your {last.label}. {last.reason ?? "It went through."}
           </p>

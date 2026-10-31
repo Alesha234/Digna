@@ -8,10 +8,10 @@ export type CardKind = "credit" | "debit" | "prepaid";
 export type Merchant = { id: string; name: string; kind: string; accepts: CardKind[]; rule: string; suggestCents: number };
 
 export const MERCHANTS: Merchant[] = [
-  { id: "nimbus_cloud", name: "Nimbus Cloud", kind: "Cloud hosting billing", accepts: ["credit"], rule: "Cloud billing accounts take credit cards only: debit and prepaid cards are declined.", suggestCents: 3200 },
-  { id: "harborview_hotel", name: "Harborview Hotel", kind: "Hotel check-in hold", accepts: ["credit", "debit"], rule: "The hotel holds a deposit at check-in and turns away prepaid cards.", suggestCents: 15000 },
-  { id: "roadready_rentals", name: "RoadReady Car Rental", kind: "Car rental deposit", accepts: ["credit"], rule: "The rental counter takes credit cards only for the security deposit.", suggestCents: 20000 },
-  { id: "streambox", name: "StreamBox", kind: "Streaming subscription", accepts: ["credit", "debit", "prepaid"], rule: "Takes any card.", suggestCents: 1599 },
+  { id: "nimbus_cloud", name: "Nimbus Cloud", kind: "Cloud service bill", accepts: ["credit"], rule: "Credit cards only. Cloud services bill you after you use them, so they want a card that can't come up empty.", suggestCents: 3200 },
+  { id: "harborview_hotel", name: "Harborview Hotel", kind: "Hotel check-in hold", accepts: ["credit", "debit"], rule: "Credit or debit, no prepaid. The hotel puts a hold on money at check-in for damage or extras, and a prepaid card can't guarantee it.", suggestCents: 15000 },
+  { id: "roadready_rentals", name: "RoadReady Car Rental", kind: "Car rental deposit", accepts: ["credit"], rule: "Credit cards only. The rental counter holds a security deposit, and most rental companies only trust a credit card for it.", suggestCents: 20000 },
+  { id: "streambox", name: "StreamBox", kind: "Streaming subscription", accepts: ["credit", "debit", "prepaid"], rule: "Any card works here.", suggestCents: 1599 },
 ];
 
 export type PayMethod = "payproxy" | "chime_debit" | "cash_app_card" | "prepaid_card" | "chime_credit_builder";
@@ -53,13 +53,13 @@ export function decide(
 ): { result: "approved" | "declined"; reason: string | null; code: string | null } {
   if (method === "payproxy") {
     if (!card) return { result: "declined", reason: "Pick one of your Digna cards.", code: "other" };
-    if (card.status === "frozen") return { result: "declined", reason: "This card is frozen. Unfreeze it to pay.", code: "frozen" };
-    if (card.status === "closed") return { result: "declined", reason: "This card is closed.", code: "closed" };
-    if (new Date(card.endDate).getTime() < Date.now() - 86_400_000) return { result: "declined", reason: "This card has passed its end date.", code: "expired" };
-    if (card.spentCents + amountCents > card.capCents) return { result: "declined", reason: `This would go over the card's cap: $${dollars(card.capCents - card.spentCents)} left of $${dollars(card.capCents)}.`, code: "over_cap" };
-    if (balanceCents < amountCents) return { result: "declined", reason: "Not enough sample money in your wallet. Add money first.", code: "insufficient_balance" };
+    if (card.status === "frozen") return { result: "declined", reason: "This card is paused. Turn it back on to pay.", code: "frozen" };
+    if (card.status === "closed") return { result: "declined", reason: "This card is closed, so it can't be used again. Make a new one.", code: "closed" };
+    if (new Date(card.endDate).getTime() < Date.now() - 86_400_000) return { result: "declined", reason: "This card has passed the day you set for it to stop.", code: "expired" };
+    if (card.spentCents + amountCents > card.capCents) return { result: "declined", reason: `This is more than the card's limit allows: $${dollars(card.capCents - card.spentCents)} left of $${dollars(card.capCents)}.`, code: "over_cap" };
+    if (balanceCents < amountCents) return { result: "declined", reason: "There isn't enough money in your wallet for this. Add money first.", code: "insufficient_balance" };
   }
   const kind = kindOf(method);
-  if (!merchant.accepts.includes(kind)) return { result: "declined", reason: `${merchant.name} doesn't accept ${kind} cards here. ${merchant.rule}`, code: "other" };
+  if (!merchant.accepts.includes(kind)) return { result: "declined", reason: `${merchant.name} doesn't take ${kind} cards. ${merchant.rule}`, code: "other" };
   return { result: "approved", reason: null, code: null };
 }

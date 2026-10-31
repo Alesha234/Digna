@@ -18,14 +18,14 @@ export function validateCardName(value: string): string | null {
   if (collapsed.length >= 2 && collapsed.length <= 40) {
     return null;
   }
-  return "Give your card a name 2-40 characters, e.g. Google Cloud.";
+  return "Give your card a name 2-40 characters, like Hotel stay.";
 }
 
 export function validateCapCents(capCents: number): string | null {
   if (Number.isInteger(capCents) && capCents >= 100 && capCents <= 2000000) {
     return null;
   }
-  return "Cap must be between $1 and $20,000.";
+  return "The limit must be between $1 and $20,000.";
 }
 
 export function validateEndDateString(endDate: string): string | null {
