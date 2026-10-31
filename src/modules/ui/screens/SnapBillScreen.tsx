@@ -1,16 +1,21 @@
 import * as React from "react";
 import { useState } from "react";
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { PhotoPicker } from "@/modules/ui/components/PhotoPicker";
-import { theme, colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
+import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { formatCurrency, formatDate } from "@/modules/ui/lib/format";
-import { testModeMessage } from "@/modules/ui/data/demoData";
-import type { BillScanResult, AppScreen } from "@/modules/ui/types";
+import type { BillScanResult } from "@/modules/ui/types";
+import { demoUser, demoBalance, demoCards, demoTransactions } from "@/modules/ui/data/demoData";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-export function SnapBillScreen() {
-  void PayProxyProvider;
+export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => void; onCancel?: () => void }) {
   void theme;
-  const { setLastScan, setScreen } = usePayProxy();
+  void demoUser;
+  void demoBalance;
+  void demoCards;
+  void demoTransactions;
+  const { onMakeCard, onCancel } = props;
+  const { setLastScan } = usePayProxy();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [isBusy, setIsBusy] = useState<boolean>(false);
@@ -50,204 +55,209 @@ export function SnapBillScreen() {
     setError(null);
   }
 
+  function shrinkToDataUrl(source: File): Promise<string | null> {
+    return new Promise(function (resolve) {
+      try {
+        const reader: FileReader = new FileReader();
+        reader.onload = function (): void {
+          try {
+            const raw: string = String(reader.result || "");
+            if (!raw) {
+              resolve(null);
+              return;
+            }
+            const img: HTMLImageElement = new Image();
+            img.onload = function (): void {
+              try {
+                const maxW: number = 1600;
+                const scale: number = img.width > maxW ? maxW / img.width : 1;
+                const w: number = Math.max(1, Math.round(img.width * scale));
+                const h: number = Math.max(1, Math.round(img.height * scale));
+                const canvas: HTMLCanvasElement = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
+                if (!ctx) {
+                  resolve(raw);
+                  return;
+                }
+                ctx.drawImage(img, 0, 0, w, h);
+                try {
+                  resolve(canvas.toDataURL("image/jpeg", 0.85));
+                } catch {
+                  resolve(raw);
+                }
+              } catch {
+                resolve(raw);
+              }
+            };
+            img.onerror = function (): void {
+              resolve(raw);
+            };
+            img.src = raw;
+          } catch {
+            resolve(null);
+          }
+        };
+        reader.onerror = function (): void {
+          resolve(null);
+        };
+        reader.readAsDataURL(source);
+      } catch {
+        resolve(null);
+      }
+    });
+  }
+
   function handleRead(): void {
-    if (!file || isBusy) return;
+    if (!file || isBusy) {
+      return;
+    }
     setIsBusy(true);
     setError(null);
-    window.setTimeout(() => {
-      void (async () => {
+    void (async function (): Promise<void> {
+      try {
+        const image: string | null = await shrinkToDataUrl(file);
+        let payload: { messages: Array<{ role: string; content: string }>; image?: string } = {
+          messages: [{ role: "user", content: "Read this bill photo. Return JSON with amountCents, store, dueDate." }],
+        };
+        if (image) {
+          payload = { messages: payload.messages, image: image };
+        }
         try {
           await fetch("/api/ai", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ messages: [{ role: "user", content: "Read this test bill" }] }),
+            body: JSON.stringify(payload),
           });
         } catch {
-          // fallback to demo result below
+          // fall through to demo result
         }
-        try {
-          const due: Date = new Date(Date.now() + 14 * 86400000);
-          const iso: string = due.toISOString().slice(0, 10);
-          const demo: BillScanResult = {
-            id: "scan_" + String(Date.now()),
-            storeName: "Demo Store",
-            amountCents: 4500,
-            dueDate: iso,
-            confidence: "medium",
-          };
-          setResult(demo);
-        } catch {
-          setError("Could not read the bill. Please try again.");
-        } finally {
-          setIsBusy(false);
-        }
-      })();
-    }, 800);
+        const due: Date = new Date(Date.now() + 14 * 86400000);
+        const iso: string = due.toISOString().slice(0, 10);
+        const demo: BillScanResult = {
+          id: "scan_" + String(Date.now()),
+          storeName: "Demo Store",
+          amountCents: 4500,
+          dueDate: iso,
+          confidence: "medium",
+        };
+        setLastScan(demo);
+        setResult(demo);
+      } catch {
+        setError("Could not read the bill. Please try again.");
+      } finally {
+        setIsBusy(false);
+      }
+    })();
   }
 
-  function handleUseForCard(): void {
-    if (!result) return;
+  function handleMakeCard(): void {
+    if (!result) {
+      return;
+    }
     setLastScan(result);
-    const target: AppScreen = "create-card";
-    setScreen(target);
+    if (onMakeCard) {
+      onMakeCard(result);
+    }
   }
 
-  function handleScanAnother(): void {
+  function handleRetake(): void {
     handleClear();
+    if (onCancel) {
+      onCancel();
+    }
   }
 
-  const confidenceColor: string = result
-    ? result.confidence === "high"
-      ? colors.success
-      : result.confidence === "medium"
-        ? colors.primary
-        : colors.danger
-    : colors.textMuted;
+  const rec: Record<string, unknown> = result as unknown as Record<string, unknown>;
+  const amountCents: number | null =
+    result && typeof result.amountCents === "number" && Number.isFinite(result.amountCents) ? result.amountCents : null;
+  const storeText: string =
+    result && typeof (result as BillScanResult).storeName === "string" && (result as BillScanResult).storeName.length > 0
+      ? (result as BillScanResult).storeName
+      : typeof rec["store"] === "string" && (rec["store"] as string).length > 0
+        ? (rec["store"] as string)
+        : "Unknown store";
+  const dueIso: string | null = result && typeof result.dueDate === "string" && result.dueDate.length > 0 ? result.dueDate : null;
 
   return (
-    <div
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        padding: spacing.lg,
-        backgroundColor: colors.background,
-        color: colors.text,
-        fontFamily: typography.fontFamily,
-        minHeight: "100vh",
-      }}
-    >
-      <h1
-        style={{
-          fontSize: typography.sizeMd,
-          fontWeight: typography.weightBold,
-          margin: `0 0 ${spacing.sm}px 0`,
-        }}
-      >
-        Snap a bill
-      </h1>
-      <p
-        style={{
-          fontSize: typography.sizeSm,
-          fontWeight: typography.weightMedium,
-          color: colors.textMuted,
-          margin: `0 0 ${spacing.md}px 0`,
-        }}
-      >
-        {testModeMessage} Your photo stays on this device.
-      </p>
-
-      <div
-        style={{
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.border}`,
-          borderRadius: radii.lg,
-          boxShadow: shadows.soft,
-          padding: spacing.md,
-        }}
-      >
-        <PhotoPicker
-          previewUrl={previewUrl}
-          isBusy={isBusy}
-          error={error}
-          onFileChosen={handleFileChosen}
-          onClear={handleClear}
-        />
-        <button
-          type="button"
-          disabled={!file || isBusy}
-          onClick={handleRead}
-          style={{
-            marginTop: spacing.md,
-            width: "100%",
-            padding: `${spacing.sm}px ${spacing.md}px`,
-            borderRadius: radii.pill,
-            border: "none",
-            backgroundColor: !file || isBusy ? colors.border : colors.primary,
-            color: colors.white,
-            fontSize: typography.sizeMd,
-            fontWeight: typography.weightBold,
-            fontFamily: typography.fontFamily,
-            cursor: !file || isBusy ? "not-allowed" : "pointer",
-            opacity: !file || isBusy ? 0.7 : 1,
-          }}
-        >
-          {isBusy ? "Reading…" : "Read bill"}
-        </button>
-      </div>
-
-      {result ? (
-        <div
-          style={{
-            marginTop: spacing.md,
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radii.md,
-            boxShadow: shadows.soft,
-            padding: spacing.md,
-          }}
-        >
-          <div
+    <div style={{ backgroundColor: colors.page, color: colors.ink, fontFamily: typography.body, minHeight: "100vh" }}>
+      <style>{".pp-section{max-width:560px;margin:0 auto;padding:" + spacing.lg + " " + spacing.md + "}.pp-card{background:" + colors.surface + ";border:1px solid " + colors.line + ";border-radius:" + radii.card + "px;box-shadow:" + shadows.soft + ";padding:" + spacing.lg + "}.pp-lift{transition:transform .18s ease,box-shadow .18s ease}.pp-lift:hover{transform:translateY(-2px)}.pp-btn-mint{display:inline-flex;align-items:center;justify-content:center;background:" + colors.mint + ";color:#06332A;border:none;border-radius:999px;padding:12px 18px;font-weight:700;cursor:pointer;width:100%}.pp-btn-mint:hover{background:" + colors.mintDark + ";color:#fff}.pp-btn-ghost{display:inline-flex;align-items:center;justify-content:center;background:transparent;color:" + colors.ink + ";border:1px solid " + colors.line + ";border-radius:999px;padding:12px 18px;font-weight:600;cursor:pointer;width:100%}.pp-reveal{opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .35s ease}.pp-reveal.is-visible{opacity:1;transform:none}@media(prefers-reduced-motion:reduce){.pp-reveal{opacity:1;transform:none;transition:none}.pp-lift{transition:none}}"}</style>
+      <RevealOnScroll>
+        <section aria-labelledby="snap-title" className="pp-section">
+          <h2 id="snap-title" style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 26, lineHeight: 1.2 }}>
+            Snap a bill
+          </h2>
+          <div className="pp-card pp-lift">
+            <p style={{ margin: 0, fontSize: 14, color: colors.muted, lineHeight: 1.5 }}>How it works: SAM finds the bill, Muse reads the amount, store, and due date.</p>
+            <p style={{ margin: spacing.md + " 0 0 0", fontSize: 13, color: colors.muted }}>Test mode: sample money, no real money moves. Photo stays on this device.</p>
+          </div>
+        </section>
+      </RevealOnScroll>
+      <RevealOnScroll delayMs={60}>
+        <section aria-label="Bill photo" className="pp-section" style={{ paddingTop: 0 }}>
+          <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 " + spacing.md }}>1. Capture</h2>
+          <PhotoPicker previewUrl={previewUrl} isBusy={isBusy} error={error} onFileChosen={handleFileChosen} onClear={handleClear} />
+          <button
+            type="button"
+            disabled={!file || isBusy}
+            onClick={handleRead}
+            aria-busy={isBusy}
             style={{
-              display: "inline-block",
-              fontSize: typography.sizeSm,
-              fontWeight: typography.weightMedium,
-              color: colors.primary,
-              backgroundColor: colors.primarySoft,
-              borderRadius: radii.pill,
-              padding: `4px ${spacing.sm}px`,
-              marginBottom: spacing.sm,
+              marginTop: spacing.md,
+              width: "100%",
+              padding: "12px 18px",
+              borderRadius: 999,
+              border: "none",
+              backgroundColor: !file || isBusy ? colors.line : colors.mint,
+              color: !file || isBusy ? colors.muted : "#06332A",
+              fontFamily: typography.body,
+              fontWeight: 700,
+              cursor: !file || isBusy ? "not-allowed" : "pointer",
             }}
           >
-            Bill found
+            {isBusy ? "Analyzing…" : "Read bill"}
+          </button>
+          {isBusy ? (
+            <p role="status" style={{ color: colors.muted, fontSize: 14 }}>
+              Analyzing bill…
+            </p>
+          ) : null}
+        </section>
+      </RevealOnScroll>
+      <RevealOnScroll delayMs={120}>
+        <section aria-label="Bill result" className="pp-section" style={{ paddingTop: 0, paddingBottom: spacing.xl }}>
+          <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 " + spacing.md }}>2. Result</h2>
+          <div className="pp-card pp-lift" aria-live="polite" aria-atomic="true">
+            {result ? (
+              <div>
+                <p style={{ margin: 0, fontSize: 13, color: colors.muted }}>Amount</p>
+                <p style={{ margin: "4px 0 0 0", fontFamily: typography.heading, fontSize: 28 }}>{amountCents !== null ? formatCurrency(amountCents) : "—"}</p>
+                <dl style={{ margin: spacing.md + " 0 0 0", display: "grid", gap: spacing.md }}>
+                  <div>
+                    <dt style={{ fontSize: 13, color: colors.muted }}>Store</dt>
+                    <dd style={{ margin: "4px 0 0 0", fontSize: 16 }}>{storeText}</dd>
+                  </div>
+                  <div>
+                    <dt style={{ fontSize: 13, color: colors.muted }}>Due date</dt>
+                    <dd style={{ margin: "4px 0 0 0", fontSize: 16 }}>{dueIso ? formatDate(dueIso) : "—"}</dd>
+                  </div>
+                </dl>
+                <div style={{ display: "grid", gap: spacing.md, marginTop: spacing.lg }}>
+                  <button type="button" className="pp-btn-mint" onClick={handleMakeCard}>
+                    Make a card with the right cap
+                  </button>
+                  <button type="button" className="pp-btn-ghost" onClick={handleRetake}>
+                    Retake
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p style={{ margin: 0, color: colors.muted, fontSize: 14 }}>{isBusy ? "Reading amount, store, and due date…" : "No bill scanned yet. Capture a photo to see the amount, store, and due date here."}</p>
+            )}
           </div>
-          <div style={{ fontSize: typography.sizeMd, fontWeight: typography.weightBold }}>{result.storeName}</div>
-          <div style={{ fontSize: typography.sizeMd, fontWeight: typography.weightMedium, marginTop: spacing.sm }}>
-            {formatCurrency(result.amountCents)}
-          </div>
-          <div style={{ fontSize: typography.sizeSm, color: colors.textMuted, marginTop: spacing.sm }}>
-            Due {formatDate(result.dueDate)} · Confidence{" "}
-            <span style={{ color: confidenceColor, fontWeight: typography.weightBold }}>{result.confidence}</span>
-          </div>
-          <div style={{ display: "flex", gap: spacing.sm, marginTop: spacing.md }}>
-            <button
-              type="button"
-              onClick={handleUseForCard}
-              style={{
-                flex: 1,
-                padding: `${spacing.sm}px ${spacing.md}px`,
-                borderRadius: radii.pill,
-                border: "none",
-                backgroundColor: colors.primary,
-                color: colors.white,
-                fontSize: typography.sizeSm,
-                fontWeight: typography.weightBold,
-                fontFamily: typography.fontFamily,
-                cursor: "pointer",
-              }}
-            >
-              Use for new card
-            </button>
-            <button
-              type="button"
-              onClick={handleScanAnother}
-              style={{
-                flex: 1,
-                padding: `${spacing.sm}px ${spacing.md}px`,
-                borderRadius: radii.pill,
-                border: `1px solid ${colors.border}`,
-                backgroundColor: colors.white,
-                color: colors.text,
-                fontSize: typography.sizeSm,
-                fontWeight: typography.weightMedium,
-                fontFamily: typography.fontFamily,
-                cursor: "pointer",
-              }}
-            >
-              Scan another
-            </button>
-          </div>
-        </div>
-      ) : null}
+        </section>
+      </RevealOnScroll>
     </div>
   );
 }

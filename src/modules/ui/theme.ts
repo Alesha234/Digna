@@ -1,49 +1,37 @@
 export const colors = {
-  primary: "#2F6FED",
-  primaryDark: "#1E54C8",
-  primarySoft: "#E8EFFD",
-  background: "#F6F8FB",
-  surface: "#FFFFFF",
-  text: "#1A2333",
-  textMuted: "#64748B",
-  border: "#E2E8F0",
-  success: "#16A34A",
-  warning: "#D97706",
-  danger: "#DC2626",
-  white: "#FFFFFF",
+  page: '#F4F8F7',
+  surface: '#FFFFFF',
+  ink: '#10201D',
+  muted: '#5E6F6C',
+  mint: '#0EC49A',
+  mintDark: '#0A8F8A',
+  midnight: '#0C1F2E',
+  midnightInk: '#E8F3F0',
+  line: '#E1EBE9',
 } as const;
 
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  xs: '4px',
+  sm: '8px',
+  md: '16px',
+  lg: '24px',
+  xl: '32px',
+  xxl: '48px',
 } as const;
 
 export const radii = {
-  sm: 8,
-  md: 12,
-  lg: 16,
+  card: 14,
   pill: 999,
 } as const;
 
 export const shadows = {
-  soft: "0 1px 2px rgba(16, 24, 40, 0.06)",
-  card: "0 4px 16px rgba(16, 24, 40, 0.08)",
+  soft: '0 8px 24px rgba(16,32,29,0.08)',
+  lift: '0 12px 32px rgba(16,32,29,0.12)',
 } as const;
 
 export const typography = {
-  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  sizeXs: 12,
-  sizeSm: 14,
-  sizeMd: 16,
-  sizeLg: 20,
-  sizeXl: 24,
-  weightRegular: 400,
-  weightMedium: 500,
-  weightBold: 700,
+  heading: "'Space Grotesk', system-ui, sans-serif",
+  body: "'Figtree', system-ui, sans-serif",
 } as const;
 
 export const theme = {

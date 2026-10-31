@@ -1,28 +1,48 @@
 import * as React from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
-import { assistantStarters, testModeMessage } from "@/modules/ui/data/demoData";
-import { formatCurrency, formatDate } from "@/modules/ui/lib/format";
-import { theme, colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
-import type { VirtualCard, CardTransaction, AssistantMessage, AppScreen } from "@/modules/ui/types";
+import { useEffect, useRef, useState } from "react";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { assistantStarters } from "@/modules/ui/data/demoData";
+import type { AssistantMessage } from "@/modules/ui/types";
+import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-void PayProxyProvider;
 void theme;
 
-function makeId(prefix: string): string {
-  return prefix + "_" + Date.now().toString(36) + "_" + Math.floor(Math.random() * 100000).toString(36);
+type ChatMsg = AssistantMessage & { content?: string };
+
+function getContent(m: ChatMsg): string {
+  const rec = m as unknown as Record<string, unknown>;
+  if (typeof rec.content === "string" && (rec.content as string).length > 0) return rec.content as string;
+  if (typeof rec.text === "string") return rec.text as string;
+  return "";
 }
 
-function cardLabel(card: VirtualCard | undefined): string {
-  if (!card) return "your card";
-  const rec = card as unknown as Record<string, unknown>;
-  if (typeof rec.label === "string" && (rec.label as string).length > 0) return rec.label as string;
-  if (typeof rec.name === "string" && (rec.name as string).length > 0) return rec.name as string;
-  return "your card";
+function makeMsg(role: "user" | "assistant", body: string): ChatMsg {
+  const base = {
+    id: role + "_" + Date.now().toString(36) + "_" + Math.floor(Math.random() * 100000).toString(36),
+    role: role,
+    text: body,
+    createdAt: new Date().toISOString(),
+  } as unknown as Record<string, unknown>;
+  base.content = body;
+  return base as unknown as ChatMsg;
 }
 
-function buildLocalReply(input: string, txn: CardTransaction | undefined, card: VirtualCard | undefined): string {
-  const q = input.toLowerCase();
+function cents(c: number): string {
+  return "$" + (c / 100).toFixed(2);
+}
+
+function day(s: string): string {
+  try {
+    const d: Date = new Date(s);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  } catch {
+    return s;
+  }
+}
+
+function buildLocalReply(input: string, txn: { storeName: string; amountCents: number; occurredAt: string; reason?: string; cardId: string } | undefined, card: { status: string; capCents: number; spentCents: number } | undefined, label: string): string {
+  const q: string = input.toLowerCase();
   if (!txn) {
     if (q.includes("unfreeze") || q.includes("frozen") || q.includes("freeze")) {
       return "To unfreeze a card, open it from your dashboard, tap Unfreeze, and try the payment again. This is test mode, so nothing real moves.";
@@ -35,430 +55,290 @@ function buildLocalReply(input: string, txn: CardTransaction | undefined, card: 
     }
     return "I can explain a decline in simple words. Pick one of the declined payments above, or tell me the store name and amount, and I will suggest a calm next step.";
   }
-  const store = txn.storeName;
-  const amount = formatCurrency(txn.amountCents);
-  const reason = (txn.reason || "").toLowerCase();
-  const label = cardLabel(card);
-  const status = card ? card.status : "active";
-  let cause = "it went over a limit";
-  let next = "You can raise the cap on the \"" + label + "\" card, add demo money, or make a new card just for " + store + ".";
+  const amount: string = cents(txn.amountCents);
+  const reason: string = (txn.reason || "").toLowerCase();
+  const status: string = card ? card.status : "active";
+  let cause: string = "it went over a limit";
+  let next: string = "You can raise the cap on the \"" + label + "\" card, add demo money, or make a new card just for " + txn.storeName + ".";
   if (status === "frozen" || reason.includes("frozen")) {
     cause = "the \"" + label + "\" card is frozen";
-    next = "Unfreeze the \"" + label + "\" card from your dashboard, then try the " + amount + " payment at " + store + " again.";
+    next = "Unfreeze the \"" + label + "\" card from your dashboard, then try the " + amount + " payment at " + txn.storeName + " again.";
   } else if (status === "closed") {
     cause = "the \"" + label + "\" card is closed";
-    next = "Make a new card for " + store + " and try the " + amount + " payment again.";
+    next = "Make a new card for " + txn.storeName + " and try the " + amount + " payment again.";
   } else if (reason.includes("cap") || reason.includes("over") || reason.includes("limit")) {
     if (card) {
-      const remaining = card.capCents - card.spentCents;
+      const remaining: number = card.capCents - card.spentCents;
       if (remaining < txn.amountCents) {
-        cause = "it was over the spending cap on \"" + label + "\" — only " + formatCurrency(Math.max(0, remaining)) + " was left under the " + formatCurrency(card.capCents) + " cap";
+        cause = "it was over the spending cap on \"" + label + "\" — only " + cents(Math.max(0, remaining)) + " was left under the " + cents(card.capCents) + " cap";
       } else {
-        cause = "it was near the " + formatCurrency(card.capCents) + " cap on \"" + label + "\"";
+        cause = "it was near the " + cents(card.capCents) + " cap on \"" + label + "\"";
       }
     } else {
       cause = "it was over the card spending cap";
     }
-    next = "You can raise the cap on \"" + label + "\", add demo money, or make a new card for " + store + ".";
+    next = "You can raise the cap on \"" + label + "\", add demo money, or make a new card for " + txn.storeName + ".";
   } else if (q.includes("balance") || reason.includes("balance")) {
     cause = "your wallet balance was too low for the " + amount + " payment";
-    next = "Add some demo money from the dashboard, then try " + store + " again.";
+    next = "Add some demo money from the dashboard, then try " + txn.storeName + " again.";
   } else if (q.includes("expir") || reason.includes("expir")) {
     cause = "the card may have expired";
-    next = "Make a new card for " + store + " with a later date and try again.";
+    next = "Make a new card for " + txn.storeName + " with a later date and try again.";
   }
-  return "That " + amount + " payment at " + store + " on " + formatDate(txn.occurredAt) + " was declined because " + cause + ". In calm words: the store asked, and PayProxy said no to protect you. Next step: " + next + " This is test mode, so nothing real moves.";
+  return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". In calm words: the store asked, and PayProxy said no to protect you. Next step: " + next + " This is test mode, so nothing real moves.";
 }
 
-export function AssistantScreen() {
-  const { cards, transactions, setScreen } = usePayProxy();
-  const [messages, setMessages] = useState<AssistantMessage[]>(() => [
-    {
-      id: "assistant-hello",
-      role: "assistant",
-      text: "Hi, I am your PayProxy helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.",
-      createdAt: new Date().toISOString(),
-    },
-  ]);
-  const [input, setInput] = useState<string>("");
-  const [isBusy, setIsBusy] = useState<boolean>(false);
+export function AssistantScreen(props: { initialPrompt?: string }) {
+  const { cards, transactions, user } = usePayProxy();
+  void user;
+  const [messages, setMessages] = useState<ChatMsg[]>(function () {
+    const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your PayProxy helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.";
+    return [makeMsg("assistant", first)];
+  });
+  const [input, setInput] = useState<string>(function () {
+    return "";
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const listRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
 
-  const declined: CardTransaction[] = useMemo(() => {
-    return transactions.filter((t: CardTransaction) => t.result === "declined");
-  }, [transactions]);
+  const declined = transactions.filter(function (t) {
+    return t.result === "declined";
+  });
 
-  const selectedTxn: CardTransaction | undefined = useMemo(() => {
-    return declined.find((t: CardTransaction) => t.id === selectedId);
-  }, [declined, selectedId]);
+  const selectedTxn = declined.find(function (t) {
+    return t.id === selectedId;
+  });
 
-  const selectedCard: VirtualCard | undefined = useMemo(() => {
-    if (!selectedTxn) return undefined;
-    return cards.find((c: VirtualCard) => c.id === selectedTxn.cardId);
-  }, [cards, selectedTxn]);
-
-  useEffect(() => {
-    const el = listRef.current;
-    if (el) {
-      el.scrollTop = el.scrollHeight;
-    }
-  }, [messages, isBusy]);
-
-  function handleBack(): void {
-    const target: AppScreen = "dashboard";
-    setScreen(target);
-  }
-
-  function handlePickStarter(s: string): void {
-    setInput(s);
-  }
-
-  function handleSelectTxn(id: string): void {
-    setSelectedId((prev: string | null) => (prev === id ? null : id));
-  }
-
-  async function handleSend(): Promise<void> {
-    const trimmed = input.trim();
-    if (trimmed.length === 0 || isBusy) return;
-    const userMsg: AssistantMessage = {
-      id: makeId("user"),
-      role: "user",
-      text: trimmed,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev: AssistantMessage[]) => [...prev, userMsg]);
-    setInput("");
-    setIsBusy(true);
-    const txnSnapshot = selectedTxn;
-    const cardSnapshot = selectedCard;
-    const question = trimmed;
-
-    await new Promise<void>((resolve) => {
-      setTimeout(() => resolve(), 600);
+  function cardLabelFor(id: string): string {
+    const c = cards.find(function (x) {
+      return x.id === id;
     });
+    if (!c) return "your card";
+    const rec = c as unknown as Record<string, unknown>;
+    if (typeof rec.name === "string" && (rec.name as string).length > 0) return rec.name as string;
+    return "your card";
+  }
 
-    let replyText = buildLocalReply(question, txnSnapshot, cardSnapshot);
+  useEffect(function () {
+    const el: HTMLUListElement | null = listRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, loading]);
+
+  function pickStarter(s: string): void {
+    setInput(s);
+    setError(null);
+  }
+
+  async function send(): Promise<void> {
+    const trimmed: string = input.trim();
+    if (trimmed.length === 0 || loading) return;
+    setError(null);
+    const um: ChatMsg = makeMsg("user", trimmed);
+    setMessages(function (prev: ChatMsg[]) {
+      return [...prev, um];
+    });
+    setInput("");
+    setLoading(true);
+    const snapTxn = selectedTxn;
+    const snapCard = snapTxn ? cards.find(function (c) {
+      return c.id === snapTxn.cardId;
+    }) : undefined;
+    const label: string = snapTxn ? cardLabelFor(snapTxn.cardId) : "your card";
+    let reply: string = buildLocalReply(trimmed, snapTxn, snapCard, label);
     try {
-      const res = await fetch("/api/ai", {
+      const res: Response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
-            {
-              role: "user",
-              content:
-                question +
-                (txnSnapshot
-                  ? " Context: " +
-                    txnSnapshot.storeName +
-                    " " +
-                    formatCurrency(txnSnapshot.amountCents) +
-                    " on " +
-                    formatDate(txnSnapshot.occurredAt) +
-                    ", reason: " +
-                    (txnSnapshot.reason || "declined")
-                  : ""),
-            },
+            { role: "user", content: trimmed + (snapTxn ? " Context: " + snapTxn.storeName + " " + cents(snapTxn.amountCents) + " on " + day(snapTxn.occurredAt) + ", reason: " + (snapTxn.reason || "declined") : "") },
           ],
         }),
       });
       if (res.ok) {
         const data = (await res.json()) as { text?: unknown };
-        if (data && typeof data.text === "string" && data.text.trim().length > 0) {
-          replyText = data.text;
-        }
+        if (data && typeof data.text === "string" && data.text.trim().length > 0) reply = data.text;
       }
-    } catch {
-      replyText = buildLocalReply(question, txnSnapshot, cardSnapshot);
+    } catch (e) {
+      const msg: string = e instanceof Error && e.message ? e.message : "Assistant is unavailable right now. Here is a plain-words guess.";
+      setError(msg + " Showing a local plain-words explanation instead.");
+      reply = buildLocalReply(trimmed, snapTxn, snapCard, label);
     }
-
-    const aiMsg: AssistantMessage = {
-      id: makeId("assistant"),
-      role: "assistant",
-      text: replyText,
-      createdAt: new Date().toISOString(),
-    };
-    setMessages((prev: AssistantMessage[]) => [...prev, aiMsg]);
-    setIsBusy(false);
+    const am: ChatMsg = makeMsg("assistant", reply);
+    setMessages(function (prev: ChatMsg[]) {
+      return [...prev, am];
+    });
+    setLoading(false);
   }
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void {
+  function onChange(e: React.ChangeEvent<HTMLInputElement>): void {
     setInput(e.target.value);
   }
 
-  function handleInputKey(e: React.KeyboardEvent<HTMLInputElement>): void {
-    if (e.key === "Enter") {
-      void handleSend();
-    }
+  function onKey(e: React.KeyboardEvent<HTMLInputElement>): void {
+    if (e.key === "Enter") void send();
   }
 
-  const sendDisabled = input.trim().length === 0 || isBusy;
+  const disabled: boolean = input.trim().length === 0 || loading;
 
   return (
-    <div
-      style={{
-        backgroundColor: colors.background,
-        minHeight: "100vh",
-        fontFamily: typography.fontFamily,
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 480, padding: spacing.md, paddingBottom: spacing.lg }}>
-        <button
-          type="button"
-          onClick={handleBack}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: colors.primary,
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightMedium,
-            fontFamily: typography.fontFamily,
-            padding: 0,
-            marginBottom: spacing.sm,
-          }}
-        >
-          ← Back to dashboard
-        </button>
-
-        <h1
-          style={{
-            color: colors.text,
-            fontSize: typography.sizeLg,
-            fontWeight: typography.weightBold,
-            margin: 0,
-            marginBottom: spacing.sm,
-          }}
-        >
-          Payment helper
-        </h1>
-        <p style={{ color: colors.textMuted, fontSize: typography.sizeSm, margin: 0, marginBottom: spacing.md }}>
-          {testModeMessage}
-        </p>
-
-        <div
-          style={{
-            backgroundColor: colors.surface,
-            border: "1px solid " + colors.border,
-            borderRadius: radii.lg,
-            boxShadow: shadows.soft,
-            padding: spacing.md,
-            marginBottom: spacing.md,
-          }}
-        >
-          <p
-            style={{
-              color: colors.text,
-              fontSize: typography.sizeSm,
-              fontWeight: typography.weightMedium,
-              margin: 0,
-              marginBottom: spacing.sm,
-            }}
-          >
-            Declined payments — pick one for context
-          </p>
-          {declined.length === 0 ? (
-            <p style={{ color: colors.textMuted, fontSize: typography.sizeSm, margin: 0 }}>
-              No declined payments right now. Nice work.
-            </p>
-          ) : (
+    <section className="pp-section" style={{ backgroundColor: colors.page, minHeight: "100vh", padding: spacing.md, fontFamily: typography.body }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", display: "flex", flexDirection: "column", gap: spacing.md }}>
+        <RevealOnScroll>
+          <div className="pp-card pp-lift" style={{ backgroundColor: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg }}>
+            <h1 style={{ fontFamily: typography.heading, color: colors.ink, margin: 0, marginBottom: spacing.sm }}>Money assistant</h1>
+            <p style={{ color: colors.muted, margin: 0, fontFamily: typography.body }}>Explains why a payment declined and what to do next, in plain words.</p>
+            <p style={{ color: colors.muted, margin: 0, marginTop: spacing.sm, fontSize: 13 }}>Test mode: sample money, no real money moves.</p>
+          </div>
+        </RevealOnScroll>
+        <RevealOnScroll delayMs={80}>
+          <div className="pp-card pp-lift" style={{ backgroundColor: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg, display: "flex", flexDirection: "column", gap: spacing.md }}>
+            {declined.length > 0 ? (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.sm }}>
+                {declined.map(function (t) {
+                  const active: boolean = t.id === selectedId;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={function () {
+                        setSelectedId(function (prev: string | null) {
+                          return prev === t.id ? null : t.id;
+                        });
+                      }}
+                      aria-pressed={active}
+                      style={{
+                        cursor: "pointer",
+                        borderRadius: radii.pill,
+                        border: "1px solid " + (active ? colors.mintDark : colors.line),
+                        backgroundColor: active ? colors.mint : colors.surface,
+                        color: active ? colors.surface : colors.ink,
+                        padding: "6px 12px",
+                        fontFamily: typography.body,
+                      }}
+                    >
+                      {t.storeName} · {cents(t.amountCents)}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
             <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.sm }}>
-              {declined.map((t: CardTransaction) => {
-                const active = t.id === selectedId;
+              {assistantStarters.map(function (s: string) {
                 return (
                   <button
-                    key={t.id}
+                    key={s}
                     type="button"
-                    onClick={() => handleSelectTxn(t.id)}
+                    onClick={function () {
+                      pickStarter(s);
+                    }}
                     style={{
                       cursor: "pointer",
                       borderRadius: radii.pill,
-                      border: "1px solid " + (active ? colors.primary : colors.border),
-                      backgroundColor: active ? colors.primarySoft : colors.white,
-                      color: active ? colors.primary : colors.text,
-                      fontSize: typography.sizeSm,
-                      fontWeight: typography.weightMedium,
-                      fontFamily: typography.fontFamily,
+                      border: "1px solid " + colors.line,
+                      backgroundColor: colors.page,
+                      color: colors.ink,
                       padding: "6px 12px",
+                      fontFamily: typography.body,
                     }}
                   >
-                    {t.storeName} · {formatCurrency(t.amountCents)} · {formatDate(t.occurredAt)}
+                    {s}
                   </button>
                 );
               })}
             </div>
-          )}
-          {selectedTxn ? (
-            <p style={{ color: colors.textMuted, fontSize: typography.sizeSm, margin: 0, marginTop: spacing.sm }}>
-              Giving context: {selectedTxn.storeName} · {formatCurrency(selectedTxn.amountCents)} ·{" "}
-              {formatDate(selectedTxn.occurredAt)}
-              {selectedTxn.reason ? " · " + selectedTxn.reason : ""}
-            </p>
-          ) : null}
-        </div>
-
-        <div
-          style={{
-            backgroundColor: colors.surface,
-            border: "1px solid " + colors.border,
-            borderRadius: radii.lg,
-            boxShadow: shadows.soft,
-            padding: spacing.md,
-            marginBottom: spacing.md,
-          }}
-        >
-          <p
-            style={{
-              color: colors.text,
-              fontSize: typography.sizeSm,
-              fontWeight: typography.weightMedium,
-              margin: 0,
-              marginBottom: spacing.sm,
-            }}
-          >
-            Try asking
-          </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.sm }}>
-            {assistantStarters.map((s: string) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => handlePickStarter(s)}
-                style={{
-                  cursor: "pointer",
-                  borderRadius: radii.pill,
-                  border: "1px solid " + colors.border,
-                  backgroundColor: colors.primarySoft,
-                  color: colors.text,
-                  fontSize: typography.sizeSm,
-                  fontFamily: typography.fontFamily,
-                  padding: "6px 12px",
-                }}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div
-          ref={listRef}
-          style={{
-            backgroundColor: colors.surface,
-            border: "1px solid " + colors.border,
-            borderRadius: radii.lg,
-            boxShadow: shadows.soft,
-            padding: spacing.md,
-            maxHeight: 340,
-            overflowY: "auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: spacing.sm,
-            marginBottom: spacing.md,
-          }}
-        >
-          {messages.map((m: AssistantMessage) => {
-            const isUser = m.role === "user";
-            return (
-              <div
-                key={m.id}
-                style={{
-                  alignSelf: isUser ? "flex-end" : "flex-start",
-                  backgroundColor: isUser ? colors.primary : colors.primarySoft,
-                  color: isUser ? colors.white : colors.text,
-                  borderRadius: radii.md,
-                  padding: spacing.sm + " " + spacing.md,
-                  maxWidth: "85%",
-                  fontSize: typography.sizeMd,
-                }}
-              >
-                <div>{m.text}</div>
-                <div
-                  style={{
-                    marginTop: 4,
-                    fontSize: typography.sizeSm,
-                    color: isUser ? colors.white : colors.textMuted,
-                    opacity: 0.85,
-                  }}
-                >
-                  {formatDate(m.createdAt)}
-                </div>
-              </div>
-            );
-          })}
-          {isBusy ? (
-            <div
+            <ul
+              ref={listRef}
+              aria-live="polite"
               style={{
-                alignSelf: "flex-start",
-                backgroundColor: colors.primarySoft,
-                color: colors.textMuted,
-                borderRadius: radii.md,
-                padding: spacing.sm + " " + spacing.md,
-                fontSize: typography.sizeSm,
+                listStyle: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: spacing.sm,
+                maxHeight: 340,
+                overflowY: "auto",
               }}
             >
-              Thinking in plain words…
+              {messages.map(function (m: ChatMsg) {
+                const isUser: boolean = m.role === "user";
+                return (
+                  <li
+                    key={m.id}
+                    style={{
+                      alignSelf: isUser ? "flex-end" : "flex-start",
+                      backgroundColor: isUser ? colors.ink : colors.page,
+                      color: isUser ? colors.surface : colors.ink,
+                      border: "1px solid " + colors.line,
+                      borderRadius: radii.card,
+                      padding: spacing.sm + " " + spacing.md,
+                      maxWidth: "88%",
+                      fontFamily: typography.body,
+                    }}
+                  >
+                    {getContent(m)}
+                  </li>
+                );
+              })}
+              {loading ? (
+                <li style={{ alignSelf: "flex-start", color: colors.muted, fontFamily: typography.body }}>Thinking in plain words…</li>
+              ) : null}
+            </ul>
+            {error ? (
+              <p role="alert" style={{ color: colors.ink, backgroundColor: colors.page, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.sm, margin: 0 }}>
+                {error}
+              </p>
+            ) : null}
+            <div style={{ display: "flex", gap: spacing.sm, alignItems: "center" }}>
+              <label htmlFor="assistant-input" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
+                Ask about a declined payment
+              </label>
+              <input
+                id="assistant-input"
+                value={input}
+                onChange={onChange}
+                onKeyDown={onKey}
+                placeholder="Ask why a payment was declined…"
+                aria-label="Ask about a declined payment"
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  border: "1px solid " + colors.line,
+                  borderRadius: radii.pill,
+                  padding: "10px 14px",
+                  fontFamily: typography.body,
+                  color: colors.ink,
+                  backgroundColor: colors.surface,
+                }}
+              />
+              <button
+                type="button"
+                className="pp-btn-mint"
+                onClick={function () {
+                  void send();
+                }}
+                disabled={disabled}
+                style={{
+                  cursor: disabled ? "not-allowed" : "pointer",
+                  border: "none",
+                  borderRadius: radii.pill,
+                  backgroundColor: colors.mint,
+                  color: "#06332A",
+                  padding: "10px 18px",
+                  fontFamily: typography.body,
+                  fontWeight: 700,
+                  opacity: disabled ? 0.6 : 1,
+                }}
+              >
+                {loading ? "…" : "Send"}
+              </button>
             </div>
-          ) : null}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: spacing.sm,
-            alignItems: "center",
-            backgroundColor: colors.surface,
-            border: "1px solid " + colors.border,
-            borderRadius: radii.lg,
-            boxShadow: shadows.soft,
-            padding: spacing.sm,
-          }}
-        >
-          <input
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleInputKey}
-            placeholder="Ask why a payment was declined…"
-            aria-label="Ask the assistant"
-            style={{
-              flex: 1,
-              border: "1px solid " + colors.border,
-              borderRadius: radii.pill,
-              padding: "10px 14px",
-              fontSize: typography.sizeMd,
-              fontFamily: typography.fontFamily,
-              color: colors.text,
-              backgroundColor: colors.white,
-              outline: "none",
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => void handleSend()}
-            disabled={sendDisabled}
-            style={{
-              cursor: sendDisabled ? "not-allowed" : "pointer",
-              border: "none",
-              borderRadius: radii.pill,
-              backgroundColor: sendDisabled ? colors.border : colors.primary,
-              color: colors.white,
-              fontSize: typography.sizeMd,
-              fontWeight: typography.weightMedium,
-              fontFamily: typography.fontFamily,
-              padding: "10px 18px",
-            }}
-          >
-            {isBusy ? "…" : "Send"}
-          </button>
-        </div>
-
-        <p style={{ color: colors.success, fontSize: typography.sizeSm, marginTop: spacing.sm, marginBottom: 0 }}>
-          Test helper: answers use simple words and never need a secret key.
-        </p>
+          </div>
+        </RevealOnScroll>
       </div>
-    </div>
+    </section>
   );
 }

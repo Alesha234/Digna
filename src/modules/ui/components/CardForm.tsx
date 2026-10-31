@@ -1,184 +1,227 @@
 import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import { validateCardName, validateCapCents, validateEndDateString, parseDollarsInputToCents } from "@/modules/ui/lib/validation";
-import { theme, colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
+import type { ChangeEvent, FormEvent, FocusEvent } from "react";
+import { validateCardName, validateCapCents, validateEndDateString } from "@/modules/ui/lib/validation";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-type CardFormErrors = {
-  name: string | null;
-  cap: string | null;
-  endDate: string | null;
+type CardFormProps = {
+  initialName?: string;
+  initialCapDollars?: string;
+  initialEndDate?: string;
+  submitLabel?: string;
+  isSubmitting?: boolean;
+  serverError?: string | null;
+  onSubmit: (input: { name: string; capCents: number; endDate: string }) => void;
 };
 
-export function CardForm(props: { initialName?: string; initialCapDollars?: string; initialEndDate?: string; submitLabel?: string; isSubmitting?: boolean; onSubmit: (input: { name: string; capCents: number; endDate: string }) => void }) {
-  const submitLabel: string = props.submitLabel ?? "Create card";
-  const isSubmitting: boolean = props.isSubmitting ?? false;
+function parseCapDollarsToCents(raw: string): number | null {
+  const trimmed: string = raw.trim().replace(/[$,\s]/g, "");
+  if (trimmed === "") {
+    return null;
+  }
+  const parsed: number = parseFloat(trimmed);
+  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
+    return null;
+  }
+  return Math.round(parsed * 100);
+}
+
+export function CardForm(props: CardFormProps) {
+  const label: string = props.submitLabel ?? "Create card";
+  const busy: boolean = props.isSubmitting ?? false;
   const [name, setName] = useState<string>(props.initialName ?? "");
   const [capDollars, setCapDollars] = useState<string>(props.initialCapDollars ?? "");
   const [endDate, setEndDate] = useState<string>(props.initialEndDate ?? "");
-  const [errors, setErrors] = useState<CardFormErrors>({ name: null, cap: null, endDate: null });
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [capError, setCapError] = useState<string | null>(null);
+  const [endDateError, setEndDateError] = useState<string | null>(null);
+
+  const palette: typeof theme = theme;
 
   function handleNameChange(e: ChangeEvent<HTMLInputElement>): void {
     setName(e.target.value);
-    if (errors.name) {
-      setErrors((prev: CardFormErrors) => ({ ...prev, name: null }));
+    if (nameError) {
+      setNameError(null);
     }
   }
 
   function handleCapChange(e: ChangeEvent<HTMLInputElement>): void {
     setCapDollars(e.target.value);
-    if (errors.cap) {
-      setErrors((prev: CardFormErrors) => ({ ...prev, cap: null }));
+    if (capError) {
+      setCapError(null);
     }
   }
 
-  function handleEndDateChange(e: ChangeEvent<HTMLInputElement>): void {
+  function handleEndChange(e: ChangeEvent<HTMLInputElement>): void {
     setEndDate(e.target.value);
-    if (errors.endDate) {
-      setErrors((prev: CardFormErrors) => ({ ...prev, endDate: null }));
+    if (endDateError) {
+      setEndDateError(null);
     }
+  }
+
+  function handleNameBlur(_e: FocusEvent<HTMLInputElement>): void {
+    setNameError(validateCardName(name));
+  }
+
+  function handleCapBlur(_e: FocusEvent<HTMLInputElement>): void {
+    const cents: number | null = parseCapDollarsToCents(capDollars);
+    if (cents === null) {
+      setCapError("Enter a cap like 25 or 25.00.");
+      return;
+    }
+    setCapError(validateCapCents(cents));
+  }
+
+  function handleEndBlur(_e: FocusEvent<HTMLInputElement>): void {
+    setEndDateError(validateEndDateString(endDate));
   }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>): void {
     e.preventDefault();
-    const nameError: string | null = validateCardName(name);
-    const parsedCents: number | null = parseDollarsInputToCents(capDollars);
-    let capError: string | null = null;
-    if (parsedCents === null) {
-      capError = "Enter a cap like 25 or 25.00.";
-    } else {
-      capError = validateCapCents(parsedCents);
-    }
-    const endError: string | null = validateEndDateString(endDate);
-    setErrors({ name: nameError, cap: capError, endDate: endError });
-    if (nameError || capError || endError) {
+    const nErr: string | null = validateCardName(name);
+    const cents: number | null = parseCapDollarsToCents(capDollars);
+    const cErr: string | null = cents === null ? "Enter a cap like 25 or 25.00." : validateCapCents(cents);
+    const dErr: string | null = validateEndDateString(endDate);
+    setNameError(nErr);
+    setCapError(cErr);
+    setEndDateError(dErr);
+    if (nErr || cErr || dErr) {
       return;
     }
     const cleanName: string = name.trim().replace(/\s+/g, " ");
-    const cleanEndDate: string = endDate.trim();
-    const capCents: number = parsedCents as number;
-    props.onSubmit({ name: cleanName, capCents: capCents, endDate: cleanEndDate });
+    const cleanEnd: string = endDate.trim();
+    const capCents: number = cents as number;
+    props.onSubmit({ name: cleanName, capCents: capCents, endDate: cleanEnd });
   }
 
-  const palette: typeof theme = theme;
+  const inputStyle: Record<string, string> = {
+    width: "100%",
+    boxSizing: "border-box",
+    fontFamily: typography.body,
+    fontSize: "15px",
+    color: colors.ink,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.line}`,
+    borderRadius: `${radii.card - 6}px`,
+    padding: spacing.sm,
+  };
+
+  const labelStyle: Record<string, string> = {
+    display: "block",
+    fontFamily: typography.body,
+    fontSize: "13px",
+    fontWeight: "600",
+    color: colors.muted,
+    marginBottom: spacing.sm,
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      noValidate
+    <section
+      className="pp-card pp-lift"
       style={{
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.border}`,
-        borderRadius: radii.md,
+        backgroundColor: palette.colors.surface,
+        border: `1px solid ${colors.line}`,
+        borderRadius: radii.card,
         boxShadow: shadows.soft,
         padding: spacing.lg,
-        fontFamily: typography.fontFamily,
-        display: "flex",
-        flexDirection: "column",
-        gap: spacing.md,
-        maxWidth: 440,
+        maxWidth: "440px",
       }}
     >
-      <div style={{ backgroundColor: colors.background, borderRadius: radii.md, padding: spacing.md }}>
-        <label
-          htmlFor="card-name"
-          style={{ display: "block", fontSize: typography.sizeSm, fontWeight: typography.weightMedium, color: colors.textMuted, marginBottom: spacing.sm }}
-        >
-          Card name
-        </label>
-        <input
-          id="card-name"
-          type="text"
-          value={name}
-          onChange={handleNameChange}
-          placeholder="Google Cloud"
+      <h2 style={{ margin: `0 0 ${spacing.md}`, fontFamily: typography.heading, color: colors.ink, fontSize: "20px" }}>
+        New card
+      </h2>
+      <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: spacing.md }}>
+        <div>
+          <label htmlFor="name" style={labelStyle}>
+            Card name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="off"
+            placeholder="Google Cloud"
+            value={name}
+            onChange={handleNameChange}
+            onBlur={handleNameBlur}
+            aria-invalid={nameError ? true : false}
+            aria-describedby={nameError ? "name-error" : undefined}
+            style={inputStyle}
+          />
+          {nameError ? (
+            <p id="name-error" role="alert" style={{ margin: `${spacing.sm} 0 0`, fontFamily: typography.body, fontSize: "13px", color: colors.ink }}>
+              {nameError}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="cap" style={labelStyle}>
+            Spending cap (USD)
+          </label>
+          <input
+            id="cap"
+            name="cap"
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            placeholder="25.00"
+            value={capDollars}
+            onChange={handleCapChange}
+            onBlur={handleCapBlur}
+            aria-invalid={capError ? true : false}
+            aria-describedby={capError ? "cap-error" : undefined}
+            style={inputStyle}
+          />
+          {capError ? (
+            <p id="cap-error" role="alert" style={{ margin: `${spacing.sm} 0 0`, fontFamily: typography.body, fontSize: "13px", color: colors.ink }}>
+              {capError}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="endDate" style={labelStyle}>
+            End date
+          </label>
+          <input
+            id="endDate"
+            name="endDate"
+            type="date"
+            value={endDate}
+            onChange={handleEndChange}
+            onBlur={handleEndBlur}
+            aria-invalid={endDateError ? true : false}
+            aria-describedby={endDateError ? "endDate-error" : undefined}
+            style={inputStyle}
+          />
+          {endDateError ? (
+            <p id="endDate-error" role="alert" style={{ margin: `${spacing.sm} 0 0`, fontFamily: typography.body, fontSize: "13px", color: colors.ink }}>
+              {endDateError}
+            </p>
+          ) : null}
+        </div>
+        {props.serverError ? (
+          <p role="alert" style={{ margin: 0, fontFamily: typography.body, fontSize: "13px", color: colors.ink }}>
+            {props.serverError}
+          </p>
+        ) : null}
+        <button
+          type="submit"
+          disabled={busy}
+          className="pp-btn-mint"
           style={{
-            width: "100%",
-            boxSizing: "border-box",
-            fontFamily: typography.fontFamily,
-            fontSize: typography.sizeMd,
-            color: colors.text,
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radii.md,
-            padding: spacing.sm,
+            backgroundColor: busy ? colors.mintDark : colors.mint,
+            color: "#06332A",
+            border: "none",
+            borderRadius: radii.card,
+            padding: `${spacing.sm} ${spacing.md}`,
+            fontFamily: typography.body,
+            fontWeight: 700,
+            cursor: busy ? "not-allowed" : "pointer",
+            opacity: busy ? 0.7 : 1,
           }}
-        />
-        {errors.name ? <p style={{ margin: `${spacing.sm}px 0 0`, fontSize: typography.sizeSm, color: colors.danger }}>{errors.name}</p> : null}
-      </div>
-      <div>
-        <label
-          htmlFor="card-cap"
-          style={{ display: "block", fontSize: typography.sizeSm, fontWeight: typography.weightMedium, color: colors.textMuted, marginBottom: spacing.sm }}
         >
-          Spending cap (USD)
-        </label>
-        <input
-          id="card-cap"
-          type="text"
-          inputMode="decimal"
-          value={capDollars}
-          onChange={handleCapChange}
-          placeholder="25.00"
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            fontFamily: palette.typography.fontFamily,
-            fontSize: typography.sizeMd,
-            color: colors.text,
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radii.md,
-            padding: spacing.sm,
-          }}
-        />
-        {errors.cap ? <p style={{ margin: `${spacing.sm}px 0 0`, fontSize: typography.sizeSm, color: colors.danger }}>{errors.cap}</p> : null}
-      </div>
-      <div>
-        <label
-          htmlFor="card-end"
-          style={{ display: "block", fontSize: typography.sizeSm, fontWeight: typography.weightMedium, color: colors.textMuted, marginBottom: spacing.sm }}
-        >
-          End date
-        </label>
-        <input
-          id="card-end"
-          type="date"
-          value={endDate}
-          onChange={handleEndDateChange}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            fontFamily: typography.fontFamily,
-            fontSize: typography.sizeMd,
-            color: colors.text,
-            backgroundColor: colors.surface,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radii.md,
-            padding: spacing.sm,
-          }}
-        />
-        {errors.endDate ? <p style={{ margin: `${spacing.sm}px 0 0`, fontSize: typography.sizeSm, color: colors.danger }}>{errors.endDate}</p> : null}
-      </div>
-      <p style={{ margin: 0, fontSize: typography.sizeSm, color: colors.textMuted }}>Test mode — No real money moves.</p>
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        style={{
-          marginTop: spacing.sm,
-          backgroundColor: colors.primary,
-          color: colors.white,
-          border: "none",
-          borderRadius: radii.md,
-          padding: `${spacing.sm}px ${spacing.md}px`,
-          fontFamily: typography.fontFamily,
-          fontSize: typography.sizeMd,
-          fontWeight: typography.weightBold,
-          cursor: isSubmitting ? "not-allowed" : "pointer",
-          opacity: isSubmitting ? 0.7 : 1,
-        }}
-      >
-        {isSubmitting ? "Creating…" : submitLabel}
-      </button>
-    </form>
+          {label}
+        </button>
+      </form>
+    </section>
   );
 }

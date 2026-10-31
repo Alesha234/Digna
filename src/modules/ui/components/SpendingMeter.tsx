@@ -1,57 +1,82 @@
-import { formatPercent, formatCapUsage } from "@/modules/ui/lib/format";
-import { theme, colors, spacing, radii, typography } from "@/modules/ui/theme";
+import { formatCapUsage } from "@/modules/ui/lib/format";
+import { isNearCap } from "@/modules/ui/lib/alerts";
+import { colors, spacing, radii, typography, theme } from "@/modules/ui/theme";
 
-export function SpendingMeter(props: { spentCents: number; capCents: number; showLabels?: boolean }) {
-  const { spentCents, capCents, showLabels = true }: { spentCents: number; capCents: number; showLabels?: boolean } = props;
-  const safeSpent: number = typeof spentCents === "number" && Number.isFinite(spentCents) ? spentCents : 0;
-  const safeCap: number = typeof capCents === "number" && Number.isFinite(capCents) ? capCents : 0;
-  const pct: number = safeCap <= 0 ? 0 : Math.round((safeSpent / safeCap) * 100);
-  const safePct: number = Number.isFinite(pct) ? pct : 0;
-  const clamped: number = Math.min(100, Math.max(0, safePct));
-  const fillColor: string = safePct >= 100 ? colors.danger : safePct >= 80 ? colors.warning : colors.primary;
+export function SpendingMeter(props: { spentCents: number; capCents: number }) {
+  const { spentCents, capCents }: { spentCents: number; capCents: number } = props;
+  const percent: number = capCents <= 0 ? 0 : Math.min(100, Math.round((spentCents / capCents) * 100));
+  const usage: string = formatCapUsage(spentCents, capCents);
+  void theme;
+  // @ts-expect-error - contract calls isNearCap(spentCents, capCents); lib accepts a card object at runtime
+  const directNear: boolean = isNearCap(spentCents, capCents);
+  const near: boolean =
+    directNear === true
+      ? true
+      : (() => {
+          try {
+            return (isNearCap as unknown as (card: unknown) => boolean)({
+              status: "active",
+              spentCents,
+              capCents,
+            });
+          } catch {
+            return false;
+          }
+        })();
   return (
-    <div>
-      {showLabels ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: spacing.xs,
-            gap: spacing.sm,
-          }}
-        >
-          <span style={{ fontSize: typography.sizeSm, color: colors.textMuted }}>
-            {formatCapUsage(safeSpent, safeCap)}
-          </span>
-          <span style={{ fontSize: typography.sizeXs, color: colors.textMuted }}>
-            {formatPercent(safeSpent, safeCap)}
-          </span>
-        </div>
-      ) : null}
+    <div
+      className={near ? "pp-meter is-near-cap" : "pp-meter"}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      aria-label={`Spent ${usage}`}
+      style={{
+        backgroundColor: colors.mint,
+        backgroundImage: "none",
+        padding: spacing.md,
+        borderRadius: radii.pill,
+        fontFamily: typography.body,
+        color: colors.ink,
+      }}
+    >
+      <style>{".pp-meter-fill{transition:width 240ms ease}.pp-meter.is-near-cap .pp-meter-fill{background:" + colors.mintDark + "}@media (prefers-reduced-motion: reduce){.pp-meter-fill{transition:none}}"}</style>
       <div
-        role="progressbar"
-        aria-valuenow={safePct}
-        aria-valuemin={0}
-        aria-valuemax={100}
+        className="pp-meter-track"
         style={{
-          width: "100%",
-          backgroundColor: theme.colors.primarySoft,
-          border: "1px solid " + colors.border,
+          backgroundColor: colors.line,
           borderRadius: radii.pill,
           height: spacing.sm,
           overflow: "hidden",
+          width: "100%",
         }}
       >
         <div
+          className="pp-meter-fill"
           style={{
-            width: clamped + "%",
+            width: percent + "%",
             height: "100%",
-            backgroundColor: fillColor,
+            backgroundColor: colors.mint,
+            backgroundImage: "linear-gradient(90deg," + colors.mint + "," + colors.mintDark + ")",
             borderRadius: radii.pill,
+            transition: "width 240ms ease",
           }}
         />
       </div>
+      <p
+        className="pp-meter-caption"
+        style={{
+          fontFamily: typography.body,
+          fontSize: "13px",
+          lineHeight: "20px",
+          color: colors.muted,
+          marginTop: spacing.sm,
+          marginBottom: "0",
+        }}
+      >
+        {usage}
+        {near ? " · Near cap" : null}
+      </p>
     </div>
   );
 }

@@ -1,0 +1,96 @@
+{
+  "id": "clear-mint-theme",
+  "title": "Clear Mint Tokens",
+  "version": "clear-mint-v1",
+  "audience": "Designers, developers and QA adopting Clear Mint tokens",
+  "objectives": [
+    "Understand mint surfaces and calm blue primary by role from src/modules/ui/theme.ts",
+    "Apply Space Grotesk for display and Figtree for body using theme text roles for phone legibility",
+    "Use 14px soft corners, spacing scale and soft shadows for calm depth without hardcoding",
+    "Follow token-only workflow and identify what did not change in features or wording"
+  ],
+  "sections": [
+    {
+      "id": "mint-surfaces-and-primary",
+      "title": "Light and Airy Mint Surfaces with Calm Blue Primary",
+      "bodyMarkdown": "Clear Mint gives the app a light and airy feel built around mint-inspired surfaces with a single calm blue as the primary action color. Instead of memorizing color values, think in roles defined in src/modules/ui/theme.ts, the single source of truth. The page background creates overall lightness. A soft card surface lifts content gently from the page. A subtle tint band highlights grouped information without shouting. A deep midnight band provides strong contrast for footers or emphasis areas. Text has distinct roles for headings versus secondary information. Borders are intentionally light and minimal. When you need a color, always choose the role, not a code. This keeps the palette consistent, accessible, and easy to update from one place without searching screens for hardcoded values.",
+      "analogy": "Like a paint-box with named pastels: pick the labeled paper, soft card, tint strip, midnight ink, text pen and faint border pencil by purpose instead of mixing a new hue.",
+      "pitch30s": "Clear Mint uses light mint surfaces and one calm blue for actions. All colors are roles from src/modules/ui/theme.ts — page, card, tint band, midnight band, text and border — never a code.",
+      "keyPoints": [
+        "Page background, soft card, tint band, midnight band, text and border are roles from src/modules/ui/theme.ts",
+        "Single calm blue is only for primary actions; mint surfaces provide light and airy foundation",
+        "Always choose a role, never a code, to keep palette consistent and updatable"
+      ],
+      "quiz": [
+        {"question": "Where should Clear Mint colors be sourced from?", "options": ["Any hardcoded value that looks close", "Roles defined in src/modules/ui/theme.ts", "External color picker each time"], "answerIndex": 1, "explanation": "The theme file is the single source of truth; use its roles."},
+        {"question": "What does the midnight band role provide?", "options": ["Soft card surface for lifting content", "Light border for separation", "Strong contrast for footers or emphasis areas"], "answerIndex": 2, "explanation": "Midnight band is the deep high-contrast role for footers and emphasis."}
+      ]
+    },
+    {
+      "id": "typography-system",
+      "title": "Space Grotesk Display and Figtree Body",
+      "bodyMarkdown": "Typography in Clear Mint pairs two complementary families defined in the theme: Space Grotesk for display and Figtree for body. Use the display role for screen titles, hero numbers, and short impactful headings where personality matters. Use the body family for paragraphs, labels, list items, and anything long-form where legibility on phones is critical. The theme controls weight, size, and line height together so you never pick them separately. Body text is optimized for small screens with generous line spacing and clear letterforms that stay readable while scrolling or in bright light. Display text is tighter and more expressive but reserved for brief moments. By choosing a text role rather than a font name or size, you get consistent hierarchy everywhere and automatic improvements whenever the design system evolves in the theme file.",
+      "analogy": "Like a magazine masthead versus article text: display is the bold cover title for a moment, body is the clear article you read comfortably on a small phone.",
+      "pitch30s": "Space Grotesk is for short display moments like titles and hero numbers; Figtree is for body and labels where phone legibility matters. Choose the theme text role.",
+      "keyPoints": [
+        "Space Grotesk is for display: titles, hero numbers, short impactful headings",
+        "Figtree is for body: paragraphs, labels, lists where phone legibility is critical",
+        "Pick theme text roles, not font names or sizes, for consistent hierarchy"
+      ],
+      "quiz": [
+        {"question": "When should you use Space Grotesk?", "options": ["Long paragraphs and list items", "Screen titles, hero numbers and short headings for personality", "Captions needing maximum legibility"], "answerIndex": 1, "explanation": "Display family is reserved for brief impactful moments; body is for reading."},
+        {"question": "Why does Clear Mint manage typography via theme roles?", "options": ["To allow random sizes on each screen", "To ensure weight, size and line height stay together and update centrally", "To force everyone to memorize font values"], "answerIndex": 1, "explanation": "Roles keep weight, size and line height paired and enable central updates."}
+      ]
+    },
+    {
+      "id": "corners-spacing-shadows",
+      "title": "14px Soft Corners, Spacing Scale and Soft Shadows",
+      "bodyMarkdown": "Clear Mint feels calm because edges and spacing are soft and predictable, all governed by tokens in the theme. Cards, sheets, and inputs use a consistent large soft corner that feels friendly and modern, avoiding sharp or harsh edges that make an interface feel tense. Spacing follows a stepped scale rather than arbitrary numbers, so padding inside cards, gaps between sections, and margins around pages feel rhythmically related. Shadows are soft, diffuse, and subtle, providing just enough depth to show layering without heavy outlines or dark drops. Together these create calm depth: content floats gently instead of competing for attention. Never invent a custom radius, gap, or shadow. Always select the closest theme role for corners, spacing, and elevation. This guarantees visual harmony across devices and keeps future adjustments simple.",
+      "analogy": "Like rounded pebbles evenly spaced on a soft blanket: 14px corners soften edges, the scale spaces pebbles evenly, and soft shadows lift them gently without harsh stamps.",
+      "pitch30s": "14px soft corners, a stepped spacing scale and soft shadows create calm depth. Content floats gently with no harsh edges, all from theme roles.",
+      "keyPoints": [
+        "Large soft corners create friendly modern edges with no harsh lines",
+        "Spacing scale keeps padding, gaps and margins rhythmically related",
+        "Soft diffuse shadows add calm depth to show layering without heavy outlines"
+      ],
+      "quiz": [
+        {"question": "How should corners, spacing and shadows be chosen?", "options": ["Invent custom values per screen", "Select the closest theme role for corners, spacing and elevation", "Remove all shadows and corners"], "answerIndex": 1, "explanation": "Always use theme roles to keep harmony and easy future updates."},
+        {"question": "What effect do Clear Mint shadows aim for?", "options": ["Heavy dark drops for strong contrast", "Soft diffuse depth that lets content float gently", "Harsh outlines around every card"], "answerIndex": 1, "explanation": "Shadows are subtle and soft to create calm depth without harsh edges."}
+      ]
+    },
+    {
+      "id": "using-tokens",
+      "title": "How to Use Tokens: Always Use the Theme",
+      "bodyMarkdown": "Using Clear Mint correctly means always pulling values from the theme and never hardcoding. If you need a background, text style, corner, spacing, or shadow, import from src/modules/ui/theme.ts and apply the semantic role that matches the intent, not the appearance you guess. Hardcoding values creates drift, breaks dark mode or future palette updates, and makes accessibility audits painful. During code review, check that no literal color, size, or shadow appears outside the theme import. If a needed role does not exist, propose an addition to the theme file rather than inventing a one-off value. This discipline keeps the app consistent and maintainable. The theme is the contract between design and code: design updates the tokens once, and every screen reflecting those roles updates automatically without manual hunting and replacing.",
+      "analogy": "Like a shared spice rack with labeled jars: cook only from the rack, and if a flavor is missing, request a new jar instead of hiding your own stash.",
+      "pitch30s": "Always use the theme and never hardcode. Import the role that matches your intent, and propose new tokens when needed.",
+      "keyPoints": [
+        "Never hardcode colors, typography, corners, spacing or shadows outside the theme",
+        "Import from src/modules/ui/theme.ts by intent, not appearance guessing",
+        "If a role is missing, propose adding it to the theme instead of one-off values"
+      ],
+      "quiz": [
+        {"question": "What is the correct workflow for a new screen needing a background?", "options": ["Copy a value from another screen", "Import the appropriate background role from src/modules/ui/theme.ts", "Pick any light mint that looks good"], "answerIndex": 1, "explanation": "Always pull semantic roles from the theme by intent."},
+        {"question": "What should you do if no theme role fits your need?", "options": ["Hardcode a one-off value", "Skip styling that element", "Propose adding a new token role to the theme file"], "answerIndex": 2, "explanation": "Extend the theme via proposal rather than drifting with one-offs."}
+      ]
+    },
+    {
+      "id": "what-did-not-change",
+      "title": "What Did Not Change",
+      "bodyMarkdown": "Clear Mint is a token-only refresh, so functionality, navigation, and wording remain exactly as they were. Buttons still do the same actions, forms still validate the same way, screens still appear in the same order, and copy is untouched. Only the visual dressing driven by theme roles — surfaces, text styles, corners, spacing, and soft shadows — has changed to feel lighter and calmer. This distinction matters for support and testing: users do not need to relearn flows, and no business logic was altered. If you notice a visual difference, it traces back to a token; if you notice a behavior or wording difference, it is unrelated to this theme release. By keeping scope to tokens, we reduce risk, simplify QA, and ensure the update can roll out confidently while preserving the familiar experience users already trust and understand daily.",
+      "analogy": "Like repainting a house the same style while leaving doors, switches and labels where they were: it feels fresher but you still know where everything is.",
+      "pitch30s": "Clear Mint only repainted tokens. Features, navigation and wording did not change, so users keep familiar flows with a fresher look.",
+      "keyPoints": [
+        "Clear Mint changes only visual tokens: surfaces, text styles, corners, spacing, shadows",
+        "Functionality, navigation, validation and wording are unchanged",
+        "Visual differences trace to tokens; behavior differences are unrelated to the theme release"
+      ],
+      "quiz": [
+        {"question": "Which statement is true after Clear Mint rollout?", "options": ["Buttons have new actions and copy is rewritten", "Only token-driven visuals changed; features and wording stayed the same", "Navigation order was completely redesigned"], "answerIndex": 1, "explanation": "Scope was token-only, so flows and copy were untouched."},
+        {"question": "How should you handle a report of different wording after the theme update?", "options": ["Assume it was caused by Clear Mint", "Investigate separately because wording did not change in this release", "Revert the token file"], "answerIndex": 1, "explanation": "Wording changes are out of scope for this token refresh; treat as unrelated."}
+      ]
+    }
+  ],
+  "relatedScreens": ["ThemeScreen"],
+  "accessibilityNotes": "Colors meet contrast targets when roles are used as intended — do not lower opacity or misuse text roles. Reduced-motion is unaffected; this is a token-only visual refresh with no motion added. Keyboard focus ring color comes from the theme, ensuring visible focus without custom styling."
+}

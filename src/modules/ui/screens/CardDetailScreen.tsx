@@ -1,229 +1,241 @@
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
-import { VirtualCardView } from "@/modules/ui/components/VirtualCardView";
+import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { formatCurrency, formatDate, formatCapUsage } from "@/modules/ui/lib/format";
+import { isNearCap, isExpiringSoon } from "@/modules/ui/lib/alerts";
+import { LedgerBand } from "@/modules/ui/components/LedgerBand";
 import { SpendingMeter } from "@/modules/ui/components/SpendingMeter";
 import { TransactionList } from "@/modules/ui/components/TransactionList";
 import { WarningBanner } from "@/modules/ui/components/WarningBanner";
-import { buildWarnings } from "@/modules/ui/lib/alerts";
-import { formatCurrency, formatDate } from "@/modules/ui/lib/format";
-import { theme, colors, spacing, radii, typography } from "@/modules/ui/theme";
+import { EmptyState } from "@/modules/ui/components/EmptyState";
+import type { VirtualCard, CardTransaction } from "@/modules/ui/types";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
-export function CardDetailScreen() {
-  void PayProxyProvider;
+export function CardDetailScreen(props: { cardId: string; onBack: () => void; onAddMoney?: () => void }) {
+  const { cardId, onBack, onAddMoney }: { cardId: string; onBack: () => void; onAddMoney?: () => void } = props;
   void theme;
-  const { cards, transactions, balance, selectedCardId, freezeCard, unfreezeCard, closeCard, setScreen } = usePayProxy();
-  const card = cards.find((c) => c.id === selectedCardId);
+  void onAddMoney;
+  const { cards, transactions, balance, freezeCard, unfreezeCard, closeCard }: {
+    cards: VirtualCard[];
+    transactions: CardTransaction[];
+    balance: { availableCents: number };
+    freezeCard: (id: string) => void;
+    unfreezeCard: (id: string) => void;
+    closeCard: (id: string) => void;
+  } = usePayProxy() as unknown as {
+    cards: VirtualCard[];
+    transactions: CardTransaction[];
+    balance: { availableCents: number };
+    freezeCard: (id: string) => void;
+    unfreezeCard: (id: string) => void;
+    closeCard: (id: string) => void;
+  };
+
+  const card: VirtualCard | undefined = cards.find((c: VirtualCard) => c.id === cardId);
+  const cardTxns: CardTransaction[] = transactions.filter((t: CardTransaction) => t.cardId === cardId);
 
   if (!card) {
     return (
-      <div
-        style={{
-          backgroundColor: colors.background,
-          color: colors.text,
-          padding: spacing.lg,
-          fontSize: typography.sizeMd,
-          fontWeight: typography.weightMedium,
-          minHeight: "100vh",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: colors.surface,
-            border: "1px solid " + colors.border,
-            borderRadius: radii.lg,
-            padding: spacing.lg,
-            textAlign: "center",
-          }}
-        >
-          <p style={{ fontSize: typography.sizeMd, fontWeight: typography.weightBold, color: colors.text }}>
-            No card selected
-          </p>
-          <p style={{ fontSize: typography.sizeSm, fontWeight: typography.weightMedium, color: colors.textMuted }}>
-            Choose a card to see its details.
-          </p>
-          <button
-            type="button"
-            onClick={() => setScreen("dashboard")}
-            style={{
-              marginTop: spacing.md,
-              backgroundColor: colors.primary,
-              color: colors.white,
-              border: "1px solid " + colors.border,
-              borderRadius: radii.pill,
-              paddingTop: spacing.sm,
-              paddingBottom: spacing.sm,
-              paddingLeft: spacing.md,
-              paddingRight: spacing.md,
-              fontSize: typography.sizeSm,
-              fontWeight: typography.weightBold,
-              cursor: "pointer",
-            }}
-          >
-            Back to dashboard
-          </button>
-        </div>
+      <div style={{ backgroundColor: colors.page, minHeight: "100vh", padding: spacing.lg, fontFamily: typography.body }}>
+        <EmptyState title="Card not found" hint="This card no longer exists." actionLabel="Back" onAction={onBack} />
       </div>
     );
   }
 
-  const cardId: string = card.id;
-  const spentCents: number = card.spentCents;
-  const capCents: number = card.capCents;
-  const endDate: string = card.endDate;
-  const status: string = card.status;
-  const warnings = buildWarnings(cards, balance).filter((w) => w.cardId === cardId);
-  const cardTxns = transactions.filter((t) => t.cardId === cardId);
-  const cardsById: Record<string, string> = {};
-  for (const c of cards) {
-    cardsById[c.id] = c.name;
+  const found: VirtualCard = card;
+  const balanceCents: number = balance.availableCents;
+  const isFrozen: boolean = found.status === "frozen";
+  const isClosed: boolean = found.status === "closed";
+
+  const warnings: { id: string; kind: "near-cap" | "expiring"; title: string; message: string; cardId?: string }[] = [];
+  if (isNearCap(found)) {
+    warnings.push({
+      id: "near-cap-" + found.id,
+      kind: "near-cap",
+      title: found.name + " is near its cap",
+      message: formatCapUsage(found.spentCents, found.capCents) + " used.",
+      cardId: found.id,
+    });
+  }
+  if (isExpiringSoon(found)) {
+    warnings.push({
+      id: "expiring-" + found.id,
+      kind: "expiring",
+      title: found.name + " ends soon",
+      message: "Ends " + formatDate(found.endDate) + ".",
+      cardId: found.id,
+    });
   }
 
+  function handleFreeze(): void {
+    freezeCard(found.id);
+  }
+  function handleUnfreeze(): void {
+    unfreezeCard(found.id);
+  }
   function handleClose(): void {
-    if (confirm("Close this card?")) {
-      closeCard(cardId);
-      setScreen("dashboard");
-    }
+    closeCard(found.id);
   }
 
   return (
     <div
       style={{
-        backgroundColor: colors.background,
-        color: colors.text,
+        backgroundColor: colors.page,
+        color: colors.ink,
         minHeight: "100vh",
-        padding: spacing.md,
+        padding: spacing.lg,
+        fontFamily: typography.body,
         display: "flex",
         flexDirection: "column",
-        gap: spacing.md,
-        maxWidth: 640,
+        gap: spacing.lg,
+        maxWidth: 720,
         margin: "0 auto",
       }}
     >
-      <button
-        type="button"
-        onClick={() => setScreen("dashboard")}
-        style={{
-          alignSelf: "flex-start",
-          backgroundColor: colors.surface,
-          color: colors.primary,
-          border: "1px solid " + colors.border,
-          borderRadius: radii.pill,
-          paddingTop: spacing.sm,
-          paddingBottom: spacing.sm,
-          paddingLeft: spacing.md,
-          paddingRight: spacing.md,
-          fontSize: typography.sizeSm,
-          fontWeight: typography.weightMedium,
-          cursor: "pointer",
-        }}
-      >
-        Back
-      </button>
-
-      <VirtualCardView card={card} />
-
-      <div
-        style={{
-          backgroundColor: colors.surface,
-          border: "1px solid " + colors.border,
-          borderRadius: radii.lg,
-          padding: spacing.md,
-          display: "flex",
-          flexDirection: "column",
-          gap: spacing.sm,
-        }}
-      >
-        <SpendingMeter spentCents={spentCents} capCents={capCents} showLabels={true} />
-        <div style={{ fontSize: typography.sizeSm, fontWeight: typography.weightMedium, color: colors.textMuted }}>
-          Ends {formatDate(endDate)} · Cap {formatCurrency(capCents)}
-        </div>
-        <div style={{ display: "flex", gap: spacing.sm, flexWrap: "wrap" }}>
-          {status === "active" ? (
-            <button
-              type="button"
-              onClick={() => freezeCard(cardId)}
-              style={{
-                backgroundColor: colors.primary,
-                color: colors.white,
-                border: "1px solid " + colors.border,
-                borderRadius: radii.md,
-                paddingTop: spacing.sm,
-                paddingBottom: spacing.sm,
-                paddingLeft: spacing.md,
-                paddingRight: spacing.md,
-                fontSize: typography.sizeSm,
-                fontWeight: typography.weightBold,
-                cursor: "pointer",
-              }}
-            >
-              Freeze
-            </button>
-          ) : null}
-          {status === "frozen" ? (
-            <button
-              type="button"
-              onClick={() => unfreezeCard(cardId)}
-              style={{
-                backgroundColor: colors.primary,
-                color: colors.white,
-                border: "1px solid " + colors.border,
-                borderRadius: radii.md,
-                paddingTop: spacing.sm,
-                paddingBottom: spacing.sm,
-                paddingLeft: spacing.md,
-                paddingRight: spacing.md,
-                fontSize: typography.sizeSm,
-                fontWeight: typography.weightBold,
-                cursor: "pointer",
-              }}
-            >
-              Unfreeze
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={handleClose}
-            style={{
-              backgroundColor: colors.surface,
-              color: colors.danger,
-              border: "1px solid " + colors.border,
-              borderRadius: radii.md,
-              paddingTop: spacing.sm,
-              paddingBottom: spacing.sm,
-              paddingLeft: spacing.lg,
-              paddingRight: spacing.lg,
-              fontSize: typography.sizeSm,
-              fontWeight: typography.weightMedium,
-              cursor: "pointer",
-            }}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-
-      {warnings.map((w) => (
-        <WarningBanner key={w.id} warning={w} />
-      ))}
-
-      <div
-        style={{
-          backgroundColor: colors.surface,
-          border: "1px solid " + colors.border,
-          borderRadius: radii.lg,
-          padding: spacing.md,
-        }}
-      >
-        <div
+      <div className="pp-reveal">
+        <button
+          type="button"
+          onClick={onBack}
           style={{
-            fontSize: typography.sizeMd,
-            fontWeight: typography.weightBold,
-            color: colors.text,
-            marginBottom: spacing.sm,
+            backgroundColor: colors.surface,
+            color: colors.ink,
+            border: "1px solid " + colors.line,
+            borderRadius: radii.card,
+            paddingTop: spacing.md,
+            paddingBottom: spacing.md,
+            paddingLeft: spacing.lg,
+            paddingRight: spacing.lg,
+            fontFamily: typography.body,
+            cursor: "pointer",
           }}
         >
-          Transactions
+          Back
+        </button>
+      </div>
+      <div className="pp-reveal">
+        <LedgerBand card={found} balanceCents={balanceCents} onFreeze={handleFreeze} onUnfreeze={handleUnfreeze} />
+      </div>
+      <div className="pp-reveal">
+        <section
+          className="pp-card"
+          aria-label="Card details"
+          style={{
+            backgroundColor: colors.surface,
+            border: "1px solid " + colors.line,
+            borderRadius: radii.card,
+            boxShadow: shadows.soft,
+            padding: spacing.lg,
+            display: "grid",
+            gap: spacing.md,
+          }}
+        >
+          <div style={{ display: "grid", gap: spacing.md }}>
+            <div>
+              <span style={{ color: colors.muted, fontSize: 13 }}>Cap </span>
+              <span>{formatCurrency(found.capCents)}</span>
+            </div>
+            <div>
+              <span style={{ color: colors.muted, fontSize: 13 }}>Spent </span>
+              <span>{formatCapUsage(found.spentCents, found.capCents)}</span>
+            </div>
+            <div>
+              <span style={{ color: colors.muted, fontSize: 13 }}>Ends </span>
+              <span>{formatDate(found.endDate)}</span>
+            </div>
+            <div>
+              <span
+                aria-live="polite"
+                style={{
+                  display: "inline-block",
+                  backgroundColor: isClosed ? colors.line : colors.mint,
+                  color: isClosed ? colors.muted : colors.midnightInk,
+                  borderRadius: 999,
+                  padding: "2px 12px",
+                  fontSize: 13,
+                }}
+              >
+                {found.status}
+              </span>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: spacing.md, flexWrap: "wrap" }}>
+            {isFrozen ? (
+              <button
+                type="button"
+                aria-label={"Unfreeze " + found.name}
+                onClick={handleUnfreeze}
+                disabled={isClosed}
+                style={{
+                  backgroundColor: colors.midnight,
+                  color: colors.midnightInk,
+                  border: "none",
+                  borderRadius: radii.card,
+                  padding: spacing.md,
+                  fontFamily: typography.body,
+                  cursor: isClosed ? "not-allowed" : "pointer",
+                }}
+              >
+                Unfreeze
+              </button>
+            ) : (
+              <button
+                type="button"
+                aria-label={"Freeze " + found.name}
+                onClick={handleFreeze}
+                disabled={isClosed}
+                style={{
+                  backgroundColor: colors.midnight,
+                  color: colors.midnightInk,
+                  border: "none",
+                  borderRadius: radii.card,
+                  padding: spacing.md,
+                  fontFamily: typography.body,
+                  cursor: isClosed ? "not-allowed" : "pointer",
+                }}
+              >
+                Freeze
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label={"Close " + found.name}
+              onClick={handleClose}
+              disabled={isClosed}
+              style={{
+                backgroundColor: colors.surface,
+                color: colors.ink,
+                border: "1px solid " + colors.line,
+                borderRadius: radii.card,
+                padding: spacing.md,
+                fontFamily: typography.body,
+                cursor: isClosed ? "not-allowed" : "pointer",
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </section>
+      </div>
+      <div className="pp-reveal">
+        <SpendingMeter spentCents={found.spentCents} capCents={found.capCents} />
+      </div>
+      {warnings.length > 0 ? (
+        <div className="pp-reveal">
+          <WarningBanner warnings={warnings} />
         </div>
-        <TransactionList transactions={cardTxns} cardsById={cardsById} />
+      ) : null}
+      <div className="pp-reveal">
+        <section
+          aria-label="History"
+          style={{
+            backgroundColor: colors.surface,
+            border: "1px solid " + colors.line,
+            borderRadius: radii.card,
+            boxShadow: shadows.soft,
+            padding: spacing.lg,
+          }}
+        >
+          <h2 style={{ fontFamily: typography.heading, marginTop: 0, color: colors.ink }}>History</h2>
+          <TransactionList transactions={cardTxns} />
+        </section>
       </div>
     </div>
   );

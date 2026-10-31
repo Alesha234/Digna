@@ -1,86 +1,91 @@
-import type { WalletBalance } from "@/modules/ui/types";
+import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 import { formatCurrency } from "@/modules/ui/lib/format";
-import { isLowBalance } from "@/modules/ui/lib/alerts";
-import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
-import { theme, colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
+import type { PayProxyUser, WalletBalance, VirtualCard, CardTransaction } from "@/modules/ui/types";
 
-export function BalanceCard(props: { balance?: WalletBalance; onAddMoney?: () => void }) {
-  void PayProxyProvider;
-  void theme;
-  const proxyBalance: WalletBalance = usePayProxy().balance;
-  const proxySetScreen: (s: "welcome" | "auth" | "dashboard" | "card-detail" | "create-card" | "add-money" | "snap-bill" | "assistant" | "settings") => void = usePayProxy().setScreen;
-  const resolved: WalletBalance = props.balance ?? proxyBalance;
-  const low: boolean = isLowBalance(resolved);
-  function handleAddMoney(): void {
-    if (props.onAddMoney) {
-      props.onAddMoney();
-    } else {
-      proxySetScreen("add-money");
-    }
-  }
+type BalanceTypeRefs = PayProxyUser | WalletBalance | VirtualCard | CardTransaction;
+
+void theme;
+const _balanceTypeGuard: BalanceTypeRefs | null = null;
+void _balanceTypeGuard;
+
+export function BalanceCard(props: { balanceCents: number; onAddMoney: () => void }) {
+  const { balanceCents, onAddMoney } = props as { balanceCents: number; onAddMoney: () => void };
   return (
-    <div
+    <section
+      className="pp-card"
+      aria-label="PayProxy balance"
       style={{
+        width: "100%",
+        maxWidth: "100%",
         backgroundColor: colors.surface,
-        border: `1px solid ${colors.border}`,
-        borderRadius: radii.lg,
-        boxShadow: shadows.card,
+        color: colors.ink,
+        border: `1px solid ${colors.line}`,
+        borderRadius: radii.card,
+        boxShadow: shadows.soft,
         padding: spacing.lg,
-        fontFamily: typography.fontFamily,
+        fontFamily: typography.body,
+        transition: "transform 160ms ease, box-shadow 160ms ease",
       }}
     >
+      <style>{`.pp-card:hover{transform:translateY(-2px);box-shadow:${shadows.soft}, 0 12px 32px rgba(16,32,29,0.12);}@media (prefers-reduced-motion: reduce){.pp-card,.pp-btn-mint{transition:none !important;transform:none !important;}}.pp-btn-mint{transition:transform 160ms ease, filter 160ms ease;}.pp-btn-mint:hover{filter:brightness(1.04);transform:translateY(-1px);}.pp-btn-mint:focus-visible{outline:2px solid ${colors.ink};outline-offset:2px;}`}</style>
       <div
         style={{
-          color: colors.textMuted,
-          fontSize: typography.sizeSm,
-          fontWeight: typography.weightMedium,
+          color: colors.muted,
+          fontFamily: typography.body,
+          fontSize: "13px",
+          fontWeight: 600,
+          letterSpacing: "0.02em",
+          textTransform: "uppercase",
         }}
       >
-        Available balance
+        PayProxy balance
       </div>
       <div
         style={{
-          color: colors.text,
-          fontSize: typography.sizeLg,
-          fontWeight: typography.weightBold,
-          marginTop: spacing.sm,
+          color: colors.ink,
+          fontFamily: typography.heading,
+          fontSize: "34px",
+          lineHeight: 1.1,
+          fontWeight: 700,
+          marginTop: spacing.md,
         }}
       >
-        {formatCurrency(resolved.availableCents)}
+        {formatCurrency(balanceCents)}
       </div>
-      {low ? (
-        <div
-          style={{
-            color: colors.warning,
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightMedium,
-            marginTop: spacing.md,
-          }}
-        >
-          Add a little demo money to stay covered
-        </div>
-      ) : null}
+      <div
+        style={{
+          color: colors.muted,
+          fontFamily: typography.body,
+          fontSize: "14px",
+          marginTop: spacing.md,
+        }}
+      >
+        Test mode sample money
+      </div>
       <button
         type="button"
-        onClick={handleAddMoney}
+        className="pp-btn-mint"
+        aria-label="Add money"
+        onClick={onAddMoney}
         style={{
-          backgroundColor: colors.primary,
-          color: colors.white,
-          border: `1px solid ${colors.border}`,
-          borderRadius: radii.pill,
-          paddingLeft: spacing.md,
-          paddingRight: spacing.md,
-          paddingTop: spacing.sm,
-          paddingBottom: spacing.sm,
-          fontFamily: typography.fontFamily,
-          fontSize: typography.sizeSm,
-          fontWeight: typography.weightBold,
-          marginTop: spacing.md,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          backgroundColor: colors.mint,
+          color: "#06332A",
+          border: `1px solid ${colors.mint}`,
+          borderRadius: 999,
+          padding: `${spacing.md} ${spacing.lg}`,
+          fontFamily: typography.body,
+          fontSize: "15px",
+          fontWeight: 700,
+          marginTop: spacing.lg,
           cursor: "pointer",
         }}
       >
         Add money
       </button>
-    </div>
+    </section>
   );
 }

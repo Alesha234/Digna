@@ -1,0 +1,80 @@
+{
+  "id": "demo-data",
+  "title": "Demo Data - Sample Wallet",
+  "version": "clear-mint-v1",
+  "audience": "First-time users previewing the demo wallet in test mode before using real money",
+  "objectives": [
+    "Understand Demo User and demoBalance as safe sample money with testModeMessage",
+    "Interpret sample cards including caps, end dates and statuses like Google Cloud and Hotel trip",
+    "Read sample history with store, amount, date and charge or decline results per card",
+    "Recognize consistent currency, date and masking formatting with unchanged logic"
+  ],
+  "sections": [
+    {
+      "id": "demo-user-wallet",
+      "title": "Demo User & Wallet Balance",
+      "bodyMarkdown": "Demo User is a fictional profile that powers the demo data page. It shows how a real wallet would look without touching your actual money. The wallet balance, called demoBalance, is sample money displayed for learning. A visible testModeMessage explains you are in simulation, not live payments. No real money moves, no charges occur, and no bank connection is needed. Features, buttons, and wording stay exactly the same as the live app, so what you learn transfers directly. Use this safe sandbox to explore balances, check formatting, and gain confidence before using real funds. It helps new users practice without anxiety.",
+      "analogy": "Like play money in a board game: looks real, teaches rules, but no real cash leaves your pocket.",
+      "pitch30s": "Meet Demo User, your safe practice profile; demoBalance shows sample money and testModeMessage reminds you it's simulation with no real money moving, while all features and wording stay identical to live.",
+      "keyPoints": [
+        "demoUser and demoBalance are fictional for learning; testModeMessage means simulation only, no charges or bank link.",
+        "No real money moves; you can explore freely without risk.",
+        "Features, buttons and wording are unchanged from live, so skills transfer directly."
+      ],
+      "quiz": [
+        {"question": "What does demoBalance represent?", "options": ["Sample money for learning", "Real withdrawable cash", "A bank transfer fee"], "answerIndex": 0, "explanation": "demoBalance is sample money to practice; it never moves real funds."},
+        {"question": "What does testModeMessage tell you?", "options": ["You are in simulation, no real payments", "Your card is blocked", "You earned rewards"], "answerIndex": 0, "explanation": "testModeMessage confirms test mode; features and wording remain exactly as in live."}
+      ]
+    },
+    {
+      "id": "sample-cards",
+      "title": "Sample Cards with Caps and Dates",
+      "bodyMarkdown": "Sample cards illustrate how virtual cards manage spending in the demo wallet. Each card in demoCards has a friendly name like Google Cloud for subscriptions or Hotel trip for travel. You will see a spending cap that limits total use, an end date when the card expires, and a status such as active, paused, or closed. These are examples only, with no real card numbers or usable credentials. The limits and dates teach you how controls work, while different statuses show what a blocked or expired card looks like. Practice reading card details here, so you can set caps and timelines confidently with real cards later without risk.",
+      "analogy": "Like labeled jars with allowances and expiry stickers for different chores.",
+      "pitch30s": "Explore demoCards named Google Cloud and Hotel trip; each shows a cap, end date and status so you learn spending limits before using real virtual cards.",
+      "keyPoints": [
+        "Cards use example names like Google Cloud and Hotel trip to teach use cases.",
+        "Each card shows a spending cap and end date to control usage.",
+        "Statuses active, paused, closed show whether a card can be charged."
+      ],
+      "quiz": [
+        {"question": "What does a spending cap do?", "options": ["Limits total spend on that card", "Increases your wallet balance", "Hides transaction history"], "answerIndex": 0, "explanation": "Caps prevent overspending by declining charges over the limit."},
+        {"question": "Why see different statuses?", "options": ["To learn what active vs paused vs closed looks like", "To delete your account", "To change currency"], "answerIndex": 0, "explanation": "Statuses teach you to recognize when a card will approve or decline."}
+      ]
+    },
+    {
+      "id": "sample-history",
+      "title": "Sample History by Card",
+      "bodyMarkdown": "Sample history brings the wallet to life with realistic transactions. Each entry in demoTransactions includes a store name, the amount charged, the date it happened, and whether the result was a charge or decline for a specific card. You might see a coffee shop purchase approved on your travel card or an online service declined after hitting its cap. These entries are fake, but they mirror real statements to teach pattern recognition. Studying them helps you understand how limits cause declines, how to trace spending by card, and how dates order your history. Use this view to practice reviewing activity before managing live transaction logs.",
+      "analogy": "Like a practice receipt book showing approved and declined slips per card.",
+      "pitch30s": "Review demoTransactions with store name, amount, date and charge or decline per card to build confidence reading history before handling real payments.",
+      "keyPoints": [
+        "Each demoTransactions entry lists store, amount, date and result per card.",
+        "Declines often show caps or expiry in action, not errors.",
+        "History mirrors real statements for safe pattern practice."
+      ],
+      "quiz": [
+        {"question": "What fields are in each history entry?", "options": ["Store, amount, date, charge/decline per card", "Only card color", "Only user email"], "answerIndex": 0, "explanation": "History teaches you to read the four key fields together."},
+        {"question": "Why is a transaction declined in demo?", "options": ["It hit the card cap or end date", "The app is broken", "Demo has no data"], "answerIndex": 0, "explanation": "Demo declines illustrate how limits protect budgets."}
+      ]
+    },
+    {
+      "id": "formatting-helpers",
+      "title": "Formatting Helpers View",
+      "bodyMarkdown": "Formatting helpers ensure everything looks familiar and consistent. This view demonstrates how currency, dates, and masking appear everywhere in the app. Currency always shows with correct symbols and decimals, dates use the same clear format, and card numbers are masked for safety, showing only the last few digits. The underlying logic stays unchanged from the live experience, only the data is sample. Seeing helpers in action teaches you to trust what you read and to spot details quickly. Consistent formatting reduces confusion, helps accessibility tools read values aloud correctly, and lets you focus on decisions rather than decoding numbers. What you see here is exactly how real data will be presented.",
+      "analogy": "Like a ruler and stencil that makes every number and date look neat and consistent.",
+      "pitch30s": "See how currency, dates and masked numbers display consistently; logic is unchanged from live, only data is sample, with assistantStarters guiding exploration.",
+      "keyPoints": [
+        "Currency, date and masking helpers format values consistently for readability.",
+        "Masking hides full card numbers, showing only last digits for safety.",
+        "Logic is unchanged; only sample data differs, plus assistantStarters prompt next steps."
+      ],
+      "quiz": [
+        {"question": "What do formatting helpers do?", "options": ["Display currency, dates and masking consistently without changing logic", "Change spending limits", "Move real money"], "answerIndex": 0, "explanation": "Helpers only format display; underlying logic stays live-identical."},
+        {"question": "How is card masking shown?", "options": ["Only last digits visible for safety", "Full number always visible", "No cards shown"], "answerIndex": 0, "explanation": "Masking protects numbers while keeping them recognizable."}
+      ]
+    }
+  ],
+  "relatedScreens": ["DemoDataScreen"],
+  "accessibilityNotes": "All demo data uses high-contrast text, clear labels for balances and card statuses, and screen-reader friendly currency and date formats; no motion or time limits."
+}

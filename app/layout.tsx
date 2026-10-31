@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import "./shell/fonts.css";
 
 export const metadata = { title: "PayProxy: virtual cards with spending caps, for people wh…", appleWebApp: { capable: true, title: "PayProxy: virtual cards with spending caps, for people wh…" } };
 export const viewport = { themeColor: "#111111" };

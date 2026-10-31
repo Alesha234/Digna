@@ -1,1 +1,121 @@
-{"manifestId": "dashboard-balance", "title": "Dashboard and Balance at a Glance", "moduleName": "Dashboard balance", "audience": "New PayProxy users checking money on phones", "objectives": ["Learn how to read your total available balance at a glance on the Dashboard", "Understand what each virtual card summary shows, including name, spend and status", "Use the mobile-first glanceable design to check your money quickly and confidently"], "analogy": {"title": "Your Car Dashboard Fuel Gauge", "text": "Think of your PayProxy Dashboard like the dashboard in your car. You don't open the hood to check your fuel; you glance at the fuel gauge. In the same way, you don't dig through statements to know your money. Your balance is the big, clear number at the top, always visible. Below it, your virtual cards are like trip meters showing spend per journey. It's designed for a quick, calm check while you're on the move, just like checking your speed, not rebuilding your engine."}, "pitch30Seconds": "Open PayProxy and the first thing you see is your balance, large and clear. No clutter, no confusion, just how much you have right now. Scroll slightly and you'll see your virtual cards, each with its own summary: name, last spend, and status. It's your money, organized for a quick check on your phone. Designed to feel calm and trustworthy, so you can make confident decisions in seconds, anywhere you are.", "keyPoints": ["Your total balance is always visible at the top for an instant, at-a-glance check", "Each virtual card has a clear summary showing its name, recent spend and current status", "You only see your own data — the Dashboard is private and personalized to your account", "In test mode the balance is sample money for practice, not your real funds"], "recallQuiz": [{"question": "What does the Dashboard show first when you open PayProxy?", "options": ["Your total balance at a glance", "A full list of all transactions", "The app settings menu", "Customer support chat"], "correctIndex": 0, "explanation": "The Dashboard is designed to show your total balance first as the most important, glanceable information."}, {"question": "What does a virtual card summary on the Dashboard include?", "options": ["Card name, recent spend and status", "Only the card number", "Other users’ balances", "App download instructions"], "correctIndex": 0, "explanation": "Each card summary gives a quick overview of that card’s name, how much was spent and whether it is active."}, {"question": "Why is a glanceable balance important for mobile users?", "options": ["So you can check your money quickly and confidently on the go", "So you must use a desktop computer", "So you can share your balance publicly", "So you never need to look at your cards"], "correctIndex": 0, "explanation": "A clear, glanceable balance lets you make fast, confident decisions from your phone without digging through details."}], "testModeNote": "In test mode your Dashboard shows a sample balance for practice. No real money is moved or displayed until you switch to live mode.", "nextManifestId": "virtual-card-creation"}
+{
+  "id": "dashboard-balance",
+  "title": "Dashboard - Midnight Ledger Band",
+  "version": "clear-mint-v1",
+  "audience": "New PayProxy users checking money on phones, needing a calm glanceable dashboard",
+  "objectives": [
+    "Recognize the Midnight Ledger Band as the calm dark container that holds money focus",
+    "Read the floating live card panel on dark with crisp number and status legibility",
+    "Scan the BalanceCard on dark as the soft-card balance-at-a-glance",
+    "Follow the light flow below the band to cards list, warnings and history without functional change"
+  ],
+  "sections": [
+    {
+      "id": "midnight-ledger-band",
+      "title": "Deep Midnight Ledger Band Concept",
+      "bodyMarkdown": "The Dashboard opens with a full-width Midnight Ledger Band that stretches edge to edge across the top of the screen. Its deep navy-charcoal tone creates a calm, focused container that immediately signals money matters live here. Content inside the band stays contained to a centered max width, so on desktop the dark surface feels expansive while text and cards remain comfortably readable. On phones the band stacks vertically, full-bleed with generous top and bottom padding, preserving rhythm without crowding. The surface is matte, not glossy, with soft inner shadows and no harsh borders to keep attention inward. Cards and balance float above it with subtle elevation, not inset. Motion is restrained: on entry the band fades in first, then inner elements lift gently upward. With reduced motion enabled there is no scroll-in or parallax, just an instant calm reveal. This framing isolates financial focus before any list appears below.",
+      "analogy": "Night-market tray with lit-up wallet: a dark velvet tray stretches full-width across the stall, holding only the glowing wallet so you know where to look before browsing the rest.",
+      "pitch30s": "Think of the top of the dashboard as a midnight ledger tray — a deep, calm dark band that says money lives here. It stretches full-width for focus, but everything inside stays neatly contained and readable. On phones it stacks gracefully; motion is just a soft fade, never a distraction.",
+      "keyPoints": [
+        "Full-width dark band creates calm money-focus container, inner content stays contained and centered",
+        "Matte surface with soft shadow lets light cards float with clear elevation",
+        "Gentle fade-in only; reduced motion shows instant appearance with no scroll-in"
+      ],
+      "quiz": [
+        {
+          "question": "What is the purpose of the Midnight Ledger Band?",
+          "options": ["To create a calm dark container that holds money focus", "To hide the balance", "To replace the cards list", "To animate constantly"],
+          "answerIndex": 0,
+          "explanation": "The band frames money focus with a calm dark container, guiding the eye before the light flow below."
+        },
+        {
+          "question": "How does the band behave on phones?",
+          "options": ["Full-width full-bleed with contained inner column stacking vertically", "Narrow and centered with no padding", "Hidden entirely", "Overlaps the light area"],
+          "answerIndex": 0,
+          "explanation": "On phones the band remains full-width but inner content stays contained and stacks with generous padding."
+        }
+      ]
+    },
+    {
+      "id": "live-card-panel",
+      "title": "Live Card Panel Inside the Band",
+      "bodyMarkdown": "Inside the band sits the live card panel, a crisp white soft-card that appears to float on the dark surface with a diffuse shadow and rounded corners. The contrast is deliberate: light card on dark field draws the eye without glare, keeping the card number highly legible in a clean mono-spaced style against generous white space. Status is shown as a quiet pill near the number, muted in color so it reads as calm confirmation rather than alarm. On desktop the card is centered and slightly lifted, with breathing room on all sides inside the band. On phones it stacks full-width within the contained column, hugging the band's padding and maintaining the floating effect. The card never touches the band edge. Entrance motion is subtle: a gentle fade and 4-pixel rise, suggesting placement onto a tray. For reduced motion the card simply appears with no rise or scroll-linked movement, preserving hierarchy through contrast and elevation alone.",
+      "analogy": "White jewelry card on dark velvet display: the light card floats on the dark tray, number and status instantly readable by contrast.",
+      "pitch30s": "Inside that dark band floats your live card — crisp white, softly shadowed, number clear and status calm. It never touches the edge; it hovers. On phones it stacks neatly. A tiny lift on entry hints it was placed, but with reduced motion it simply appears, focused and legible.",
+      "keyPoints": [
+        "Crisp white soft-card floats on dark with diffuse shadow and rounded corners",
+        "Card number in airy mono style, status as quiet muted pill",
+        "Contained alignment on desktop, full-width stacking on phones, no edge contact"
+      ],
+      "quiz": [
+        {
+          "question": "Why is the live card white on dark?",
+          "options": ["High contrast draws focus while keeping the number legible without glare", "To match the background", "To hide the status", "For decoration only"],
+          "answerIndex": 0,
+          "explanation": "Light on dark creates deliberate contrast for legibility and focus without harsh glare."
+        },
+        {
+          "question": "What is the reduced-motion alternative for the card?",
+          "options": ["No rise or scroll-linked movement, instant appearance relying on contrast", "Faster bounce", "Continuous spinning", "Slide from side"],
+          "answerIndex": 0,
+          "explanation": "Reduced motion removes lift and scroll-in, preserving hierarchy through contrast and elevation."
+        }
+      ]
+    },
+    {
+      "id": "balance-at-a-glance",
+      "title": "Balance at a Glance — BalanceCard on Dark",
+      "bodyMarkdown": "The BalanceCard shares the band but remains visually distinct from the live card panel, using the same soft-card language of white surface, rounded edges, and soft shadow to maintain family while avoiding merge. Placed just below or beside the card panel depending on width, it presents the total available amount as the dominant hierarchy element with large, airy numerals and generous line height for instant scannability on dark. Supporting labels sit in muted gray, small and calm, so the number remains the focal point. On desktop the two cards sit in balanced alignment with consistent gap; on phones they stack vertically inside the contained column, band still full-width behind them. Spacing scales with viewport, preserving readability without truncation. Motion mirrors the card panel: faint lift on load, no bounce. With reduced motion enabled the balance appears instantly with no scroll-in, relying on size, contrast, and placement on the dark band to convey importance and readability.",
+      "analogy": "Price tag on the same velvet tray: same soft-card family as the live card but distinct, large numerals catching light first for an instant read.",
+      "pitch30s": "Your balance gets its own soft white card on the dark band — same floating family, big airy numbers you catch in a glance. Labels stay small and muted so the total dominates. Stacks below the card on phones, side-by-side on desktop, always instantly readable.",
+      "keyPoints": [
+        "Soft-card white surface on dark band keeps balance highly scannable with large numerals",
+        "Muted supporting labels keep hierarchy on the total amount",
+        "Stacks vertically on phones, aligned gap on desktop, motion is faint lift only"
+      ],
+      "quiz": [
+        {
+          "question": "How is BalanceCard readability achieved on dark?",
+          "options": ["White soft-card with large airy numerals and soft shadow on dark band", "Dark text directly on dark background", "Tiny hidden number", "Flashing animation"],
+          "answerIndex": 0,
+          "explanation": "White card on dark with large numerals and generous line height ensures instant glanceability."
+        },
+        {
+          "question": "What motion is used for reduced motion?",
+          "options": ["Instant appearance with no scroll-in, relying on size and contrast", "Parallax scroll effect", "Continuous pulsing", "Delayed stagger"],
+          "answerIndex": 0,
+          "explanation": "Reduced motion shows the balance instantly, using size and contrast instead of movement."
+        }
+      ]
+    },
+    {
+      "id": "dashboard-flow-below",
+      "title": "Dashboard Flow Below the Band",
+      "bodyMarkdown": "Below the Midnight Ledger Band the dashboard returns to a light, airy canvas where the existing flow continues unchanged in function. Cards list, warnings, and history links appear on white with familiar spacing, as if stepping off a dark stage onto a bright hall. The transition is a clean horizontal edge with no overlap, preserving visual separation between focused money and routine browsing. On desktop content stays contained and centered; on phones it stacks vertically with comfortable gutters, band content above still contained to the same column width for alignment. List items retain their soft-card elevation and gentle dividers, entering with a subtle staggered fade that suggests order without distraction. Reduced motion removes all scroll-in staging, showing the list instantly in final position. Keyboard focus rings remain highly visible against the light background, and tab order moves naturally from band actions down through the flow, keeping card actions reachable by keyboard without altering wording or features.",
+      "analogy": "Stepping from a dark theater stage into a bright lobby: the show focuses on stage, then you browse programs calmly in the light hall.",
+      "pitch30s": "Below the dark band, the dashboard returns to light — cards list, warnings, history links exactly as you knew them. No features changed, just a clean edge from focused money to everyday browsing. Keyboard tabs flow naturally from band actions down through the list.",
+      "keyPoints": [
+        "Light canvas restores familiar flow; cards list, warnings and history unchanged in function",
+        "Clean horizontal edge separates dark focus from light browsing",
+        "Keyboard tab order flows from band actions into list with visible focus rings"
+      ],
+      "quiz": [
+        {
+          "question": "What changes in function below the band?",
+          "options": ["Nothing — cards list, warnings and history links stay unchanged", "All features are removed", "Wording is rewritten", "History is hidden"],
+          "answerIndex": 0,
+          "explanation": "The flow below retains existing function; only the visual container above changes."
+        },
+        {
+          "question": "How is keyboard access preserved?",
+          "options": ["Tab order flows from band actions down through light list with visible focus rings", "Keyboard is disabled", "Only mouse works", "Focus is hidden"],
+          "answerIndex": 0,
+          "explanation": "Tab moves naturally from band actions into the light area, with high-contrast focus rings on both surfaces."
+        }
+      ]
+    }
+  ],
+  "relatedScreens": ["DashboardScreen", "BalanceCard", "VirtualCardView"],
+  "accessibilityNotes": "Phone stacking: Midnight Ledger Band is full-width full-bleed; inner content contained to centered max-width column and stacks vertically on phones with generous padding; card and BalanceCard never touch band edges. Reduced motion: no scroll-in, parallax, or staggered lift — all band and below-band elements appear instantly, preserving hierarchy via contrast and elevation. Keyboard access: all card actions inside band are keyboard operable with logical tab order from band into light flow below; visible focus rings meet contrast on both dark and light surfaces.",
+  "doNotChange": ["features", "wording"]
+}
