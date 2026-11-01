@@ -75,6 +75,88 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
           <div className="pp-hero-grid">
             <div>
               <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Cards with limits you choose · Free to try</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", margin: "0 0 14px" }}>
+                <div aria-hidden="true" style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
+                    <circle cx="24" cy="24" r="24" fill={colors.primarySoft} />
+                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.midnight} />
+                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#6B4226" />
+                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#7A4B2A" />
+                    <circle cx="24" cy="10" r="10" fill="#14100C" />
+                    <circle cx="15" cy="16" r="3.2" fill="#14100C" />
+                    <circle cx="33" cy="16" r="3.2" fill="#14100C" />
+                    <circle cx="20.5" cy="18" r="1.1" fill="#14100C" />
+                    <circle cx="27.5" cy="18" r="1.1" fill="#14100C" />
+                    <path d="M21 23 Q24 25.5 27 23" stroke="#3E2412" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                  </svg>
+                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
+                    <circle cx="24" cy="24" r="24" fill={colors.surface} />
+                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.mint} />
+                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#D9A077" />
+                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#F1C9A5" />
+                    <path d="M15 17 C15 8 33 8 33 17 C33 13 30 11 24 11 C18 11 15 13 15 17 Z" fill="#D1D5DB" />
+                    <path d="M16 24 C16 30 20 33 24 33 C28 33 32 30 32 24 C32 28 28 29 24 29 C20 29 16 28 16 24 Z" fill="#D1D5DB" />
+                    <circle cx="20.5" cy="18.5" r="1.1" fill="#0E1726" />
+                    <circle cx="27.5" cy="18.5" r="1.1" fill="#0E1726" />
+                    <g stroke="#0E1726" strokeWidth="1.3" fill="none">
+                      <circle cx="20.5" cy="18.5" r="3.4" />
+                      <circle cx="27.5" cy="18.5" r="3.4" />
+                      <path d="M23.9 18.5 H24.1" />
+                    </g>
+                    <path d="M21.5 26.5 Q24 28 26.5 26.5" stroke="#7C4A2D" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+                  </svg>
+                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
+                    <circle cx="24" cy="24" r="24" fill={colors.primarySoft} />
+                    <path d="M10 48 C10 30 16 26 24 26 C32 26 38 30 38 48 Z" fill={colors.mintDark} />
+                    <ellipse cx="24" cy="14" rx="12" ry="12" fill={colors.mintDark} />
+                    <ellipse cx="24" cy="18" rx="7.5" ry="8.5" fill="#C68642" />
+                    <circle cx="21.5" cy="18" r="1.1" fill="#0E1726" />
+                    <circle cx="26.5" cy="18" r="1.1" fill="#0E1726" />
+                    <path d="M21.5 22.5 Q24 24.5 26.5 22.5" stroke="#5C3413" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                  </svg>
+                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
+                    <circle cx="24" cy="24" r="24" fill={colors.surface} />
+                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.muted} />
+                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#8A5230" />
+                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#A66A3F" />
+                    <circle cx="17" cy="11" r="4" fill="#1F2937" />
+                    <circle cx="24" cy="9" r="4.5" fill="#1F2937" />
+                    <circle cx="31" cy="11" r="4" fill="#1F2937" />
+                    <circle cx="20.5" cy="18" r="1.1" fill="#14100C" />
+                    <circle cx="27.5" cy="18" r="1.1" fill="#14100C" />
+                    <path d="M20.5 23.5 Q24 27 27.5 23.5" stroke="#3E2412" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+                  </svg>
+                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
+                    <circle cx="24" cy="24" r="24" fill={colors.primarySoft} />
+                    <circle cx="24" cy="7" r="4.5" fill="#E5E7EB" />
+                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.midnight} />
+                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#D9A077" />
+                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#E8B48C" />
+                    <path d="M15 16 C15 8 33 8 33 16 C31 12 28 11 24 11 C20 11 17 12 15 16 Z" fill="#E5E7EB" />
+                    <circle cx="20.5" cy="18.5" r="1.1" fill="#0E1726" />
+                    <circle cx="27.5" cy="18.5" r="1.1" fill="#0E1726" />
+                    <g stroke="#0E1726" strokeWidth="1.2" fill="none">
+                      <rect x="16.5" y="15.5" width="7" height="5.5" rx="2.5" />
+                      <rect x="24.5" y="15.5" width="7" height="5.5" rx="2.5" />
+                      <path d="M23.5 18 H24.5" />
+                    </g>
+                    <path d="M21 24 Q24 26 27 24" stroke="#7C4A2D" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+                    <path d="M19 14.5 Q24 13 29 14.5" stroke="#9CA3AF" strokeWidth="1" fill="none" strokeLinecap="round" />
+                  </svg>
+                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
+                    <circle cx="24" cy="24" r="24" fill={colors.surface} />
+                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.mint} />
+                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#4A2D15" />
+                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#5C3A21" />
+                    <path d="M15 15 C15 8 33 8 33 15 C33 12 29 10.5 24 10.5 C19 10.5 15 12 15 15 Z" fill="#0F0D0B" />
+                    <path d="M16.5 22 C16.5 28 20 31 24 31 C28 31 31.5 28 31.5 22 C31.5 26 28 27 24 27 C20 27 16.5 26 16.5 22 Z" fill="#0F0D0B" />
+                    <circle cx="20.5" cy="18" r="1.1" fill="#FFFFFF" />
+                    <circle cx="27.5" cy="18" r="1.1" fill="#FFFFFF" />
+                    <path d="M22 24.5 Q24 25.5 26 24.5" stroke="#FFFFFF" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>People of different ages and backgrounds who use Digna</span>
+              </div>
               <h1 className="pp-hero-title">Dignity at every checkout.</h1>
               <p style={{ ...lead, fontSize: 18 }}>
                 Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
