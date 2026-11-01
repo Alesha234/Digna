@@ -5,6 +5,8 @@ const MODEL = "muse-spark-1.3";
 /** Plain retry wording for every Muse Spark outage: missing key, timeout, upstream 429 or any upstream failure. Never a dead end. */
 const BUSY = "Muse Spark is busy — try again in a moment";
 const MAX_CHARS = 8000;
+/** Room for Muse Spark's brief thinking and its answer (thinking counts against max_tokens). */
+const MAX_OUTPUT_TOKENS = 4000;
 const MAX_MESSAGES = 20;
 /** One picture per request, as a data URL of at most about 1.5 MB: the app shrinks a photo before sending it. */
 const MAX_IMAGE_CHARS = 2_000_000;
@@ -22,7 +24,11 @@ export async function POST(req: Request): Promise<Response> {
   const key = process.env.MUSE_SPARK_API_KEY || process.env.META_API_KEY;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!key || !url || !anon) return fail(503, BUSY);
+  if (!key || !url || !anon) {
+    // Only the names of what is missing, never a value: it shows in the host's logs, so the owner can see why.
+    console.error(`[ai] not set on the host: ${[!key && "META_API_KEY", !url && "NEXT_PUBLIC_SUPABASE_URL", !anon && "NEXT_PUBLIC_SUPABASE_ANON_KEY"].filter(Boolean).join(", ")}`);
+    return fail(503, BUSY);
+  }
   const token = /^Bearer (.+)$/.exec(req.headers.get("authorization") ?? "")?.[1];
   if (!token) return fail(401, "Sign in first.");
   const { data, error } = await createClient(url, anon).auth.getUser(token);
@@ -54,14 +60,39 @@ export async function POST(req: Request): Promise<Response> {
   if (site.n >= SITE_DAILY_LIMIT) return fail(429, "Digna's AI is resting for today: lots of people asked. Try again tomorrow.");
   used.set(data.user.id, { day, n: n + 1 });
   site.n += 1;
+  // A request that gets no answer doesn't count against anyone's daily limit.
+  const giveBack = () => {
+    const now = used.get(data.user.id);
+    if (now && now.day === day && now.n > 0) now.n -= 1;
+    if (site.day === day && site.n > 0) site.n -= 1;
+  };
+  // Muse Spark thinks before it answers, and its thinking counts against max_tokens. So it is asked to think briefly
+  // (reasoning_effort, as Meta's Model API takes it) and given room for the thinking and the answer; with 800 tokens
+  // and no effort set, the thinking used them all and the answer came back empty.
   const res = await fetch("https://api.meta.ai/v1/chat/completions", {
     method: "POST",
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-    body: JSON.stringify({ model: MODEL, max_tokens: 800, messages: [...(system ? [{ role: "system", content: system }] : []), ...sent] }),
+    body: JSON.stringify({ model: MODEL, max_tokens: MAX_OUTPUT_TOKENS, reasoning_effort: "low", messages: [...(system ? [{ role: "system", content: system }] : []), ...sent] }),
     signal: AbortSignal.timeout(60_000),
-  }).catch(() => null);
-  // A timeout, an upstream 429, or any other upstream failure is the same plain retry to the caller.
-  if (!res || !res.ok) return fail(503, BUSY);
-  const out = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  return Response.json({ text: out.choices?.[0]?.message?.content ?? "" });
+  }).catch((e: unknown) => {
+    console.error(`[ai] Muse Spark couldn't be reached: ${e instanceof Error ? e.name : "error"}`);
+    return null;
+  });
+  // A timeout, an upstream 429, or any other upstream failure is the same plain retry to the caller; the host's logs
+  // keep Meta's own status and words (never the key), so the owner can see why.
+  if (!res || !res.ok) {
+    if (res) console.error(`[ai] Muse Spark answered HTTP ${res.status}: ${(await res.text().catch(() => "")).slice(0, 300)}`);
+    giveBack();
+    return fail(503, BUSY);
+  }
+  const out = (await res.json().catch(() => ({}))) as { choices?: { finish_reason?: string | null; message?: { content?: string | null } }[] };
+  const choice = out.choices?.[0];
+  const text = (choice?.message?.content ?? "").trim();
+  if (!text) {
+    // An empty answer is a failure, never a silent "nothing": the screen then says so instead of looking like it worked.
+    console.error(`[ai] Muse Spark sent no answer (finish_reason ${choice?.finish_reason ?? "none"})`);
+    giveBack();
+    return fail(503, BUSY);
+  }
+  return Response.json({ text });
 }
