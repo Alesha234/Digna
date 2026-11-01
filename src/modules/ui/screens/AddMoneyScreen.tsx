@@ -5,7 +5,6 @@ import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { formatCurrency } from "@/modules/ui/lib/format";
 import { validateAddMoneyCents } from "@/modules/ui/lib/validation";
-import { testModeMessage } from "@/modules/ui/data/demoData";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
 void theme;
@@ -112,7 +111,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
       >
         <style>{`.pp-card{transition:transform 160ms ease,box-shadow 160ms ease;}.pp-lift:hover{transform:translateY(-2px);box-shadow:${shadows.soft},0 12px 32px rgba(16,32,29,0.12);}.pp-btn-mint{transition:transform 160ms ease,filter 160ms ease;background-color:${colors.mint} !important;}.pp-btn-mint:hover:not(:disabled){filter:brightness(1.04);transform:translateY(-1px);background-color:${colors.mintDark} !important;}.pp-btn-mint:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid ${colors.ink};outline-offset:2px;}@media (prefers-reduced-motion: reduce){.pp-card,.pp-btn-mint{transition:none !important;transform:none !important;}}`}</style>
         <div style={{ width: "100%", maxWidth: 480, display: "grid", gap: spacing.lg }}>
-          <BalanceCard balanceCents={balanceCents} onAddMoney={handleFocusBalance} />
+          <BalanceCard balanceCents={balanceCents} onAddMoney={handleFocusBalance} showAddMoney={false} />
           <section
             className="pp-card pp-lift"
             aria-labelledby="add-money-title"
@@ -138,12 +137,6 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
             >
               Add money
             </h1>
-            <p style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "14px" }}>
-              Current balance: {formatCurrency(balanceCents)}
-            </p>
-            <p style={{ margin: 0, marginTop: spacing.sm, color: colors.muted, fontSize: "14px" }}>
-              {testModeMessage}
-            </p>
             {addedCents !== null ? (
               <section
                 className="pp-card"

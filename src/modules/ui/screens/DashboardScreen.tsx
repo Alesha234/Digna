@@ -80,25 +80,6 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
           <button
             type="button"
             className="pp-btn-mint"
-            onClick={onAddMoney}
-            style={{
-              flex: "1 1 160px",
-              backgroundColor: colors.mint,
-              color: colors.midnight,
-              border: `1px solid ${colors.mint}`,
-              borderRadius: radii.pill,
-              padding: `${spacing.md} ${spacing.lg}`,
-              fontFamily: typography.body,
-              fontSize: 15,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Add money
-          </button>
-          <button
-            type="button"
-            className="pp-btn-mint"
             onClick={onCreateCard}
             style={{
               flex: "1 1 160px",
