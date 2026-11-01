@@ -19,9 +19,11 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
   const { setLastScan } = usePayProxy();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [billText, setBillText] = useState<string>("");
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BillScanResult | null>(null);
+  const [isPracticeExample, setIsPracticeExample] = useState<boolean>(false);
 
   function handleFileChosen(next: File): void {
     try {
@@ -40,6 +42,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     }
     setError(null);
     setResult(null);
+    setIsPracticeExample(false);
   }
 
   function handleClear(): void {
@@ -54,6 +57,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     setPreviewUrl(null);
     setResult(null);
     setError(null);
+    setIsPracticeExample(false);
   }
 
   function shrinkToDataUrl(source: File): Promise<string | null> {
@@ -110,53 +114,66 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     });
   }
 
+  const pastedReady: boolean = billText.trim().length >= 10;
+  const canRead: boolean = (!!file || pastedReady) && !isBusy;
+
   function handleRead(): void {
-    if (!file || isBusy) {
+    if (!file && !pastedReady) {
+      return;
+    }
+    if (isBusy) {
       return;
     }
     setIsBusy(true);
     setError(null);
     void (async function (): Promise<void> {
       try {
-        const image: string | null = await shrinkToDataUrl(file);
+        const image: string | null = file ? await shrinkToDataUrl(file) : null;
+        const pasted: string = billText.trim();
         const due: Date = new Date(Date.now() + 14 * 86400000);
         let scan: BillScanResult = {
           id: "scan_" + String(Date.now()),
-          storeName: "Sample bill",
+          storeName: "Practice money example",
           amountCents: 4500,
           dueDate: due.toISOString().slice(0, 10),
           confidence: "low",
         };
-        // Muse Spark reads the photo (signed-in people only); without an account, a sample result shows instead.
+        let example: boolean = true;
+        // Meta's Muse Spark reads the photo or pasted text (signed-in people only); otherwise a practice money example shows instead.
         const token: string | null = await accessToken();
-        if (token && image) {
+        if (token && (image || pasted)) {
           const res: Response = await fetch("/api/ai", {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
             body: JSON.stringify({
               system: "You read photos of bills and invoices. Reply with JSON only, no other words: {\"store\": string, \"amountDollars\": number, \"dueDate\": \"YYYY-MM-DD\" or null, \"confidence\": \"high\"|\"medium\"|\"low\"}.",
               messages: [{ role: "user", content: "Read this bill: who is it from, the total due, and the due date." }],
-              image: image,
+              ...(image ? { image: image } : {}),
+              ...(pasted ? { text: pasted.slice(0, 6000) } : {}),
             }),
           });
           const data = (await res.json().catch(function () { return {}; })) as { text?: unknown; error?: unknown };
-          if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "The AI couldn't read that photo.");
+          if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "Meta's Muse Spark couldn't read that bill. Try again in a moment.");
           const raw: string = typeof data.text === "string" ? data.text : "";
           const json = /\{[\s\S]*\}/.exec(raw);
           const read = json ? (JSON.parse(json[0]) as { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown }) : {};
           const dollars: number = Number(read.amountDollars);
-          if (typeof read.store !== "string" || !Number.isFinite(dollars) || dollars <= 0) throw new Error("The AI couldn't find a store and an amount on that photo. Try a clearer one.");
+          if (typeof read.store !== "string" || read.store.trim().length === 0 || !Number.isFinite(dollars) || dollars <= 0) throw new Error("Muse Spark couldn't find who the bill is from and how much it is. Try a clearer photo, or paste the bill text.");
           scan = {
             id: "scan_" + String(Date.now()),
-            storeName: read.store.slice(0, 60),
+            storeName: read.store.trim().slice(0, 60),
             amountCents: Math.round(dollars * 100),
             dueDate: typeof read.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : scan.dueDate,
             confidence: read.confidence === "high" || read.confidence === "medium" ? read.confidence : "low",
           };
+          example = false;
+        } else if (!token) {
+          setError("Sign in to have Meta's Muse Spark read your bill. Showing a practice money example instead.");
         } else {
-          setError("Sign in to have the AI read your bill. Showing a sample result.");
+          throw new Error("Couldn't open that photo. Try again or paste the bill text.");
         }
         const demo: BillScanResult = scan;
+        setIsPracticeExample(example);
         setLastScan(demo);
         setResult(demo);
       } catch (e: unknown) {
@@ -192,7 +209,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
       ? (result as BillScanResult).storeName
       : typeof rec["store"] === "string" && (rec["store"] as string).length > 0
         ? (rec["store"] as string)
-        : "Unknown store";
+        : "Unknown place or business";
   const dueIso: string | null = result && typeof result.dueDate === "string" && result.dueDate.length > 0 ? result.dueDate : null;
 
   return (
@@ -201,21 +218,35 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
       <RevealOnScroll>
         <section aria-labelledby="snap-title" className="pp-section">
           <h2 id="snap-title" style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 26, lineHeight: 1.2 }}>
-            Snap a bill
+            Snap a practice bill
           </h2>
           <div className="pp-card pp-lift">
-            <p style={{ margin: 0, fontSize: 14, color: colors.muted, lineHeight: 1.5 }}>How it works: SAM finds the bill, Muse reads the amount, store, and due date.</p>
-            <p style={{ margin: spacing.md + " 0 0 0", fontSize: 13, color: colors.muted }}>Test mode: sample money, no real money moves. Photo stays on this device.</p>
+            <p style={{ margin: 0, fontSize: 14, color: colors.muted, lineHeight: 1.5 }}>It can read a practice bill or practice invoice. Meta&apos;s Muse Spark finds the amount, the place or business, and the due date, then you can make a card with the bill amount as its limit.</p>
+            <p style={{ margin: spacing.md + " 0 0 0", fontSize: 13, color: colors.muted }}>Practice money only: no real money moves. The photo stays on this device.</p>
           </div>
         </section>
       </RevealOnScroll>
       <RevealOnScroll delayMs={60}>
-        <section aria-label="Bill photo" className="pp-section" style={{ paddingTop: 0 }}>
-          <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 " + spacing.md }}>1. Capture</h2>
+        <section aria-label="Bill photo or pasted text" className="pp-section" style={{ paddingTop: 0 }}>
+          <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 " + spacing.md }}>1. Add the bill</h2>
           <PhotoPicker previewUrl={previewUrl} isBusy={isBusy} error={error} onFileChosen={handleFileChosen} onClear={handleClear} />
+          <label htmlFor="snap-bill-text" style={{ display: "block", marginTop: spacing.md, fontSize: 14, fontWeight: 600 }}>
+            Or paste the bill text
+          </label>
+          <textarea
+            id="snap-bill-text"
+            value={billText}
+            onChange={function (e: React.ChangeEvent<HTMLTextAreaElement>): void {
+              setBillText(e.target.value);
+              setIsPracticeExample(false);
+            }}
+            rows={5}
+            placeholder="Paste the bill or its email here instead of adding a photo"
+            style={{ marginTop: spacing.sm, width: "100%", boxSizing: "border-box", padding: 12, borderRadius: 10, border: "1px solid " + colors.line, fontSize: 15, fontFamily: typography.body, backgroundColor: colors.surface, color: colors.ink }}
+          />
           <button
             type="button"
-            disabled={!file || isBusy}
+            disabled={!canRead}
             onClick={handleRead}
             aria-busy={isBusy}
             style={{
@@ -224,11 +255,11 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
               padding: "12px 18px",
               borderRadius: 999,
               border: "none",
-              backgroundColor: !file || isBusy ? colors.line : colors.mint,
-              color: !file || isBusy ? colors.muted : "#0E1726",
+              backgroundColor: !canRead ? colors.line : colors.mint,
+              color: !canRead ? colors.muted : "#0E1726",
               fontFamily: typography.body,
               fontWeight: 700,
-              cursor: !file || isBusy ? "not-allowed" : "pointer",
+              cursor: !canRead ? "not-allowed" : "pointer",
             }}
           >
             {isBusy ? "Analyzing…" : "Read bill"}
@@ -246,11 +277,14 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
           <div className="pp-card pp-lift" aria-live="polite" aria-atomic="true">
             {result ? (
               <div>
+                {isPracticeExample ? (
+                  <p style={{ margin: "0 0 " + spacing.sm, fontSize: 13, fontWeight: 700, color: colors.muted }}>Practice money example</p>
+                ) : null}
                 <p style={{ margin: 0, fontSize: 13, color: colors.muted }}>Amount</p>
                 <p style={{ margin: "4px 0 0 0", fontFamily: typography.heading, fontSize: 28 }}>{amountCents !== null ? formatCurrency(amountCents) : "—"}</p>
                 <dl style={{ margin: spacing.md + " 0 0 0", display: "grid", gap: spacing.md }}>
                   <div>
-                    <dt style={{ fontSize: 13, color: colors.muted }}>Store</dt>
+                    <dt style={{ fontSize: 13, color: colors.muted }}>Place or business</dt>
                     <dd style={{ margin: "4px 0 0 0", fontSize: 16 }}>{storeText}</dd>
                   </div>
                   <div>
@@ -258,9 +292,12 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
                     <dd style={{ margin: "4px 0 0 0", fontSize: 16 }}>{dueIso ? formatDate(dueIso) : "—"}</dd>
                   </div>
                 </dl>
+                {result.confidence === "low" ? (
+                  <p style={{ margin: spacing.md + " 0 0 0", fontSize: 13, color: colors.muted }}>Please check the amount and due date before making a card.</p>
+                ) : null}
                 <div style={{ display: "grid", gap: spacing.md, marginTop: spacing.lg }}>
                   <button type="button" className="pp-btn-mint" onClick={handleMakeCard}>
-                    Make a card with the right cap
+                    Make a card with the right limit
                   </button>
                   <button type="button" className="pp-btn-ghost" onClick={handleRetake}>
                     Retake
@@ -268,7 +305,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
                 </div>
               </div>
             ) : (
-              <p style={{ margin: 0, color: colors.muted, fontSize: 14 }}>{isBusy ? "Reading amount, store, and due date…" : "No bill scanned yet. Capture a photo to see the amount, store, and due date here."}</p>
+              <p style={{ margin: 0, color: colors.muted, fontSize: 14 }}>{isBusy ? "Reading amount, place or business, and due date…" : "No bill read yet. Add a photo or paste the bill text to see the amount, place or business, and due date here."}</p>
             )}
           </div>
         </section>
