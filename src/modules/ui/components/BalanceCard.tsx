@@ -8,8 +8,8 @@ void theme;
 const _balanceTypeGuard: BalanceTypeRefs | null = null;
 void _balanceTypeGuard;
 
-export function BalanceCard(props: { balanceCents: number; onAddMoney: () => void }) {
-  const { balanceCents, onAddMoney } = props as { balanceCents: number; onAddMoney: () => void };
+export function BalanceCard(props: { balanceCents: number; onAddMoney: () => void; showAddMoney?: boolean }) {
+  const { balanceCents, onAddMoney, showAddMoney = true } = props as { balanceCents: number; onAddMoney: () => void; showAddMoney?: boolean };
   return (
     <section
       className="pp-card"
@@ -60,8 +60,9 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
           marginTop: spacing.md,
         }}
       >
-        Practice money
+        Practice money — nothing real is charged.
       </div>
+      {showAddMoney ? (
       <button
         type="button"
         className="pp-btn-mint"
@@ -86,6 +87,7 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
       >
         Add money
       </button>
+      ) : null}
     </section>
   );
 }
