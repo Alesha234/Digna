@@ -270,6 +270,7 @@ export function AppShell(props: {
           }}
         >
           <span>© Digna · Practice money for now · Not a bank · Not connected to Chime, Cash App or any business shown</span>
+          <span>Practice money</span>
         </div>
       </footer>
     </div>
