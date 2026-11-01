@@ -8,8 +8,10 @@ type AuthClient = {
 
 /**
  * Bill reading through Meta only: Muse Spark on Meta's Model API, the same
- * endpoint and model as app/api/ai/route.ts. No other AI provider is used here.
- * (No SAM helper exists in this repo, so there is nothing else to call.)
+ * endpoint and model as app/api/ai/route.ts, with the owner's server-side
+ * MUSE_SPARK_API_KEY (falling back to META_API_KEY). No other AI provider is
+ * used here. (No SAM helper exists in this repo, so Muse Spark reads the photo
+ * directly and no SAM 3.1 use is claimed.)
  */
 const META_MODEL_API = "https://api.meta.ai/v1/chat/completions";
 const META_MODEL = "muse-spark-1.3";
@@ -92,8 +94,8 @@ export function mapBillReading(raw: unknown): BillReading {
 }
 
 async function readWithMuseSpark(input: { image: string | null; billText: string }): Promise<unknown> {
-  const metaKey: string = getEnv("META_API_KEY");
-  if (!metaKey) throw new Error("Muse Spark is not available right now.");
+  const metaKey: string = getEnv("MUSE_SPARK_API_KEY") || getEnv("META_API_KEY");
+  if (!metaKey) throw new Error("Muse Spark is busy — try again in a moment");
   const userText: string = input.billText
     ? "Read this bill: the place or business it is from, the total due, and the due date.\n\nPasted bill text:\n" + input.billText.slice(0, 6000)
     : "Read this bill photo: the place or business it is from, the total due, and the due date.";
@@ -155,8 +157,9 @@ export async function handleAnalyzeBillPhoto(req: Request) {
 
   try {
     const raw: unknown = await readWithMuseSpark({ image: image, billText: billText });
+    // mapBillReading throws when the place or amount cannot be read: never claim a reading.
     return jsonResponse(mapBillReading(raw), 200);
   } catch {
-    return jsonResponse({ error: "Muse Spark couldn't read that bill right now. Try again in a moment." }, 503);
+    return jsonResponse({ error: "Muse Spark is busy — try again in a moment" }, 503);
   }
 }

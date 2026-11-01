@@ -110,6 +110,7 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastFailed, setLastFailed] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
 
@@ -141,15 +142,17 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
     setError(null);
   }
 
-  async function send(): Promise<void> {
-    const trimmed: string = input.trim();
+  async function sendQuestion(trimmed: string, isRetry: boolean): Promise<void> {
     if (trimmed.length === 0 || loading) return;
     setError(null);
-    const um: ChatMsg = makeMsg("user", trimmed);
-    setMessages(function (prev: ChatMsg[]) {
-      return [...prev, um];
-    });
-    setInput("");
+    setLastFailed(null);
+    if (!isRetry) {
+      const um: ChatMsg = makeMsg("user", trimmed);
+      setMessages(function (prev: ChatMsg[]) {
+        return [...prev, um];
+      });
+      setInput("");
+    }
     setLoading(true);
     const snapTxn = selectedTxn;
     const snapCard = snapTxn ? cards.find(function (c) {
@@ -205,6 +208,7 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
     } catch (e) {
       const msg: string = e instanceof Error && e.message ? e.message : "Assistant is unavailable right now.";
       setError(msg);
+      setLastFailed(trimmed);
       reply = buildLocalReply(trimmed, snapTxn, snapCard, label);
     }
     const am: ChatMsg = makeMsg("assistant", reply);
@@ -212,6 +216,14 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
       return [...prev, am];
     });
     setLoading(false);
+  }
+
+  async function send(): Promise<void> {
+    await sendQuestion(input.trim(), false);
+  }
+
+  async function retry(): Promise<void> {
+    if (lastFailed) await sendQuestion(lastFailed, true);
   }
 
   function onChange(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -329,9 +341,32 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
               ) : null}
             </ul>
             {error ? (
-              <p role="alert" style={{ color: colors.ink, backgroundColor: colors.page, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.sm, margin: 0 }}>
-                {error}
-              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: spacing.sm }}>
+                <p role="alert" style={{ color: colors.ink, backgroundColor: colors.page, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.sm, margin: 0 }}>
+                  {error}
+                </p>
+                {lastFailed && !loading ? (
+                  <button
+                    type="button"
+                    onClick={function () {
+                      void retry();
+                    }}
+                    style={{
+                      cursor: "pointer",
+                      alignSelf: "flex-start",
+                      border: "none",
+                      borderRadius: radii.pill,
+                      backgroundColor: colors.mint,
+                      color: "#0E1726",
+                      padding: "10px 18px",
+                      fontFamily: typography.body,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Retry
+                  </button>
+                ) : null}
+              </div>
             ) : null}
             <div style={{ display: "flex", gap: spacing.sm, alignItems: "center" }}>
               <label htmlFor="assistant-input" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
