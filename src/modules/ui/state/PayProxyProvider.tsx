@@ -158,7 +158,9 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
       setUser({ id: session.user.id, email, displayName: email.split("@")[0] || "You" });
       setMode("live");
       await load();
-      setScreen((s) => (s === "welcome" || s === "auth" || s === "signup" ? "dashboard" : s));
+      // Signing in keeps the person where they were: on the welcome page they stay there, and from the sign-in screen
+      // they go back to the welcome page (a page a guest tried to open is sent by the app itself, after this).
+      setScreen((s) => (s === "auth" || s === "signup" ? "welcome" : s));
     },
     [load],
   );

@@ -190,49 +190,17 @@ export function matchPracticeBill(haystack: string): PracticeBill | null {
   return null;
 }
 
+/**
+ * Coming soon on the landing page: member deals Digna is working toward at the places that turn cards away most. The
+ * businesses and deals are invented examples, and the page says so: no deal is live and no business is a partner yet.
+ */
 export const comingSoonPlaces: ComingSoonPlace[] = [
-  {
-    id: "coming-soon-harbor-hotel",
-    name: "Harbor Hotel idea",
-    kind: "hotel",
-    blurb: "Idea for practicing a hotel stay with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-lakeview-stay",
-    name: "Lakeview Stay idea",
-    kind: "hotel",
-    blurb: "Idea for practicing a short stay with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-north-sky-route",
-    name: "North Sky Route idea",
-    kind: "flight",
-    blurb: "Idea for practicing a flight payment with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-coast-hop-route",
-    name: "Coast Hop Route idea",
-    kind: "flight",
-    blurb: "Idea for practicing a short trip payment with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-corner-market",
-    name: "Corner Market idea",
-    kind: "retailer",
-    blurb: "Idea for practicing a shop payment with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-main-street-goods",
-    name: "Main Street Goods idea",
-    kind: "retailer",
-    blurb: "Idea for practicing a store payment with practice money.",
-    comingSoon: true,
-  },
+  { id: "coming-soon-harbor-inn", name: "Harbor Inn", kind: "hotel", rule: "15% off weekend stays", blurb: "Book with your Digna hotel card and save on Friday and Saturday nights, with the check-in hold covered by the card's limit.", comingSoon: true },
+  { id: "coming-soon-palm-cove", name: "Palm Cove Resort", kind: "resort", rule: "4th night free", blurb: "Stay three nights at the beach and the fourth is on the resort, paid from a card made just for the trip.", comingSoon: true },
+  { id: "coming-soon-north-sky", name: "North Sky Air", kind: "flight", rule: "$40 off round trips", blurb: "Save on round-trip flights booked with a Digna card, where a prepaid card is usually turned away.", comingSoon: true },
+  { id: "coming-soon-roadready", name: "RoadReady Rentals", kind: "rental", rule: "Half-price deposit", blurb: "Pick up a rental car with a smaller hold on your Digna card, and get it back in full when you return it.", comingSoon: true },
+  { id: "coming-soon-corner-market", name: "Corner Market", kind: "retailer", rule: "5% back on groceries", blurb: "Everyday buys at a neighborhood store, with 5% back to your Digna wallet.", comingSoon: true },
+  { id: "coming-soon-main-street", name: "Main Street Goods", kind: "retailer", rule: "Free shipping", blurb: "Online orders shipped free when you pay with a Digna card made just for the shop.", comingSoon: true },
 ];
 
 export const assistantStarters: string[] = [

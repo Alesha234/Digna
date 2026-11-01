@@ -58,7 +58,7 @@ export function AuthScreen(props: { startWith?: "signin" | "signup"; returnTo?: 
     <section style={{ maxWidth: 440, margin: "24px auto", background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.xl }}>
       <h1 style={{ fontFamily: typography.heading, fontSize: 28, margin: "0 0 6px", color: colors.ink }}>{mode === "forgot" ? "Reset your password" : signingIn ? "Sign in to Digna" : "Create your Digna account"}</h1>
       <p style={{ margin: "0 0 20px", color: colors.muted, fontSize: 15, lineHeight: 1.5 }}>
-        {mode === "forgot" ? "Enter your account's email and we'll send you a link to set a new password." : signingIn ? "Welcome back." : "Free. You start with $250 in practice money to make cards and try paying, with nothing real charged."}
+        {mode === "forgot" ? "Enter your account's email and we'll send you a link to set a new password." : signingIn ? "Welcome back." : "Free. You start with $250 in practice money to make cards and pay practice bills, with nothing real charged."}
       </p>
       {sent ? (
         <div role="status" style={{ background: "#FFF3D6", borderRadius: 10, padding: 16, color: colors.ink, lineHeight: 1.5 }}>

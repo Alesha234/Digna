@@ -6,15 +6,8 @@ import { WarningBanner } from "@/modules/ui/components/WarningBanner";
 import { EmptyState } from "@/modules/ui/components/EmptyState";
 import { LedgerBand } from "@/modules/ui/components/LedgerBand";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
-import type { VirtualCard, ComingSoonPlace } from "@/modules/ui/types";
-import { comingSoonPlaces } from "@/modules/ui/data/demoData";
+import type { VirtualCard } from "@/modules/ui/types";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
-
-const comingSoonKindLabel: Record<ComingSoonPlace["kind"], string> = {
-  hotel: "Hotel",
-  flight: "Flight",
-  retailer: "Retailer",
-};
 
 export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; onAddMoney: () => void; onCreateCard: () => void }) {
   const onOpenCard: (cardId: string) => void = props.onOpenCard;
@@ -150,68 +143,6 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
           )}
         </section>
 
-        <section aria-label="Coming soon" style={{ display: "flex", flexDirection: "column", gap: spacing.md }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: spacing.xs }}>
-            <h2 style={{ fontFamily: typography.heading, color: colors.ink, fontSize: 20, margin: 0 }}>
-              Coming soon
-            </h2>
-            <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 14, margin: 0 }}>
-              Ideas only with practice money.
-            </p>
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-              gap: spacing.md,
-            }}
-          >
-            {comingSoonPlaces.map((place: ComingSoonPlace) => (
-              <div
-                key={place.id}
-                style={{
-                  backgroundColor: colors.surface,
-                  border: `1px solid ${colors.line}`,
-                  borderRadius: radii.card,
-                  boxShadow: shadows.soft,
-                  padding: spacing.md,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: spacing.sm,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: spacing.sm, flexWrap: "wrap" }}>
-                  <span
-                    style={{
-                      backgroundColor: colors.primarySoft,
-                      color: colors.mintDark,
-                      borderRadius: radii.pill,
-                      padding: `2px ${spacing.sm}`,
-                      fontFamily: typography.body,
-                      fontSize: 12,
-                      fontWeight: 700,
-                    }}
-                  >
-                    Coming soon
-                  </span>
-                  <span style={{ fontFamily: typography.body, color: colors.muted, fontSize: 12 }}>
-                    {comingSoonKindLabel[place.kind]}
-                  </span>
-                </div>
-                <div style={{ fontFamily: typography.heading, color: colors.ink, fontSize: 14, fontWeight: 700 }}>
-                  {place.name}
-                </div>
-                <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 14, margin: 0 }}>
-                  {place.blurb}
-                </p>
-              </div>
-            ))}
-          </div>
-          <EmptyState
-            title="Why a card can fall through"
-            hint="Some hotels, flights, and shops hold extra money or only take certain cards, so a prepaid card can be declined. These ideas use practice money only and nothing real is booked. Try paying a small practice amount first, check the limit on your card, and ask the place or business what they take."
-          />
-        </section>
       </div>
     </div>
   );

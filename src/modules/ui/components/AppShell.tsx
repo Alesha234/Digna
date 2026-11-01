@@ -14,7 +14,6 @@ type NavEntry = { value: AppScreen | string; label: string };
 const navEntries: NavEntry[] = [
   { value: "welcome", label: "Home" },
   { value: "dashboard", label: "Dashboard" },
-  { value: "checkout", label: "Try paying" },
   { value: "add-money", label: "Add money" },
   { value: "create-card", label: "New card" },
   { value: "snap-bill", label: "Pay a bill" },
@@ -91,8 +90,9 @@ export function AppShell(props: {
             {open ? "Close" : "Menu"}
           </button>
           <nav id="pp-nav" aria-label="Primary" className={open ? "pp-nav is-open" : "pp-nav"}>
-            {navEntries.filter((entry: NavEntry) => mode !== "guest" || entry.value === "checkout" || entry.value === "how-it-works").map((entry: NavEntry) => {
-              const active: boolean = current === entry.value;
+            {navEntries.filter((entry: NavEntry) => mode !== "guest" || entry.value === "snap-bill" || entry.value === "how-it-works").map((entry: NavEntry) => {
+              // "Try paying" is now part of Pay a bill: its old address lights up Pay a bill.
+              const active: boolean = (current === "checkout" ? "snap-bill" : current) === entry.value;
               return (
                 <button
                   key={entry.value}
@@ -198,9 +198,6 @@ export function AppShell(props: {
             </button>
             <button type="button" onClick={(): void => onNavigate("snap-bill")} style={footerLinkStyle}>
               Pay a bill
-            </button>
-            <button type="button" onClick={(): void => onNavigate("checkout")} style={footerLinkStyle}>
-              Try paying
             </button>
           </div>
           <div>
