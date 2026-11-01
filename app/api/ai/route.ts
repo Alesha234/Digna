@@ -1,7 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-/** The app's one AI step: Muse Spark on Meta's Model API, with the app owner's key, for signed-in users only. Takes system/messages plus an optional bill image or pasted bill text, and returns the model's text unchanged. */
+/** The app's one AI step: Muse Spark on Meta's Model API, with the app owner's server-side key (MUSE_SPARK_API_KEY, falling back to META_API_KEY), for signed-in users only. Takes system/messages plus an optional bill image or pasted bill text, and returns the model's text unchanged. */
 const MODEL = "muse-spark-1.3";
+/** Plain retry wording for every Muse Spark outage: missing key, timeout, upstream 429 or any upstream failure. Never a dead end. */
+const BUSY = "Muse Spark is busy — try again in a moment";
 const MAX_CHARS = 8000;
 const MAX_MESSAGES = 20;
 /** One picture per request, as a data URL of at most about 1.5 MB: the app shrinks a photo before sending it. */
@@ -17,10 +19,10 @@ type Message = { role: "user" | "assistant"; content: string };
 const fail = (status: number, error: string) => Response.json({ error }, { status });
 
 export async function POST(req: Request): Promise<Response> {
-  const key = process.env.META_API_KEY;
+  const key = process.env.MUSE_SPARK_API_KEY || process.env.META_API_KEY;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!key || !url || !anon) return fail(503, "Muse Spark couldn't answer right now. The app will show a practice money explanation instead.");
+  if (!key || !url || !anon) return fail(503, BUSY);
   const token = /^Bearer (.+)$/.exec(req.headers.get("authorization") ?? "")?.[1];
   if (!token) return fail(401, "Sign in first.");
   const { data, error } = await createClient(url, anon).auth.getUser(token);
@@ -58,7 +60,8 @@ export async function POST(req: Request): Promise<Response> {
     body: JSON.stringify({ model: MODEL, max_tokens: 800, messages: [...(system ? [{ role: "system", content: system }] : []), ...sent] }),
     signal: AbortSignal.timeout(60_000),
   }).catch(() => null);
-  if (!res || !res.ok) return fail(503, "Muse Spark couldn't answer right now. The app will show a practice money explanation instead.");
+  // A timeout, an upstream 429, or any other upstream failure is the same plain retry to the caller.
+  if (!res || !res.ok) return fail(503, BUSY);
   const out = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   return Response.json({ text: out.choices?.[0]?.message?.content ?? "" });
 }

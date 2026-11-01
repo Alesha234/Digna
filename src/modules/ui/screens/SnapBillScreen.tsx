@@ -22,6 +22,11 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BillScanResult | null>(null);
   const [isPracticeExample, setIsPracticeExample] = useState<boolean>(false);
+  const [failed, setFailed] = useState<boolean>(false);
+  const [confirming, setConfirming] = useState<boolean>(false);
+  const [editStore, setEditStore] = useState<string>("");
+  const [editAmount, setEditAmount] = useState<string>("");
+  const [editDue, setEditDue] = useState<string>("");
 
   function practiceScan(bill: PracticeBill): BillScanResult {
     return {
@@ -41,6 +46,8 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     setError(null);
     setResult(null);
     setIsPracticeExample(false);
+    setFailed(false);
+    setConfirming(false);
   }
 
   function handleClearFileOnly(): void {
@@ -74,6 +81,8 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     setError(null);
     setResult(null);
     setIsPracticeExample(false);
+    setFailed(false);
+    setConfirming(false);
   }
 
   function handleClear(): void {
@@ -90,6 +99,65 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     setResult(null);
     setError(null);
     setIsPracticeExample(false);
+    setFailed(false);
+    setConfirming(false);
+    setEditStore("");
+    setEditAmount("");
+    setEditDue("");
+  }
+
+  /** A week after the due date, like the card form; null when the bill shows no due date. */
+  function endDateFromDue(dueIso: string): string | null {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dueIso)) return null;
+    const due: number = new Date(dueIso + "T12:00:00").getTime();
+    if (!Number.isFinite(due)) return null;
+    return new Date(due + 7 * 86400000).toISOString().slice(0, 10);
+  }
+
+  /** Put a reading on the editable result card. */
+  function applyResult(scan: BillScanResult, practice: boolean): void {
+    setIsPracticeExample(practice);
+    setLastScan(scan);
+    setResult(scan);
+    setEditStore(scan.storeName);
+    setEditAmount((scan.amountCents / 100).toFixed(2));
+    setEditDue(scan.dueDate);
+    setFailed(false);
+    setConfirming(false);
+    setError(null);
+  }
+
+  /** The card details as the person edited them, or null when the place or amount is missing. */
+  function draftBill(): BillScanResult | null {
+    if (!result) return null;
+    const store: string = editStore.trim().slice(0, 60);
+    const dollars: number = Number(editAmount);
+    if (store.length === 0 || !Number.isFinite(dollars) || dollars <= 0) return null;
+    return {
+      id: result.id,
+      storeName: store,
+      amountCents: Math.round(dollars * 100),
+      dueDate: /^\d{4}-\d{2}-\d{2}$/.test(editDue) ? editDue : "",
+      confidence: result.confidence,
+    };
+  }
+
+  /** Type the bill in by hand when Muse Spark cannot read it: never a dead end. */
+  function useManualDetails(): void {
+    const store: string = editStore.trim().slice(0, 60);
+    const dollars: number = Number(editAmount);
+    if (store.length === 0 || !Number.isFinite(dollars) || dollars <= 0) {
+      setError("Type the place or business and the amount so the card can be made.");
+      return;
+    }
+    const bill: BillScanResult = {
+      id: "scan_" + String(Date.now()),
+      storeName: store,
+      amountCents: Math.round(dollars * 100),
+      dueDate: /^\d{4}-\d{2}-\d{2}$/.test(editDue) ? editDue : "",
+      confidence: "low",
+    };
+    applyResult(bill, false);
   }
 
   function shrinkToDataUrl(source: File): Promise<string | null> {
@@ -158,18 +226,28 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     }
     setIsBusy(true);
     setError(null);
+    setFailed(false);
+    setConfirming(false);
     void (async function (): Promise<void> {
       try {
         const image: string | null = file ? await shrinkToDataUrl(file) : null;
+        if (file && !image) {
+          setFailed(true);
+          setError("Couldn't open that photo. Try again or paste the bill text.");
+          return;
+        }
+        if (image && image.length > 2000000) {
+          setFailed(true);
+          setError("That photo is too big. Try a smaller screenshot, or paste the bill text.");
+          return;
+        }
         const pasted: string = billText.trim();
         const chosen: PracticeBill | null = selectedPractice;
-        // Signed out, or the AI call fails: show the matching practice bill exactly, never a made-up reading.
+        // Signed out: show the matching practice bill exactly, never a made-up reading.
         function showPracticeExample(note: string): void {
           const matched: PracticeBill | null = matchPracticeBill(pasted) ?? chosen ?? practiceBills[2];
           const demo: BillScanResult = practiceScan(matched);
-          setIsPracticeExample(true);
-          setLastScan(demo);
-          setResult(demo);
+          applyResult(demo, true);
           setError(note);
         }
         // Meta's Muse Spark reads the photo or pasted text (signed-in people only); otherwise a practice example shows instead.
@@ -197,14 +275,15 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
               id: "scan_" + String(Date.now()),
               storeName: read.store.trim().slice(0, 60),
               amountCents: Math.round(dollars * 100),
-              dueDate: typeof read.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : chosen?.dueDate ?? practiceBills[2].dueDate,
+              dueDate: typeof read.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : "",
               confidence: read.confidence === "high" || read.confidence === "medium" ? read.confidence : "low",
             };
-            setIsPracticeExample(false);
-            setLastScan(scan);
-            setResult(scan);
-          } catch (e: unknown) {
-            showPracticeExample("Meta's Muse Spark couldn't read that right now. Showing a practice example instead; Try paying with it, or try again in a moment.");
+            applyResult(scan, false);
+          } catch {
+            // A busy or failed reading: plain retry wording, a Retry button and manual-entry fields below; never a dead end.
+            setResult(null);
+            setFailed(true);
+            setError("Muse Spark is busy — try again in a moment");
           }
         } else if (!token) {
           showPracticeExample("Sign in to have Meta's Muse Spark read your bill. Showing a practice example instead: a practice bill with its amount as the limit.");
@@ -212,6 +291,8 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
           throw new Error("Couldn't open that photo. Try again or paste the bill text.");
         }
       } catch (e: unknown) {
+        setResult(null);
+        setFailed(true);
         setError(e instanceof Error && e.message ? e.message : "Could not read the bill. Please try again.");
       } finally {
         setIsBusy(false);
@@ -219,13 +300,21 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     })();
   }
 
+  /** Nothing is created until the person checks the details and taps Confirm. */
   function handleMakeCard(): void {
-    if (!result) {
+    const bill: BillScanResult | null = draftBill();
+    if (!bill) {
+      setError("Check the place or business and the amount before making the card.");
       return;
     }
-    setLastScan(result);
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    setLastScan(bill);
+    setResult(bill);
     if (onMakeCard) {
-      onMakeCard(result);
+      onMakeCard(bill);
     }
   }
 
@@ -236,16 +325,55 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     }
   }
 
-  const rec: Record<string, unknown> = result as unknown as Record<string, unknown>;
-  const amountCents: number | null =
-    result && typeof result.amountCents === "number" && Number.isFinite(result.amountCents) ? result.amountCents : null;
-  const storeText: string =
-    result && typeof (result as BillScanResult).storeName === "string" && (result as BillScanResult).storeName.length > 0
-      ? (result as BillScanResult).storeName
-      : typeof rec["store"] === "string" && (rec["store"] as string).length > 0
-        ? (rec["store"] as string)
-        : "Unknown place or business";
-  const dueIso: string | null = result && typeof result.dueDate === "string" && result.dueDate.length > 0 ? result.dueDate : null;
+  const fieldStyle: React.CSSProperties = { marginTop: spacing.sm, width: "100%", boxSizing: "border-box", padding: 12, borderRadius: 10, border: "1px solid " + colors.line, fontSize: 15, fontFamily: typography.body, backgroundColor: colors.surface, color: colors.ink };
+  const labelStyle: React.CSSProperties = { display: "block", marginTop: spacing.md, fontSize: 14, fontWeight: 600 };
+  const draftDollars: number = Number(editAmount);
+  const suggestedCents: number | null = Number.isFinite(draftDollars) && draftDollars > 0 ? Math.round(draftDollars * 100) : null;
+  const cardEnd: string | null = endDateFromDue(editDue);
+
+  function renderBillFields(prefix: string): React.ReactNode {
+    return (
+      <div>
+        <label htmlFor={prefix + "-store"} style={{ display: "block", fontSize: 14, fontWeight: 600 }}>
+          Place or business
+        </label>
+        <input
+          id={prefix + "-store"}
+          value={editStore}
+          onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+            setEditStore(e.target.value);
+          }}
+          placeholder="Who is the bill from?"
+          style={fieldStyle}
+        />
+        <label htmlFor={prefix + "-amount"} style={labelStyle}>
+          Amount
+        </label>
+        <input
+          id={prefix + "-amount"}
+          value={editAmount}
+          inputMode="decimal"
+          onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+            setEditAmount(e.target.value);
+          }}
+          placeholder="0.00"
+          style={fieldStyle}
+        />
+        <label htmlFor={prefix + "-due"} style={labelStyle}>
+          Due date
+        </label>
+        <input
+          id={prefix + "-due"}
+          type="date"
+          value={editDue}
+          onChange={function (e: React.ChangeEvent<HTMLInputElement>): void {
+            setEditDue(e.target.value);
+          }}
+          style={fieldStyle}
+        />
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: colors.page, color: colors.ink, fontFamily: typography.body, minHeight: "100vh" }}>
@@ -349,27 +477,49 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
                 {isPracticeExample ? (
                   <p style={{ margin: "0 0 " + spacing.sm, fontSize: 13, fontWeight: 700, color: colors.muted }}>Practice example</p>
                 ) : null}
-                <p style={{ margin: 0, fontSize: 13, color: colors.muted }}>Amount</p>
-                <p style={{ margin: "4px 0 0 0", fontFamily: typography.heading, fontSize: 28 }}>{amountCents !== null ? formatCurrency(amountCents) : "—"}</p>
-                <dl style={{ margin: spacing.md + " 0 0 0", display: "grid", gap: spacing.md }}>
-                  <div>
-                    <dt style={{ fontSize: 13, color: colors.muted }}>Place or business</dt>
-                    <dd style={{ margin: "4px 0 0 0", fontSize: 16 }}>{storeText}</dd>
-                  </div>
-                  <div>
-                    <dt style={{ fontSize: 13, color: colors.muted }}>Due date</dt>
-                    <dd style={{ margin: "4px 0 0 0", fontSize: 16 }}>{dueIso ? formatDate(dueIso) : "—"}</dd>
-                  </div>
-                </dl>
+                {renderBillFields("snap-result")}
+                <p style={{ margin: spacing.md + " 0 0 0", fontSize: 14, lineHeight: 1.6 }}>Suggested limit: <strong>{suggestedCents !== null ? formatCurrency(suggestedCents) : "—"}</strong> (the same as the bill).</p>
+                <p style={{ margin: "4px 0 0 0", fontSize: 14, lineHeight: 1.6 }}>Card end date: <strong>{cardEnd ? formatDate(cardEnd) : "—"}</strong>{cardEnd ? " (a week after the due date)." : " — pick one when you make the card."}</p>
                 {result.confidence === "low" ? (
                   <p style={{ margin: spacing.md + " 0 0 0", fontSize: 13, color: colors.muted }}>Please check the amount and due date before making a card.</p>
                 ) : null}
+                {confirming ? (
+                  <p style={{ margin: spacing.md + " 0 0 0", fontSize: 14, fontWeight: 700 }}>Check the details above, then tap Confirm to make the card.</p>
+                ) : null}
                 <div style={{ display: "grid", gap: spacing.md, marginTop: spacing.lg }}>
-                  <button type="button" className="pp-btn-mint" onClick={handleMakeCard}>
-                    Make a card with the right limit
+                  {confirming ? (
+                    <button type="button" className="pp-btn-mint" onClick={handleMakeCard}>
+                      Confirm
+                    </button>
+                  ) : (
+                    <button type="button" className="pp-btn-mint" onClick={handleMakeCard}>
+                      Make a card with the right limit
+                    </button>
+                  )}
+                  {confirming ? (
+                    <button type="button" className="pp-btn-ghost" onClick={function (): void { setConfirming(false); }}>
+                      Back
+                    </button>
+                  ) : (
+                    <button type="button" className="pp-btn-ghost" onClick={handleRetake}>
+                      Retake
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : failed ? (
+              <div>
+                <p role="alert" style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}>{error ?? "Muse Spark is busy — try again in a moment"}</p>
+                <div style={{ display: "grid", gap: spacing.md, marginTop: spacing.md }}>
+                  <button type="button" className="pp-btn-mint" onClick={handleRead} disabled={isBusy}>
+                    Retry
                   </button>
-                  <button type="button" className="pp-btn-ghost" onClick={handleRetake}>
-                    Retake
+                </div>
+                <h3 style={{ fontFamily: typography.heading, fontSize: 16, margin: spacing.lg + " 0 0 0" }}>Or type it in by hand</h3>
+                {renderBillFields("snap-manual")}
+                <div style={{ display: "grid", gap: spacing.md, marginTop: spacing.md }}>
+                  <button type="button" className="pp-btn-ghost" onClick={useManualDetails}>
+                    Use these details
                   </button>
                 </div>
               </div>

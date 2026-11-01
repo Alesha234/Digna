@@ -4,7 +4,7 @@ import { requireUser, requireUserId } from "@/modules/security/require-user";
 import { assertCardOwner, assertTransactionOwner } from "@/modules/security/ownership-guards";
 import { trimAndCollapseSpaces, isValidStoreName } from "@/modules/security/text-validation";
 
-/** Meta's Model API, reached with the owner's META_API_KEY. Muse Spark is the only AI this function uses. */
+/** Meta's Model API, reached with the owner's server-side MUSE_SPARK_API_KEY (falling back to META_API_KEY). Muse Spark is the only AI this function uses. */
 const META_MODEL_API = "https://api.meta.ai/v1/chat/completions";
 const META_MODEL = "muse-spark-1.3";
 
@@ -108,7 +108,7 @@ export function buildDeclinePrompt(input: BuildPromptInput) {
 
 /**
  * The deterministic fallback: the same plain-words explanation built only from the
- * saved transaction and card facts, used whenever Muse Spark or META_API_KEY is unavailable.
+ * saved transaction and card facts, used whenever Muse Spark is missing, busy, or fails.
  * It never invents a reason; when the facts do not pin one down, it says what to check.
  */
 export function buildLocalDeclineExplanation(facts: DeclineFacts): { explanation: string; nextSteps: string[] } {
@@ -172,7 +172,7 @@ export function sanitizeAssistantOutput(raw: string) {
 }
 
 async function askMuseSpark(prompt: string): Promise<string> {
-  const metaKey: string = getEnv("META_API_KEY");
+  const metaKey: string = getEnv("MUSE_SPARK_API_KEY") || getEnv("META_API_KEY");
   if (!metaKey) return "";
   try {
     const aiRes = await fetch(META_MODEL_API, {
