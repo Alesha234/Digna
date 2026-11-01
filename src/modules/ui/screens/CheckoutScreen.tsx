@@ -15,6 +15,7 @@ import type { BillScanResult, PracticeReceipt, VirtualCard } from "@/modules/ui/
 import { practiceBills } from "@/modules/ui/data/demoData";
 import { fallbackPracticeBill, matchPastedBill, practiceScan, readBillViaAi, shrinkToDataUrl } from "@/modules/ui/screens/SnapBillScreen";
 import { downloadPracticeReceipt } from "@/modules/ui/components/TransactionList";
+import { downloadPracticeReceiptPdf } from "@/modules/ui/lib/practicePdf";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
 
 const box: React.CSSProperties = { background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20 };
@@ -453,9 +454,23 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                       <dt style={{ color: colors.muted }}>When</dt><dd style={{ margin: 0 }}>{last.at}</dd>
                     </dl>
                     {receipt && (
-                      <div style={{ marginTop: 14 }}>
+                      <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: 10 }}>
                         <button type="button" onClick={() => downloadPracticeReceipt(receipt)} style={pill(true)}>
                           Download practice receipt
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            downloadPracticeReceiptPdf({
+                              placeOrBusiness: last.merchant,
+                              amountCents: last.amountCents,
+                              date: last.at,
+                              receiptId: last.receipt,
+                            })
+                          }
+                          style={pill(false)}
+                        >
+                          Download receipt PDF
                         </button>
                       </div>
                     )}

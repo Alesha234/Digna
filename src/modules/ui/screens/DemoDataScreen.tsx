@@ -1,5 +1,6 @@
-import { demoBalance, demoCards, demoTransactions, demoUser, testModeMessage } from "@/modules/ui/data/demoData";
+import { demoBalance, demoCards, demoTransactions, demoUser, practiceBills, testModeMessage } from "@/modules/ui/data/demoData";
 import { formatCurrency, formatDate } from "@/modules/ui/lib/format";
+import { downloadPracticeBillPdf, openPracticeBillPdf } from "@/modules/ui/lib/practicePdf";
 import { TransactionList } from "@/modules/ui/components/TransactionList";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
@@ -46,6 +47,38 @@ export function DemoDataScreen() {
                     <p className="pp-meta"><strong>Spent: </strong>{formatCurrency(card.spentCents)}</p>
                     <p className="pp-meta"><strong>Ends: </strong>{formatDate(card.endDate)}</p>
                     <p className="pp-meta"><span className={card.status === "active" ? "pp-status is-active" : "pp-status"}>{card.status}</span></p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </RevealOnScroll>
+          <RevealOnScroll>
+            <section className="pp-card" aria-labelledby="demo-bills-heading">
+              <p className="pp-section-label">Practice bills</p>
+              <h2 id="demo-bills-heading">Practice bills</h2>
+              <p className="pp-meta">Made-up bills you can preview or keep as a PDF. Practice money only: no real money moves.</p>
+              <ul className="pp-cards-list">
+                {practiceBills.map((bill) => (
+                  <li key={bill.id} className="pp-card pp-lift" tabIndex={0}>
+                    <h3>{bill.storeName}</h3>
+                    <p className="pp-meta"><strong>Amount: </strong>{formatCurrency(bill.amountCents)} in practice money</p>
+                    <p className="pp-meta"><strong>Due: </strong>{bill.dueDate}</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                      <button
+                        type="button"
+                        style={{ background: colors.mint, color: "#0E1726", border: 0, borderRadius: 999, padding: "8px 14px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: typography.body }}
+                        onClick={() => openPracticeBillPdf({ business: bill.storeName, amountCents: bill.amountCents, date: bill.dueDate, receiptId: bill.id })}
+                      >
+                        Open preview
+                      </button>
+                      <button
+                        type="button"
+                        style={{ background: "transparent", border: `1px solid ${colors.line}`, borderRadius: 999, padding: "8px 14px", fontWeight: 600, fontSize: 13, cursor: "pointer", color: colors.ink, fontFamily: typography.body }}
+                        onClick={() => downloadPracticeBillPdf({ business: bill.storeName, amountCents: bill.amountCents, date: bill.dueDate, receiptId: bill.id })}
+                      >
+                        Download PDF
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
