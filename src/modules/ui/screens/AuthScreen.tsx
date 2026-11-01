@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { getSafeNextPath } from "@/modules/security/safe-redirect";
 import { colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
 
 const field: React.CSSProperties = {
@@ -15,8 +16,8 @@ const field: React.CSSProperties = {
 };
 
 /** Sign in, or create an account: email and a password. New accounts start with $250 of practice money. */
-export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
-  const { signIn, signUp, signInDemo, requestPasswordReset } = usePayProxy();
+export function AuthScreen(props: { startWith?: "signin" | "signup"; returnTo?: string | null; onSuccess?: (next: string | null) => void }) {
+  const { signIn, signUp, signInDemo, requestPasswordReset, screen } = usePayProxy();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">(props.startWith ?? "signin");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,12 +33,20 @@ export function AuthScreen(props: { startWith?: "signin" | "signup" }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setError("Enter your email address, like name@example.com.");
     if (mode !== "forgot" && password.length < 6) return setError("Use a password of at least 6 characters.");
     setBusy(true);
+    // Where the person was when they started signing in: success stays there unless a safe saved page exists.
+    const from = screen;
     try {
       if (mode === "forgot") {
         await requestPasswordReset(email);
         setSent(email);
-      } else if (signingIn) await signIn(email, password);
-      else if ((await signUp(email, password)) === "check-email") setSent(email);
+      } else if (signingIn) {
+        await signIn(email, password);
+        props.onSuccess?.(getSafeNextPath(props.returnTo ?? null, from));
+      } else if ((await signUp(email, password)) === "check-email") {
+        setSent(email);
+      } else {
+        props.onSuccess?.(getSafeNextPath(props.returnTo ?? null, from));
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
     } finally {
