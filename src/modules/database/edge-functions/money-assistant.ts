@@ -97,9 +97,12 @@ export function buildDeclinePrompt(input: BuildPromptInput) {
     ". Practice money in the wallet: $" + balance +
     ". Saved decline reason: " + reason +
     ". Person's question: " + question +
-    ". Reply in 2 to 5 short sentences: why it happened, and exactly one concrete next step " +
-    "(turn the card back on, raise the limit, add practice money, or make a new card). " +
-    "Never invent a reason the facts above do not support; if the facts do not pin down the reason, say what to check instead (the card's status, what is left of its limit, and the money in the wallet)."
+    ". Reply in 2 to 5 short sentences: always explain the likely why " +
+    "(over the limit, a paused card, past its end date, a low wallet, or not enough detail) " +
+    "and give exactly one concrete next step " +
+    "(turn the card back on, raise the limit, add practice money, or make a new card), " +
+    "wording the next step with the words Try paying. " +
+    "Never invent a reason the facts above do not support; if the facts do not pin down the reason, say there is not enough detail and say what to check instead (the card's status, what is left of its limit, and the money in the wallet)."
   );
 }
 
@@ -122,19 +125,19 @@ export function buildLocalDeclineExplanation(facts: DeclineFacts): { explanation
     expiredByDate = false;
   }
   let cause: string | null = null;
-  let next: string = "Open the \"" + facts.cardName + "\" card and check whether it is paused, what is left of its limit, and the money in the wallet, then try the " + amount + " payment at " + facts.storeName + " again.";
+  let next: string = "Open the \"" + facts.cardName + "\" card and check whether it is paused, what is left of its limit, and the practice money in the wallet, then Try paying the " + amount + " at " + facts.storeName + " again.";
   if (status === "frozen" || reason.includes("frozen") || reason.includes("paus")) {
     cause = "the \"" + facts.cardName + "\" card is paused or frozen";
-    next = "Turn the \"" + facts.cardName + "\" card back on from the dashboard, then try the " + amount + " payment at " + facts.storeName + " again.";
+    next = "Turn the \"" + facts.cardName + "\" card back on from the dashboard, then Try paying the " + amount + " at " + facts.storeName + " again.";
   } else if (status === "closed" || reason.includes("closed")) {
     cause = "the \"" + facts.cardName + "\" card is closed";
-    next = "Make a new card for " + facts.storeName + " and try the " + amount + " payment again.";
+    next = "Make a new card for " + facts.storeName + ", then Try paying the " + amount + " again.";
   } else if (expiredByDate || reason.includes("expir") || reason.includes("passed the day")) {
-    cause = "the \"" + facts.cardName + "\" card has expired";
-    next = "Make a new card for " + facts.storeName + " with a later date and try the " + amount + " payment again.";
+    cause = "the \"" + facts.cardName + "\" card is past its end date";
+    next = "Make a new card for " + facts.storeName + " with a later date, then Try paying the " + amount + " again.";
   } else if (facts.capCents > 0 && facts.spentCents + facts.amountCents > facts.capCents) {
     cause = "it was over the limit on \"" + facts.cardName + "\": only $" + dollars(Math.max(0, facts.capCents - facts.spentCents)) + " was left of its $" + dollars(facts.capCents) + " limit";
-    next = "Raise the limit on \"" + facts.cardName + "\" as far as the practice money in the wallet covers, then try the " + amount + " payment at " + facts.storeName + " again. Or make a new card just for " + facts.storeName + ".";
+    next = "Raise the limit on \"" + facts.cardName + "\" as far as the practice money in the wallet covers, then Try paying the " + amount + " at " + facts.storeName + " again. Or make a new card just for " + facts.storeName + ".";
   } else if (
     reason.includes("limit") || reason.includes("over") ||
     (facts.balanceCents !== null && facts.balanceCents < facts.amountCents) ||
@@ -142,10 +145,10 @@ export function buildLocalDeclineExplanation(facts: DeclineFacts): { explanation
   ) {
     if (reason.includes("limit") || reason.includes("over") || (facts.capCents > 0 && facts.spentCents + facts.amountCents > facts.capCents)) {
       cause = "it was over the limit on \"" + facts.cardName + "\"";
-      next = "Raise the limit on \"" + facts.cardName + "\" as far as the practice money in the wallet covers, then try the " + amount + " payment at " + facts.storeName + " again. Or make a new card just for " + facts.storeName + ".";
+      next = "Raise the limit on \"" + facts.cardName + "\" as far as the practice money in the wallet covers, then Try paying the " + amount + " at " + facts.storeName + " again. Or make a new card just for " + facts.storeName + ".";
     } else {
       cause = "the practice money in the wallet was too low for the " + amount + " payment";
-      next = "Add practice money from the dashboard, then try " + facts.storeName + " again.";
+      next = "Add practice money from the dashboard, then Try paying at " + facts.storeName + " again.";
     }
   }
   let explanation: string;
