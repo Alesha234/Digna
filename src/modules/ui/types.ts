@@ -60,3 +60,11 @@ export type AssistantMessage = {
 };
 
 export type AppScreen = 'welcome' | 'auth' | 'signup' | 'dashboard' | 'card-detail' | 'create-card' | 'add-money' | 'snap-bill' | 'assistant' | 'settings' | 'checkout' | 'alerts' | 'demo-data' | 'privacy' | 'terms' | 'feedback' | 'new-password' | 'how-it-works';
+
+export type ComingSoonPlace = {
+  id: string;
+  name: string;
+  kind: 'hotel' | 'flight' | 'retailer';
+  blurb: string;
+  comingSoon: boolean;
+};

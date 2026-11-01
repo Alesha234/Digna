@@ -1,4 +1,4 @@
-import type { PayProxyUser, WalletBalance, VirtualCard, CardTransaction } from "@/modules/ui/types";
+import type { PayProxyUser, WalletBalance, VirtualCard, CardTransaction, ComingSoonPlace } from "@/modules/ui/types";
 
 export const demoUser: PayProxyUser = {
   id: "demo-user-1",
@@ -189,6 +189,51 @@ export function matchPracticeBill(haystack: string): PracticeBill | null {
   }
   return null;
 }
+
+export const comingSoonPlaces: ComingSoonPlace[] = [
+  {
+    id: "coming-soon-harbor-hotel",
+    name: "Harbor Hotel idea",
+    kind: "hotel",
+    blurb: "Idea for practicing a hotel stay with practice money.",
+    comingSoon: true,
+  },
+  {
+    id: "coming-soon-lakeview-stay",
+    name: "Lakeview Stay idea",
+    kind: "hotel",
+    blurb: "Idea for practicing a short stay with practice money.",
+    comingSoon: true,
+  },
+  {
+    id: "coming-soon-north-sky-route",
+    name: "North Sky Route idea",
+    kind: "flight",
+    blurb: "Idea for practicing a flight payment with practice money.",
+    comingSoon: true,
+  },
+  {
+    id: "coming-soon-coast-hop-route",
+    name: "Coast Hop Route idea",
+    kind: "flight",
+    blurb: "Idea for practicing a short trip payment with practice money.",
+    comingSoon: true,
+  },
+  {
+    id: "coming-soon-corner-market",
+    name: "Corner Market idea",
+    kind: "retailer",
+    blurb: "Idea for practicing a shop payment with practice money.",
+    comingSoon: true,
+  },
+  {
+    id: "coming-soon-main-street-goods",
+    name: "Main Street Goods idea",
+    kind: "retailer",
+    blurb: "Idea for practicing a store payment with practice money.",
+    comingSoon: true,
+  },
+];
 
 export const assistantStarters: string[] = [
   "Why was my Netflix payment declined?",
