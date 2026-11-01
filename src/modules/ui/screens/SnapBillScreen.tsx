@@ -5,25 +5,55 @@ import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { formatCurrency, formatDate } from "@/modules/ui/lib/format";
 import type { BillScanResult } from "@/modules/ui/types";
-import { demoUser, demoBalance, demoCards, demoTransactions } from "@/modules/ui/data/demoData";
+import { practiceBills, matchPracticeBill } from "@/modules/ui/data/demoData";
+import type { PracticeBill } from "@/modules/ui/data/demoData";
 import { accessToken } from "@/modules/ui/lib/supabase";
 import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui/theme";
 
 export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => void; onCancel?: () => void }) {
   void theme;
-  void demoUser;
-  void demoBalance;
-  void demoCards;
-  void demoTransactions;
   const { onMakeCard, onCancel } = props;
   const { setLastScan } = usePayProxy();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [billText, setBillText] = useState<string>("");
+  const [selectedPractice, setSelectedPractice] = useState<PracticeBill | null>(null);
   const [isBusy, setIsBusy] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BillScanResult | null>(null);
   const [isPracticeExample, setIsPracticeExample] = useState<boolean>(false);
+
+  function practiceScan(bill: PracticeBill): BillScanResult {
+    return {
+      id: "scan_" + String(Date.now()),
+      storeName: bill.storeName,
+      amountCents: bill.amountCents,
+      dueDate: bill.dueDate,
+      confidence: bill.confidence,
+    };
+  }
+
+  /** An example chip fills the paste box with that practice bill's text and shows a sample preview. */
+  function choosePractice(bill: PracticeBill): void {
+    handleClearFileOnly();
+    setBillText(bill.billText);
+    setSelectedPractice(bill);
+    setError(null);
+    setResult(null);
+    setIsPracticeExample(false);
+  }
+
+  function handleClearFileOnly(): void {
+    try {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    } catch {
+      // ignore
+    }
+    setFile(null);
+    setPreviewUrl(null);
+  }
 
   function handleFileChosen(next: File): void {
     try {
@@ -33,6 +63,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     } catch {
       // ignore
     }
+    setSelectedPractice(null);
     setFile(next);
     try {
       const url: string = URL.createObjectURL(next);
@@ -55,6 +86,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
     }
     setFile(null);
     setPreviewUrl(null);
+    setSelectedPractice(null);
     setResult(null);
     setError(null);
     setIsPracticeExample(false);
@@ -130,52 +162,55 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
       try {
         const image: string | null = file ? await shrinkToDataUrl(file) : null;
         const pasted: string = billText.trim();
-        const due: Date = new Date(Date.now() + 14 * 86400000);
-        let scan: BillScanResult = {
-          id: "scan_" + String(Date.now()),
-          storeName: "Practice money example",
-          amountCents: 4500,
-          dueDate: due.toISOString().slice(0, 10),
-          confidence: "low",
-        };
-        let example: boolean = true;
-        // Meta's Muse Spark reads the photo or pasted text (signed-in people only); otherwise a practice money example shows instead.
+        const chosen: PracticeBill | null = selectedPractice;
+        // Signed out, or the AI call fails: show the matching practice bill exactly, never a made-up reading.
+        function showPracticeExample(note: string): void {
+          const matched: PracticeBill | null = matchPracticeBill(pasted) ?? chosen ?? practiceBills[2];
+          const demo: BillScanResult = practiceScan(matched);
+          setIsPracticeExample(true);
+          setLastScan(demo);
+          setResult(demo);
+          setError(note);
+        }
+        // Meta's Muse Spark reads the photo or pasted text (signed-in people only); otherwise a practice example shows instead.
         const token: string | null = await accessToken();
         if (token && (image || pasted)) {
-          const res: Response = await fetch("/api/ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-            body: JSON.stringify({
-              system: "You read photos of bills and invoices. Reply with JSON only, no other words: {\"store\": string, \"amountDollars\": number, \"dueDate\": \"YYYY-MM-DD\" or null, \"confidence\": \"high\"|\"medium\"|\"low\"}.",
-              messages: [{ role: "user", content: "Read this bill: who is it from, the total due, and the due date." }],
-              ...(image ? { image: image } : {}),
-              ...(pasted ? { text: pasted.slice(0, 6000) } : {}),
-            }),
-          });
-          const data = (await res.json().catch(function () { return {}; })) as { text?: unknown; error?: unknown };
-          if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "Meta's Muse Spark couldn't read that bill. Try again in a moment.");
-          const raw: string = typeof data.text === "string" ? data.text : "";
-          const json = /\{[\s\S]*\}/.exec(raw);
-          const read = json ? (JSON.parse(json[0]) as { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown }) : {};
-          const dollars: number = Number(read.amountDollars);
-          if (typeof read.store !== "string" || read.store.trim().length === 0 || !Number.isFinite(dollars) || dollars <= 0) throw new Error("Muse Spark couldn't find who the bill is from and how much it is. Try a clearer photo, or paste the bill text.");
-          scan = {
-            id: "scan_" + String(Date.now()),
-            storeName: read.store.trim().slice(0, 60),
-            amountCents: Math.round(dollars * 100),
-            dueDate: typeof read.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : scan.dueDate,
-            confidence: read.confidence === "high" || read.confidence === "medium" ? read.confidence : "low",
-          };
-          example = false;
+          try {
+            const res: Response = await fetch("/api/ai", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+              body: JSON.stringify({
+                system: "You read photos of bills and invoices. Reply with JSON only, no other words: {\"store\": string, \"amountDollars\": number, \"dueDate\": \"YYYY-MM-DD\" or null, \"confidence\": \"high\"|\"medium\"|\"low\"}.",
+                messages: [{ role: "user", content: "Read this bill: who is it from, the total due, and the due date." }],
+                ...(image ? { image: image } : {}),
+                ...(pasted ? { text: pasted.slice(0, 6000) } : {}),
+              }),
+            });
+            const data = (await res.json().catch(function () { return {}; })) as { text?: unknown; error?: unknown };
+            if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "Meta's Muse Spark couldn't read that bill. Try again in a moment.");
+            const raw: string = typeof data.text === "string" ? data.text : "";
+            const json = /\{[\s\S]*\}/.exec(raw);
+            const read: { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown } = json ? (JSON.parse(json[0]) as { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown }) : {};
+            const dollars: number = Number(read.amountDollars);
+            if (typeof read.store !== "string" || read.store.trim().length === 0 || !Number.isFinite(dollars) || dollars <= 0) throw new Error("Muse Spark couldn't find who the bill is from and how much it is. Try a clearer photo, or paste the bill text.");
+            const scan: BillScanResult = {
+              id: "scan_" + String(Date.now()),
+              storeName: read.store.trim().slice(0, 60),
+              amountCents: Math.round(dollars * 100),
+              dueDate: typeof read.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : chosen?.dueDate ?? practiceBills[2].dueDate,
+              confidence: read.confidence === "high" || read.confidence === "medium" ? read.confidence : "low",
+            };
+            setIsPracticeExample(false);
+            setLastScan(scan);
+            setResult(scan);
+          } catch (e: unknown) {
+            showPracticeExample("Meta's Muse Spark couldn't read that right now. Showing a practice example instead; Try paying with it, or try again in a moment.");
+          }
         } else if (!token) {
-          setError("Sign in to have Meta's Muse Spark read your bill. Showing a practice money example instead.");
+          showPracticeExample("Sign in to have Meta's Muse Spark read your bill. Showing a practice example instead: a practice bill with its amount as the limit.");
         } else {
           throw new Error("Couldn't open that photo. Try again or paste the bill text.");
         }
-        const demo: BillScanResult = scan;
-        setIsPracticeExample(example);
-        setLastScan(demo);
-        setResult(demo);
       } catch (e: unknown) {
         setError(e instanceof Error && e.message ? e.message : "Could not read the bill. Please try again.");
       } finally {
@@ -229,6 +264,39 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
       <RevealOnScroll delayMs={60}>
         <section aria-label="Bill photo or pasted text" className="pp-section" style={{ paddingTop: 0 }}>
           <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 " + spacing.md }}>1. Add the bill</h2>
+          <p style={{ margin: "0 0 " + spacing.sm, fontSize: 14, color: colors.muted }}>Try a practice bill or a practice invoice to fill the box below. Practice money only.</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.sm, marginBottom: spacing.md }}>
+            {practiceBills.map(function (bill: PracticeBill) {
+              const active: boolean = selectedPractice !== null && selectedPractice.id === bill.id;
+              return (
+                <button
+                  key={bill.id}
+                  type="button"
+                  onClick={function (): void { choosePractice(bill); }}
+                  aria-pressed={active}
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: 999,
+                    border: "1px solid " + (active ? colors.mintDark : colors.line),
+                    backgroundColor: active ? colors.mint : colors.surface,
+                    color: colors.ink,
+                    padding: "6px 12px",
+                    fontFamily: typography.body,
+                    fontSize: 14,
+                  }}
+                >
+                  {bill.title} · {formatCurrency(bill.amountCents)}
+                </button>
+              );
+            })}
+          </div>
+          {selectedPractice ? (
+            <div role="img" aria-label={"Sample photo of the " + selectedPractice.title} style={{ border: "1px solid " + colors.line, borderRadius: 12, backgroundColor: colors.page, padding: spacing.md, lineHeight: 1.7, marginBottom: spacing.md }}>
+              <p style={{ margin: 0, fontFamily: typography.heading, fontSize: 17 }}>{selectedPractice.storeName}</p>
+              <p style={{ margin: "4px 0 0 0", fontSize: 15 }}><strong>{formatCurrency(selectedPractice.amountCents)}</strong> · due {formatDate(selectedPractice.dueDate)}</p>
+              <p style={{ margin: "4px 0 0 0", fontSize: 13, color: colors.muted }}>Sample photo of a {selectedPractice.title}. The text is in the paste box below.</p>
+            </div>
+          ) : null}
           <PhotoPicker previewUrl={previewUrl} isBusy={isBusy} error={error} onFileChosen={handleFileChosen} onClear={handleClear} />
           <label htmlFor="snap-bill-text" style={{ display: "block", marginTop: spacing.md, fontSize: 14, fontWeight: 600 }}>
             Or paste the bill text
@@ -238,6 +306,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
             value={billText}
             onChange={function (e: React.ChangeEvent<HTMLTextAreaElement>): void {
               setBillText(e.target.value);
+              setSelectedPractice(null);
               setIsPracticeExample(false);
             }}
             rows={5}
@@ -278,7 +347,7 @@ export function SnapBillScreen(props: { onMakeCard?: (bill: BillScanResult) => v
             {result ? (
               <div>
                 {isPracticeExample ? (
-                  <p style={{ margin: "0 0 " + spacing.sm, fontSize: 13, fontWeight: 700, color: colors.muted }}>Practice money example</p>
+                  <p style={{ margin: "0 0 " + spacing.sm, fontSize: 13, fontWeight: 700, color: colors.muted }}>Practice example</p>
                 ) : null}
                 <p style={{ margin: 0, fontSize: 13, color: colors.muted }}>Amount</p>
                 <p style={{ margin: "4px 0 0 0", fontFamily: typography.heading, fontSize: 28 }}>{amountCents !== null ? formatCurrency(amountCents) : "—"}</p>

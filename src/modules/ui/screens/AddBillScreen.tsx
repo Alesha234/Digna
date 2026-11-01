@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { accessToken } from "@/modules/ui/lib/supabase";
 import type { BillScanResult } from "@/modules/ui/types";
+import { practiceBills, matchPracticeBill } from "@/modules/ui/data/demoData";
+import type { PracticeBill } from "@/modules/ui/data/demoData";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
 
 const box: React.CSSProperties = { background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 22 };
@@ -39,6 +41,8 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
   const [camera, setCamera] = useState(false);
   const [text, setText] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
+  const [sample, setSample] = useState<PracticeBill | null>(null);
+  const [isPractice, setIsPractice] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<BillScanResult | null>(null);
@@ -48,17 +52,48 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
     setCamera(typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
   }, []);
 
+  function practiceResult(bill: PracticeBill): BillScanResult {
+    return { id: `scan_${Date.now()}`, storeName: bill.storeName, amountCents: bill.amountCents, dueDate: bill.dueDate, confidence: bill.confidence };
+  }
+
+  /** Choosing a practice bill fills the paste box and shows it as the sample photo. */
+  function choosePractice(bill: PracticeBill): void {
+    setText(bill.billText);
+    setSample(bill);
+    setPreview(null);
+    setIsPractice(false);
+    setResult(null);
+    setError(null);
+  }
+
+  /** Signed out, or the AI call failed: show the matching practice bill exactly, never a made-up reading. */
+  function showPracticeExample(pastedText: string): boolean {
+    const matched: PracticeBill | null = matchPracticeBill(pastedText) ?? sample;
+    if (!matched) return false;
+    const bill: BillScanResult = practiceResult(matched);
+    setResult(bill);
+    setLastScan(bill);
+    setIsPractice(true);
+    return true;
+  }
+
   async function read(input: { image?: string; text?: string }): Promise<void> {
     setError(null);
     setResult(null);
+    setIsPractice(false);
     setBusy(true);
     try {
       const token = mode === "live" ? await accessToken() : null;
       if (!token) {
-        const sample: BillScanResult = { id: `scan_${Date.now()}`, storeName: "Nimbus Cloud", amountCents: 3200, dueDate: new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10), confidence: "low" };
-        setResult(sample);
-        setLastScan(sample);
-        setError("Meta's Muse Spark reads bills for people with an account. Here's a practice money example of what it finds; create a free account to read your own.");
+        if (showPracticeExample(input.text ?? text)) {
+          setError("Meta's Muse Spark reads bills for people with an account. This is a practice example of what it finds; create a free account to read your own.");
+          return;
+        }
+        const fallback: BillScanResult = practiceResult(practiceBills[0]);
+        setResult(fallback);
+        setLastScan(fallback);
+        setIsPractice(true);
+        setError("Meta's Muse Spark reads bills for people with an account. Here's a practice example of what it finds; create a free account to read your own.");
         return;
       }
       const res = await fetch("/api/ai", {
@@ -73,7 +108,7 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
       const data = (await res.json().catch(() => ({}))) as { text?: unknown; error?: unknown };
       if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "The AI couldn't read that bill.");
       const json = /\{[\s\S]*\}/.exec(typeof data.text === "string" ? data.text : "");
-      const got = json ? (JSON.parse(json[0]) as { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown }) : {};
+      const got: { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown } = json ? (JSON.parse(json[0]) as { store?: unknown; amountDollars?: unknown; dueDate?: unknown; confidence?: unknown }) : {};
       const dollars = Number(got.amountDollars);
       if (typeof got.store !== "string" || !Number.isFinite(dollars) || dollars <= 0) throw new Error("The AI couldn't find who the bill is from and how much it is. Try a clearer picture, or paste the text.");
       const bill: BillScanResult = {
@@ -86,7 +121,11 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
       setResult(bill);
       setLastScan(bill);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "The AI couldn't read that bill. Try again.");
+      if (showPracticeExample(input.text ?? text)) {
+        setError("Meta's Muse Spark couldn't read that right now. This is a practice example instead; Try paying with it, or try again in a moment.");
+      } else {
+        setError(e instanceof Error ? e.message : "The AI couldn't read that bill. Try again.");
+      }
     } finally {
       setBusy(false);
     }
@@ -97,6 +136,7 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
     try {
       const image = await shrink(file);
       setPreview(image);
+      setSample(null);
       await read({ image });
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Couldn't open that picture.");
@@ -109,6 +149,34 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
         <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Pay a practice bill</h1>
         <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>Got a bill, like a cloud service, phone or hotel invoice? Show it to Digna. Meta&apos;s Muse Spark reads the amount, the place or business it is from and the due date, then makes a card just for it, with the bill&apos;s amount as its limit. Practice money only: no real money moves. No typing it all in.</p>
       </header>
+
+      <section aria-label="Try a practice bill" style={box}>
+        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 6px" }}>Try a practice bill</h2>
+        <p style={{ margin: "0 0 12px", fontSize: 14, color: colors.muted, lineHeight: 1.6 }}>New here? Pick one to fill the paste box below. Practice money only: no real money moves.</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          {practiceBills.map((bill) => {
+            const active = sample?.id === bill.id;
+            return (
+              <button
+                key={bill.id}
+                type="button"
+                onClick={() => choosePractice(bill)}
+                aria-pressed={active}
+                style={{ ...pick, background: active ? colors.mint : colors.surface, borderColor: active ? colors.mint : colors.line }}
+              >
+                {bill.title} · {money(bill.amountCents)}
+              </button>
+            );
+          })}
+        </div>
+        {sample && (
+          <div role="img" aria-label={`Sample photo of the ${sample.title}`} style={{ marginTop: 14, borderRadius: 12, border: `1px solid ${colors.line}`, background: colors.page, padding: 16, lineHeight: 1.7 }}>
+            <p style={{ margin: 0, fontFamily: typography.heading, fontSize: 17 }}>{sample.storeName}</p>
+            <p style={{ margin: "4px 0 0", fontSize: 15 }}><strong>{money(sample.amountCents)}</strong> · due {sample.dueDate}</p>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: colors.muted }}>Sample photo of a {sample.title}. The text is in the paste box below.</p>
+          </div>
+        )}
+      </section>
 
       <section aria-label="Picture of the bill" style={box}>
         <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>A picture of the bill</h2>
@@ -140,6 +208,7 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
       {error && <p role="alert" style={{ margin: 0, color: "#B42318" }}>{error}</p>}
       {result && (
         <section role="status" aria-label="What the AI found" style={{ ...box, borderColor: colors.mint }}>
+          {isPractice && <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700, color: colors.muted }}>Practice example</p>}
           <h2 style={{ fontFamily: typography.heading, fontSize: 20, margin: "0 0 8px" }}>{result.storeName}</h2>
           <p style={{ margin: 0, lineHeight: 1.7 }}>
             <strong>{money(result.amountCents)}</strong>

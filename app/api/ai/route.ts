@@ -58,7 +58,7 @@ export async function POST(req: Request): Promise<Response> {
     body: JSON.stringify({ model: MODEL, max_tokens: 800, messages: [...(system ? [{ role: "system", content: system }] : []), ...sent] }),
     signal: AbortSignal.timeout(60_000),
   }).catch(() => null);
-  if (!res || !res.ok) return fail(502, "The AI couldn't answer right now. Try again in a moment.");
+  if (!res || !res.ok) return fail(503, "Muse Spark couldn't answer right now. The app will show a practice money explanation instead.");
   const out = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   return Response.json({ text: out.choices?.[0]?.message?.content ?? "" });
 }

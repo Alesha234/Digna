@@ -127,6 +127,69 @@ export const demoTransactions: CardTransaction[] = [
   },
 ];
 
+export type PracticeBill = {
+  id: string;
+  /** Uses only "practice bill" or "practice invoice", never other words. */
+  title: string;
+  storeName: string;
+  amountCents: number;
+  dueDate: string;
+  confidence: "high" | "medium" | "low";
+  /** The full bill text: paste it into the bill box and the app reads it back exactly. */
+  billText: string;
+};
+
+export const practiceBills: PracticeBill[] = [
+  {
+    id: "practice-bill-nimbus-cloud",
+    title: "Nimbus Cloud practice bill",
+    storeName: "Nimbus Cloud",
+    amountCents: 3200,
+    dueDate: "2026-11-15",
+    confidence: "high",
+    billText:
+      "Nimbus Cloud practice bill\nAccount: demo@digna.dev\nBilling period: Oct 1 - Oct 31, 2026\nAmount due: $32.00\nDue date: 2026-11-15\nPractice money only: no real money moves.",
+  },
+  {
+    id: "practice-invoice-harbor-hotel",
+    title: "Harbor Hotel practice invoice",
+    storeName: "Harbor Hotel",
+    amountCents: 14820,
+    dueDate: "2026-11-20",
+    confidence: "high",
+    billText:
+      "Harbor Hotel practice invoice\nInvoice #HH-2041\nGuest stay: Nov 2 - Nov 4, 2026\nAmount due: $148.20\nDue date: 2026-11-20\nPractice money only: no real money moves.",
+  },
+  {
+    id: "practice-bill-city-phone",
+    title: "City Phone practice bill",
+    storeName: "City Phone",
+    amountCents: 4500,
+    dueDate: "2026-12-01",
+    confidence: "high",
+    billText:
+      "City Phone practice bill\nAccount: 555-0142\nPlan: Monthly 5G, Nov 2026\nAmount due: $45.00\nDue date: 2026-12-01\nPractice money only: no real money moves.",
+  },
+];
+
+/** Find the practice bill pasted text (or a chosen example) is from, if any. */
+export function matchPracticeBill(haystack: string): PracticeBill | null {
+  const hay: string = haystack.toLowerCase();
+  if (hay.trim().length === 0) return null;
+  for (const b of practiceBills) {
+    const full: string = b.billText.toLowerCase();
+    if (hay.includes(full) || (hay.length >= 20 && full.includes(hay))) return b;
+  }
+  for (const b of practiceBills) {
+    if (hay.includes(b.storeName.toLowerCase())) return b;
+  }
+  for (const b of practiceBills) {
+    const dollars: string = (b.amountCents / 100).toFixed(2);
+    if (hay.includes("$" + dollars) || hay.includes(dollars)) return b;
+  }
+  return null;
+}
+
 export const assistantStarters: string[] = [
   "Why was my Netflix payment declined?",
   "Why was my cloud bill payment declined?",

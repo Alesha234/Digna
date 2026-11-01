@@ -47,15 +47,15 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
   const q: string = input.toLowerCase();
   if (!txn) {
     if (q.includes("unfreeze") || q.includes("frozen") || q.includes("freeze") || q.includes("paus")) {
-      return "To turn a paused card back on, open it from your dashboard, tap Unfreeze, and try the payment again.";
+      return "That payment was likely declined because the card is paused. Next step: open it from your dashboard, tap Unfreeze, then Try paying again.";
     }
     if (q.includes("cap") || q.includes("limit") || q.includes("raise")) {
-      return "If a payment is more than a card's limit, open the card and use Change limit. You can raise it as far as the money in your wallet covers; if that's not enough, add money first. Tell me which place turned you down and I'll walk you through it.";
+      return "That payment was likely declined because it was over the card's limit. Next step: open the card and raise the limit as far as the practice money in your wallet covers (add practice money first if that's not enough), then Try paying again. Tell me which place or business turned you down and I'll walk you through it.";
     }
     if (q.includes("balance") || q.includes("add money") || q.includes("wallet")) {
-      return "If your wallet is low, add money from the dashboard, then try the payment again.";
+      return "That payment was likely declined because the practice money in the wallet was too low. Next step: add practice money from the dashboard, then Try paying again.";
     }
-    return "I can explain a decline in simple words. Pick one of the declined payments above, or tell me the place or business and amount, and I will suggest a calm next step.";
+    return "I don't have enough detail yet to say why it was declined. Next step: pick one of the declined payments above, or tell me the place or business and the amount, then Try paying again and I'll explain it in plain words.";
   }
   const amount: string = cents(txn.amountCents);
   const reason: string = (txn.reason || "").toLowerCase();
@@ -69,17 +69,17 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
     expiredByDate = false;
   }
   const expiredByReason: boolean = reason.includes("expir") || reason.includes("passed the day") || (reason.includes("pass") && reason.includes("stop"));
-  let cause: string = "it went over a limit";
-  let next: string = "You can raise the limit on the \"" + label + "\" card (as far as your wallet covers), add practice money, or make a new card just for " + txn.storeName + ".";
+  let cause: string = "there is not enough detail in the saved record to pin down why, but it is often over the limit or a low wallet";
+  let next: string = "Open the \"" + label + "\" card and check whether it is paused, what is left of its limit, and the practice money in the wallet, then Try paying the " + amount + " at " + txn.storeName + " again. You can also raise the limit, add practice money, or make a new card just for " + txn.storeName + ".";
   if (status === "frozen" || reason.includes("frozen") || reason.includes("paus")) {
     cause = "the \"" + label + "\" card is paused or frozen";
-    next = "Turn the \"" + label + "\" card back on from your dashboard (Unfreeze), then try the " + amount + " payment at " + txn.storeName + " again.";
+    next = "Turn the \"" + label + "\" card back on from your dashboard (Unfreeze), then Try paying the " + amount + " at " + txn.storeName + " again.";
   } else if (status === "closed" || reason.includes("closed")) {
     cause = "the \"" + label + "\" card is closed";
-    next = "Make a new card for " + txn.storeName + " and try the " + amount + " payment again.";
+    next = "Make a new card for " + txn.storeName + ", then Try paying the " + amount + " again.";
   } else if (expiredByDate || expiredByReason || q.includes("expir")) {
-    cause = "the \"" + label + "\" card has expired";
-    next = "Make a new card for " + txn.storeName + " with a later date and try the " + amount + " payment again.";
+    cause = "the \"" + label + "\" card is past its end date";
+    next = "Make a new card for " + txn.storeName + " with a later date, then Try paying the " + amount + " again.";
   } else if (reason.includes("cap") || reason.includes("over") || reason.includes("limit")) {
     if (card) {
       const remaining: number = card.capCents - card.spentCents;
@@ -91,10 +91,10 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
     } else {
       cause = "it was over the card's limit";
     }
-    next = "You can raise the limit on \"" + label + "\" (as far as your wallet covers), add practice money, or make a new card for " + txn.storeName + ".";
+    next = "Raise the limit on \"" + label + "\" (as far as the practice money in the wallet covers), add practice money if needed, then Try paying the " + amount + " at " + txn.storeName + " again. Or make a new card just for " + txn.storeName + ".";
   } else if (q.includes("balance") || q.includes("wallet") || reason.includes("balance") || reason.includes("wallet") || reason.includes("enough money") || reason.includes("add money")) {
-    cause = "your wallet was too low for the " + amount + " payment";
-    next = "Add practice money from the dashboard, then try " + txn.storeName + " again.";
+    cause = "the practice money in the wallet was too low for the " + amount + " payment";
+    next = "Add practice money from the dashboard, then Try paying at " + txn.storeName + " again.";
   }
   return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". Digna said no to protect you from spending more than you planned. Next step: " + next;
 }
@@ -158,13 +158,22 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
     const label: string = snapTxn ? cardLabelFor(snapTxn.cardId) : "your card";
     let reply: string = buildLocalReply(trimmed, snapTxn, snapCard, label);
     // What Muse Spark is told: what Digna is, the sample businesses' rules, and this person's own cards and payments.
+    // The question plus the recent declined payments and their cards go to Meta's Muse Spark through /api/ai.
+    const declinedForAi: string = declined.length
+      ? declined.slice(0, 6).map(function (t) {
+        const c = cards.find(function (x) { return x.id === t.cardId; });
+        const cardBits: string = c ? " on card \"" + cardLabelFor(c.id) + "\" (limit " + cents(c.capCents) + ", spent " + cents(c.spentCents) + ", " + c.status + ")" : "";
+        return cents(t.amountCents) + " at " + t.storeName + " on " + day(t.occurredAt) + cardBits + (t.reason ? ", saved reason: " + t.reason : "");
+      }).join("; ")
+      : "none";
     const system: string = [
       "You are Digna's money assistant. For now Digna uses practice money only: no real card, bank or business is involved. Use only plain words: practice money, Try paying, place or business, limit.",
       "Digna gives people whose Cash App, Chime, debit or prepaid cards get declined a card for each place, with a limit they choose, that works like a credit card and is paid from their Digna wallet. A card's limit can be raised on its page, but only as far as the money in the wallet covers.",
-      "Answer in plain, friendly, everyday words, in 2 to 5 short sentences: why it happened and the one or two things to do next. Explain the reason behind a place's rule (for example, hotels hold a deposit). Never invent rules beyond the ones below.",
+      "Answer in plain, friendly, everyday words, in 2 to 5 short sentences: always explain the likely why (over the limit, a paused card, past its end date, a low wallet, or not enough detail) and give one clear next step (raise the limit, unfreeze, add practice money, or make a card) using the words Try paying. Explain the reason behind a place's rule (for example, hotels hold a deposit). Never invent rules beyond the ones below.",
       "Sample businesses and what they accept: " + MERCHANTS.map(function (m) { return m.name + " (" + m.kind + "): " + m.rule; }).join(" "),
       "Wallet: " + cents(balance.availableCents) + " in practice money.",
       "Cards: " + (cards.length ? cards.slice(0, 8).map(function (c) { return c.name + " limit " + cents(c.capCents) + ", spent " + cents(c.spentCents) + ", " + c.status; }).join("; ") : "none yet") + ".",
+      "Recent declined payments and their cards: " + declinedForAi + ".",
       "Recent payments: " + (payments.length ? payments.slice(0, 6).map(function (p) { return cents(p.amountCents) + " at " + p.merchant + " with " + methodLabel(p.method) + ": " + p.result + (p.reason ? " (" + p.reason + ")" : ""); }).join("; ") : "none") + ".",
     ].join(" ").slice(0, 2000);
     const history = messages.slice(-6).map(function (m) { return { role: m.role, content: m.text.slice(0, 1000) }; });
