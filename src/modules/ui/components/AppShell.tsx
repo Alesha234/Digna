@@ -9,7 +9,10 @@ void theme;
 type NavEntry = { value: AppScreen | string; label: string };
 
 // The pages a visitor uses. The home page is the Digna name at the top left.
+// Home keeps the welcome page valid for signed-in people too: it shows once
+// signed in and goes straight there, like every entry below goes straight to its page.
 const navEntries: NavEntry[] = [
+  { value: "welcome", label: "Home" },
   { value: "dashboard", label: "Dashboard" },
   { value: "checkout", label: "Try paying" },
   { value: "add-money", label: "Add money" },

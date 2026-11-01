@@ -58,8 +58,8 @@ const FAQS = [
   { q: "Who drew the pictures on this page?", a: "Meta's Muse Image model. The people in them are invented." },
 ];
 
-export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void; onTryDemo?: () => void; onHowItWorks?: () => void }) {
-  const { onGetStarted, onSignIn, onTryDemo } = props;
+export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () => void; onTryDemo?: () => void; onHowItWorks?: () => void; isSignedIn?: boolean; onDashboard?: () => void; onPayBill?: () => void }) {
+  const { onGetStarted, onSignIn, onTryDemo, isSignedIn, onDashboard, onPayBill } = props;
   const section: React.CSSProperties = { padding: `${spacing.xxl} ${spacing.lg}` };
   const inner: React.CSSProperties = { maxWidth: 1080, margin: "0 auto" };
   const h2: React.CSSProperties = { fontFamily: typography.heading, color: colors.ink, fontSize: "clamp(26px, 3.4vw, 36px)", lineHeight: 1.15, margin: "0 0 12px" };
@@ -79,15 +79,24 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               <p style={{ ...lead, fontSize: 18 }}>
                 Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
               </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
-                <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
-                <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
-              </div>
-              <p style={{ color: colors.muted, fontSize: 14, margin: spacing.md + " 0 0" }}>
-                Already have an account?{" "}
-                <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 14, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
-                {" · "}Starts with $250 in practice money.
-              </p>
+              {isSignedIn ? (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
+                  <button type="button" className="pp-btn-mint" onClick={onDashboard} style={primary}>Dashboard</button>
+                  <button type="button" className="pp-btn-secondary" onClick={onPayBill} style={secondary}>Pay a bill</button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
+                    <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
+                    <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
+                  </div>
+                  <p style={{ color: colors.muted, fontSize: 14, margin: spacing.md + " 0 0" }}>
+                    Already have an account?{" "}
+                    <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 14, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
+                    {" · "}Starts with $250 in practice money.
+                  </p>
+                </>
+              )}
             </div>
             <div style={{ position: "relative", maxWidth: 480, width: "100%", margin: "0 auto" }}>
               <Picture name="hero" alt="A person smiling at their phone after a payment went through" ratio="1 / 1" />

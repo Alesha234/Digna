@@ -1,6 +1,7 @@
 import "./styles.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PayProxyProvider, usePayProxy } from "@/modules/ui/state/PayProxyProvider";
+import { getSafeNextPath } from "@/modules/security/safe-redirect";
 import { AppShell } from "@/modules/ui/components/AppShell";
 import { WelcomeScreen } from "@/modules/ui/screens/WelcomeScreen";
 import { AuthScreen, NewPasswordScreen } from "@/modules/ui/screens/AuthScreen";
@@ -24,12 +25,29 @@ function InnerApp() {
   const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard } = usePayProxy();
   const [question, setQuestion] = useState<string | undefined>(undefined);
   const [bill, setBill] = useState<BillScanResult | null>(null);
+  // The protected page a guest tried to open: signing in returns there when it is safe, otherwise stays put.
+  const [pendingReturn, setPendingReturn] = useState<string | null>(null);
+  const isSignedIn = mode !== "guest";
+
+  // Guest guard memory only: remember the attempted page; a voluntary visit back to welcome clears it.
+  // Signing in never moves the person: the screen stays exactly where it is unless onSuccess navigates.
+  useEffect(() => {
+    if (mode !== "guest") return;
+    if (!OPEN.includes(screen)) setPendingReturn(screen);
+    else if (screen === "welcome") setPendingReturn(null);
+  }, [mode, screen]);
 
   function go(next: AppScreen | string): void {
     clearNotice();
     setBill(null);
     setScreen(next as AppScreen);
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+  // After a sign-in: go to the saved page when it is a safe internal screen, else stay on the current screen.
+  function handleAuthSuccess(next: string | null): void {
+    const dest = getSafeNextPath(next ?? pendingReturn, screen);
+    setPendingReturn(null);
+    if (dest && dest !== screen) go(dest as AppScreen);
   }
   function openCard(cardId: string): void {
     selectCard(cardId);
@@ -45,15 +63,15 @@ function InnerApp() {
   }
 
   function page() {
-    if (screen === "welcome") return <WelcomeScreen onGetStarted={() => go("signup")} onSignIn={() => go("auth")} onTryDemo={signInDemo} onHowItWorks={() => go("how-it-works")} />;
+    if (screen === "welcome") return <WelcomeScreen onGetStarted={() => go("signup")} onSignIn={() => go("auth")} onTryDemo={signInDemo} onHowItWorks={() => go("how-it-works")} isSignedIn={isSignedIn} onDashboard={() => go("dashboard")} onPayBill={() => go("snap-bill")} />;
     if (screen === "privacy") return <PrivacyScreen />;
     if (screen === "terms") return <TermsScreen />;
     if (screen === "feedback") return <FeedbackScreen />;
     if (screen === "how-it-works") return <HowItWorksScreen />;
     if (!ready) return <p style={{ padding: 24 }}>Loading your account…</p>;
     if (screen === "new-password") return <NewPasswordScreen />;
-    if (screen === "auth" || screen === "signup") return <AuthScreen key={screen} startWith={screen === "signup" ? "signup" : "signin"} />;
-    if (mode === "guest" && !OPEN.includes(screen)) return <AuthScreen startWith="signin" />;
+    if (screen === "auth" || screen === "signup") return <AuthScreen key={screen} startWith={screen === "signup" ? "signup" : "signin"} returnTo={pendingReturn} onSuccess={handleAuthSuccess} />;
+    if (mode === "guest" && !OPEN.includes(screen)) return <AuthScreen startWith="signin" returnTo={pendingReturn ?? screen} onSuccess={handleAuthSuccess} />;
     switch (screen) {
       case "card-detail":
         return <CardDetailScreen cardId={selectedCardId ?? ""} onBack={() => go("dashboard")} onAddMoney={() => go("add-money")} />;
