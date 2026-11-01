@@ -8,7 +8,6 @@ import { DashboardScreen } from "@/modules/ui/screens/DashboardScreen";
 import { CardDetailScreen } from "@/modules/ui/screens/CardDetailScreen";
 import { CreateCardScreen } from "@/modules/ui/screens/CreateCardScreen";
 import { AddMoneyScreen } from "@/modules/ui/screens/AddMoneyScreen";
-import { AddBillScreen } from "@/modules/ui/screens/AddBillScreen";
 import { HowItWorksScreen } from "@/modules/ui/screens/HowItWorksScreen";
 import { AssistantScreen } from "@/modules/ui/screens/AssistantScreen";
 import { SettingsScreen } from "@/modules/ui/screens/SettingsScreen";
@@ -63,13 +62,14 @@ function InnerApp() {
       case "add-money":
         return <AddMoneyScreen onDone={() => go("dashboard")} onCancel={() => go("dashboard")} />;
       case "snap-bill":
-        return <AddBillScreen onMakeCard={makeCardFor} />;
+        // The old bill route now opens Pay a bill: there is only one bill section.
+        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} onMakeCard={makeCardFor} />;
       case "assistant":
         return <AssistantScreen key={question ?? "assistant"} initialPrompt={question} />;
       case "settings":
         return <SettingsScreen onSignOut={() => go("welcome")} onBack={() => go("dashboard")} />;
       case "checkout":
-        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} />;
+        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} onMakeCard={makeCardFor} />;
       case "alerts":
         return <AlertsScreen />;
       case "demo-data":

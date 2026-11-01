@@ -59,4 +59,28 @@ export type AssistantMessage = {
   createdAt: string;
 };
 
+export type PracticeBillStatus = 'paid' | 'past';
+
+/** One practice bill kept in storage: what it was, when it was due, and its practice receipt. */
+export type PracticeBillRecord = {
+  id: string;
+  placeOrBusiness: string;
+  amountCents: number;
+  dueDate: string;
+  paidAt: string;
+  receiptId: string;
+  status: PracticeBillStatus;
+};
+
+/** The practice receipt for a paid practice bill. Practice money only: no real money moves. */
+export type PracticeReceipt = {
+  id: string;
+  placeOrBusiness: string;
+  amountCents: number;
+  dueDate: string;
+  paidAt: string;
+  receiptId: string;
+  status: PracticeBillStatus;
+};
+
 export type AppScreen = 'welcome' | 'auth' | 'signup' | 'dashboard' | 'card-detail' | 'create-card' | 'add-money' | 'snap-bill' | 'assistant' | 'settings' | 'checkout' | 'alerts' | 'demo-data' | 'privacy' | 'terms' | 'feedback' | 'new-password' | 'how-it-works';
