@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
+import { comingSoonPlaces } from "@/modules/ui/data/demoData";
+import type { ComingSoonPlace } from "@/modules/ui/types";
+
+/** How each kind of coming-soon place is labelled. */
+const COMING_SOON_KIND: Record<ComingSoonPlace["kind"], string> = { hotel: "Hotel", flight: "Airline", retailer: "Shop", rental: "Car rental", app: "Apps & games" };
 
 /** A picture Meta's Muse Image drew for this page (app/api/picture); while it draws, or if it can't, a soft panel. */
 function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: string }) {
@@ -13,7 +18,7 @@ function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: strin
   return (
     <div style={{ aspectRatio: ratio, borderRadius: 18, overflow: "hidden", background: "linear-gradient(135deg, #FFF3D6, #D6E8F0)" }}>
       {mounted && (
-        <img src={`/api/picture/${name}`} alt={alt} loading="lazy" onLoad={() => setLoaded(true)} onError={() => setLoaded(false)}
+        <img src={`/api/picture/${name}?v=2`} alt={alt} loading="lazy" onLoad={() => setLoaded(true)} onError={() => setLoaded(false)}
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: loaded ? 1 : 0, transition: "opacity .4s ease", color: "transparent" }} />
       )}
     </div>
@@ -44,15 +49,15 @@ function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent
 }
 
 const STORIES = [
-  { picture: "cloud", alt: "A developer setting up hosting on a laptop", title: "Cloud bills", text: "Cloud services bill you after you use them, so many take credit cards only. Make a Digna card just for that bill, with a limit, so it can never run over." },
-  { picture: "hotel", alt: "A traveler checking in at a hotel desk", title: "Hotel check-in", text: "Hotels set money aside at check-in for damage or extras, and many turn away prepaid cards for it. Give the hotel its own card, with a limit that covers the stay and nothing more." },
-  { picture: "rental", alt: "Friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna card covers the deposit, and you can pause it in one tap when you bring the car back." },
+  { picture: "cloud", alt: "A developer in a wheelchair setting up hosting on a laptop", title: "Cloud bills", text: "Cloud services bill you after you use them, so many take credit cards only. Make a Digna card just for that bill, with a limit, so it can never run over." },
+  { picture: "hotel", alt: "An older traveler checking in at a hotel desk with a friendly receptionist", title: "Hotel check-in", text: "Hotels set money aside at check-in for damage or extras, and many turn away prepaid cards for it. Give the hotel its own card, with a limit that covers the stay and nothing more." },
+  { picture: "rental", alt: "Two friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna card covers the deposit, and you can pause it in one tap when you bring the car back." },
 ];
 
 const FAQS = [
   { q: "Is this real money?", a: "Not yet. Your account, cards and history are real and saved, but for now every dollar is practice money, so you can try everything without risk. Real cards are on the way, and we'll say so clearly here when they arrive." },
-  { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Try paying to pay sample businesses with an everyday card or a Digna card and see what each would say, and why." },
-  { q: "Why do hotels, car rentals and cloud services turn down Cash App, Chime or prepaid cards?", a: "Usually it isn't about you or your money. Places that hold a deposit, or bill you after you use something, want a card that can't come up empty, so many only trust credit cards. The businesses on Try paying follow rules like these, so you can see exactly why a card gets turned down." },
+  { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Pay a bill to pay sample businesses with an everyday card or a Digna card and see what each would say, and why." },
+  { q: "Why do hotels, car rentals and cloud services turn down Cash App, Chime or prepaid cards?", a: "Usually it isn't about you or your money. Places that hold a deposit, or bill you after you use something, want a card that can't come up empty, so many only trust credit cards. The businesses on Pay a bill follow rules like these, so you can see exactly why a card gets turned down." },
   { q: "What does the money assistant use?", a: "Meta's Muse Spark AI. It looks at your cards and recent payments and explains a decline in plain words, with what to do next. It also reads your bills on Pay a bill." },
   { q: "Is Digna a bank?", a: "No. Digna is not a bank. When real cards arrive, they'll come through a licensed card partner." },
   { q: "Who drew the pictures on this page?", a: "Meta's Muse Image model. The people in them are invented." },
@@ -75,88 +80,6 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
           <div className="pp-hero-grid">
             <div>
               <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Cards with limits you choose · Free to try</p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", margin: "0 0 14px" }}>
-                <div aria-hidden="true" style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
-                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
-                    <circle cx="24" cy="24" r="24" fill={colors.primarySoft} />
-                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.midnight} />
-                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#6B4226" />
-                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#7A4B2A" />
-                    <circle cx="24" cy="10" r="10" fill="#14100C" />
-                    <circle cx="15" cy="16" r="3.2" fill="#14100C" />
-                    <circle cx="33" cy="16" r="3.2" fill="#14100C" />
-                    <circle cx="20.5" cy="18" r="1.1" fill="#14100C" />
-                    <circle cx="27.5" cy="18" r="1.1" fill="#14100C" />
-                    <path d="M21 23 Q24 25.5 27 23" stroke="#3E2412" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                  </svg>
-                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
-                    <circle cx="24" cy="24" r="24" fill={colors.surface} />
-                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.mint} />
-                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#D9A077" />
-                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#F1C9A5" />
-                    <path d="M15 17 C15 8 33 8 33 17 C33 13 30 11 24 11 C18 11 15 13 15 17 Z" fill="#D1D5DB" />
-                    <path d="M16 24 C16 30 20 33 24 33 C28 33 32 30 32 24 C32 28 28 29 24 29 C20 29 16 28 16 24 Z" fill="#D1D5DB" />
-                    <circle cx="20.5" cy="18.5" r="1.1" fill="#0E1726" />
-                    <circle cx="27.5" cy="18.5" r="1.1" fill="#0E1726" />
-                    <g stroke="#0E1726" strokeWidth="1.3" fill="none">
-                      <circle cx="20.5" cy="18.5" r="3.4" />
-                      <circle cx="27.5" cy="18.5" r="3.4" />
-                      <path d="M23.9 18.5 H24.1" />
-                    </g>
-                    <path d="M21.5 26.5 Q24 28 26.5 26.5" stroke="#7C4A2D" strokeWidth="1.3" fill="none" strokeLinecap="round" />
-                  </svg>
-                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
-                    <circle cx="24" cy="24" r="24" fill={colors.primarySoft} />
-                    <path d="M10 48 C10 30 16 26 24 26 C32 26 38 30 38 48 Z" fill={colors.mintDark} />
-                    <ellipse cx="24" cy="14" rx="12" ry="12" fill={colors.mintDark} />
-                    <ellipse cx="24" cy="18" rx="7.5" ry="8.5" fill="#C68642" />
-                    <circle cx="21.5" cy="18" r="1.1" fill="#0E1726" />
-                    <circle cx="26.5" cy="18" r="1.1" fill="#0E1726" />
-                    <path d="M21.5 22.5 Q24 24.5 26.5 22.5" stroke="#5C3413" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                  </svg>
-                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
-                    <circle cx="24" cy="24" r="24" fill={colors.surface} />
-                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.muted} />
-                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#8A5230" />
-                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#A66A3F" />
-                    <circle cx="17" cy="11" r="4" fill="#1F2937" />
-                    <circle cx="24" cy="9" r="4.5" fill="#1F2937" />
-                    <circle cx="31" cy="11" r="4" fill="#1F2937" />
-                    <circle cx="20.5" cy="18" r="1.1" fill="#14100C" />
-                    <circle cx="27.5" cy="18" r="1.1" fill="#14100C" />
-                    <path d="M20.5 23.5 Q24 27 27.5 23.5" stroke="#3E2412" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                  </svg>
-                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
-                    <circle cx="24" cy="24" r="24" fill={colors.primarySoft} />
-                    <circle cx="24" cy="7" r="4.5" fill="#E5E7EB" />
-                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.midnight} />
-                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#D9A077" />
-                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#E8B48C" />
-                    <path d="M15 16 C15 8 33 8 33 16 C31 12 28 11 24 11 C20 11 17 12 15 16 Z" fill="#E5E7EB" />
-                    <circle cx="20.5" cy="18.5" r="1.1" fill="#0E1726" />
-                    <circle cx="27.5" cy="18.5" r="1.1" fill="#0E1726" />
-                    <g stroke="#0E1726" strokeWidth="1.2" fill="none">
-                      <rect x="16.5" y="15.5" width="7" height="5.5" rx="2.5" />
-                      <rect x="24.5" y="15.5" width="7" height="5.5" rx="2.5" />
-                      <path d="M23.5 18 H24.5" />
-                    </g>
-                    <path d="M21 24 Q24 26 27 24" stroke="#7C4A2D" strokeWidth="1.3" fill="none" strokeLinecap="round" />
-                    <path d="M19 14.5 Q24 13 29 14.5" stroke="#9CA3AF" strokeWidth="1" fill="none" strokeLinecap="round" />
-                  </svg>
-                  <svg width="48" height="48" viewBox="0 0 48 48" focusable="false" style={{ width: 48, height: 48, borderRadius: 999, display: "block", background: colors.surface, border: "1px solid " + colors.line, overflow: "hidden" }}>
-                    <circle cx="24" cy="24" r="24" fill={colors.surface} />
-                    <path d="M8 48 C8 37 15 32 24 32 C33 32 40 37 40 48 Z" fill={colors.mint} />
-                    <rect x="21" y="23" width="6" height="7" rx="3" fill="#4A2D15" />
-                    <ellipse cx="24" cy="18" rx="9" ry="10" fill="#5C3A21" />
-                    <path d="M15 15 C15 8 33 8 33 15 C33 12 29 10.5 24 10.5 C19 10.5 15 12 15 15 Z" fill="#0F0D0B" />
-                    <path d="M16.5 22 C16.5 28 20 31 24 31 C28 31 31.5 28 31.5 22 C31.5 26 28 27 24 27 C20 27 16.5 26 16.5 22 Z" fill="#0F0D0B" />
-                    <circle cx="20.5" cy="18" r="1.1" fill="#FFFFFF" />
-                    <circle cx="27.5" cy="18" r="1.1" fill="#FFFFFF" />
-                    <path d="M22 24.5 Q24 25.5 26 24.5" stroke="#FFFFFF" strokeWidth="1.3" fill="none" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>People of different ages and backgrounds who use Digna</span>
-              </div>
               <h1 className="pp-hero-title">Dignity at every checkout.</h1>
               <p style={{ ...lead, fontSize: 18 }}>
                 Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
@@ -181,7 +104,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               )}
             </div>
             <div style={{ position: "relative", maxWidth: 480, width: "100%", margin: "0 auto" }}>
-              <Picture name="hero" alt="A person smiling at their phone after a payment went through" ratio="1 / 1" />
+              <Picture name="hero" alt="A woman smiling at her phone after a payment went through" ratio="1 / 1" />
               <div className="pp-hero-float">
                 <SampleCard name="Cloud hosting" spent={32} cap={50} last="4242" bg="linear-gradient(135deg, #0E1726, #17405C)" />
               </div>
@@ -214,7 +137,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
           <p style={{ ...lead, color: "#C9CFDB" }}>It's being told, in public, that your money doesn't count. Digna is built so that never happens to you, and every feature keeps that promise.</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
             {[
-              { t: "No public declines", b: "Know before you pay. Try paying and the money assistant show you whether a card will work, and why, so you're not caught out at the counter." },
+              { t: "No public declines", b: "Know before you pay. Pay a bill and the money assistant show you whether a card will work, and why, so you're not caught out at the counter." },
               { t: "No credit check, no judgment", b: "Sign up with an email. Your history doesn't decide your access." },
               { t: "Your money, not a loan", b: "Every card spends only your own money. No debt, no interest, no traps." },
               { t: "Limits that protect you", b: "No place can take more than you allowed, so a surprise charge never costs you rent. Need more? Raise it, as far as your money covers." },
@@ -249,6 +172,30 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
+      {/* Coming soon: the kinds of places practice checkouts add next. Invented names, said plainly. */}
+      <section aria-label="Coming soon" className="pp-section" style={section}>
+        <RevealOnScroll delayMs={0}>
+          <div style={inner}>
+            <p style={{ display: "inline-block", margin: "0 0 12px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Coming soon</p>
+            <h2 style={h2}>More places to practice, next</h2>
+            <p style={lead}>Hotels, airlines, rentals and everyday shops are the places that turn cards away most. These are the checkouts Digna adds next, each with the same rules real places use. The names are examples: Digna isn't partnered with any business yet, and it's all practice money.</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+              {comingSoonPlaces.map((place: ComingSoonPlace) => (
+                <div key={place.id} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ fontFamily: typography.body, color: colors.muted, fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{COMING_SOON_KIND[place.kind]}</span>
+                    <span style={{ background: colors.primarySoft, color: colors.mintDark, borderRadius: radii.pill, padding: "3px 10px", fontSize: 12, fontWeight: 700 }}>Coming soon</span>
+                  </div>
+                  <div style={{ fontFamily: typography.heading, color: colors.ink, fontSize: 19, fontWeight: 700 }}>{place.name}</div>
+                  <div style={{ color: colors.ink, fontSize: 14, fontWeight: 600 }}>{place.rule}</div>
+                  <p style={{ color: colors.muted, fontSize: 14.5, lineHeight: 1.55, margin: 0 }}>{place.blurb}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </RevealOnScroll>
+      </section>
+
       {/* How it works */}
       <section className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
@@ -271,18 +218,18 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
-      {/* Try paying */}
+      {/* Pay a bill */}
       <section className="pp-section" style={{ ...section, background: colors.surface, borderTop: "1px solid " + colors.line, borderBottom: "1px solid " + colors.line }}>
         <RevealOnScroll delayMs={0}>
           <div className="pp-hero-grid" style={{ alignItems: "center" }}>
             <div>
               <h2 style={h2}>Try it before you need it</h2>
               <p style={lead}>
-                Try paying has sample businesses that follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards, a car rental counter and a streaming service. Pay with an example Chime debit card, Cash App Card or prepaid card, then with a Digna card, and see what each one says, and why.
+                Pay a bill has sample businesses that follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards, a car rental counter and a streaming service. Pay with an example Chime debit card, Cash App Card or prepaid card, then with a Digna card, and see what each one says, and why.
               </p>
-              <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Try paying</button>
+              <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Pay a bill</button>
             </div>
-            <div aria-label="An example from Try paying" role="img" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div aria-label="An example from Pay a bill" role="img" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 { who: "Chime debit card (example)", at: "Nimbus Cloud · $32.00", out: "Declined: credit cards only", ok: false },
                 { who: "Prepaid card (example)", at: "Harborview Hotel · $150.00", out: "Declined: no prepaid cards", ok: false },

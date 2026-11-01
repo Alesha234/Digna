@@ -265,7 +265,7 @@ export function CardDetailScreen(props: { cardId: string; onBack: () => void; on
             ) : null}
           </div>
           <p style={{ margin: "14px 0 0", fontSize: 13, color: "#C9CFDB" }}>
-            Use these details on Try paying, just like a real card. Practice card: it works only on Digna's practice checkouts.
+            Use these details on Pay a bill, just like a real card. Practice card: it works only on Digna's practice checkouts.
           </p>
         </section>
       ) : null}

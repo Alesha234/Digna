@@ -52,7 +52,7 @@ function BizPicture({ name }: { name: string }) {
     <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #FFF3D6, #DDEAF3)" }}>
       {mounted && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/api/picture/${name}`} alt="" onLoad={() => setOk(true)} onError={() => setOk(false)}
+        <img src={`/api/picture/${name}?v=2`} alt="" onLoad={() => setOk(true)} onError={() => setOk(false)}
           style={{ width: "100%", height: "100%", objectFit: "cover", opacity: ok ? 1 : 0, transition: "opacity .4s" }} />
       )}
     </div>

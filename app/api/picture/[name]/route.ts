@@ -15,19 +15,25 @@ export const dynamic = "force-dynamic";
 const RULES =
   "A natural, warm lifestyle photograph for a fintech website. Any people shown are invented adults who look like no real or famous person, in everyday clothes. No company logos, brands or products, and no words, letters or numbers anywhere in the picture.";
 
+/**
+ * Who the pictures show (Nov 1, 2026): the owner asked for a landing page where everyone can see themselves, so across
+ * the set the people differ in background, age, body and ability, each shown as an ordinary customer.
+ */
 const PICTURES: Record<string, { size: string; describe: string }> = {
-  hero: { size: "1024x1024", describe: "A smiling young adult at a sunny kitchen table holding a phone, relieved after a payment went through, soft morning light, mint green and navy accents" },
-  cloud: { size: "1536x1024", describe: "A focused young developer at a laptop in a cozy apartment in the evening, setting up hosting for their app, a mug of tea beside them" },
-  hotel: { size: "1536x1024", describe: "A traveler with a small suitcase at a bright modern hotel front desk, handing over a card to a friendly receptionist" },
-  rental: { size: "1536x1024", describe: "Two friends at a car rental counter on a sunny day, one receiving car keys, both smiling" },
-  stream: { size: "1536x1024", describe: "A relaxed young adult on a couch at night with a bowl of popcorn, watching a movie on a TV, warm lamp light" },
+  hero: { size: "1024x1024", describe: "A smiling Black woman in her forties with natural curly hair, sitting at a sunny kitchen table and holding a phone, relieved after a payment went through, soft morning light, mint green and navy accents" },
+  cloud: { size: "1536x1024", describe: "A focused young South Asian man who uses a wheelchair, working at a laptop at a desk in a cozy apartment in the evening, setting up hosting for his app, a mug of tea beside him" },
+  hotel: { size: "1536x1024", describe: "An older Latino man with a small suitcase at a bright modern hotel front desk, handing over a card to a friendly East Asian woman receptionist, both smiling" },
+  rental: { size: "1536x1024", describe: "Two friends at a car rental counter on a sunny day, a young Muslim woman wearing a hijab receiving the car keys and a tall white man with a beard beside her, both smiling" },
+  stream: { size: "1536x1024", describe: "A relaxed Indigenous couple in their thirties on a couch at night with a bowl of popcorn, watching a movie on a TV, warm lamp light" },
 };
+/** Changing what a picture shows means drawing it again: kept pictures carry this version in their name. */
+const VERSION = "v2";
 
 const made = new Map<string, Promise<Uint8Array>>();
 const DIR = join(tmpdir(), "payproxy-pictures");
 
 async function draw(name: string): Promise<Uint8Array> {
-  const file = join(DIR, `${name}.webp`);
+  const file = join(DIR, `${name}-${VERSION}.webp`);
   if (existsSync(file)) return new Uint8Array(await readFile(file));
   const key = process.env.META_API_KEY;
   if (!key) throw new Error("no Meta key");

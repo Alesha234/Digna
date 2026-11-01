@@ -190,49 +190,17 @@ export function matchPracticeBill(haystack: string): PracticeBill | null {
   return null;
 }
 
+/**
+ * Coming soon on the landing page: the kinds of places Digna's practice checkouts add next. The names are invented
+ * examples, not partners, and the page says so; each one follows a rule real places of its kind use.
+ */
 export const comingSoonPlaces: ComingSoonPlace[] = [
-  {
-    id: "coming-soon-harbor-hotel",
-    name: "Harbor Hotel idea",
-    kind: "hotel",
-    blurb: "Idea for practicing a hotel stay with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-lakeview-stay",
-    name: "Lakeview Stay idea",
-    kind: "hotel",
-    blurb: "Idea for practicing a short stay with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-north-sky-route",
-    name: "North Sky Route idea",
-    kind: "flight",
-    blurb: "Idea for practicing a flight payment with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-coast-hop-route",
-    name: "Coast Hop Route idea",
-    kind: "flight",
-    blurb: "Idea for practicing a short trip payment with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-corner-market",
-    name: "Corner Market idea",
-    kind: "retailer",
-    blurb: "Idea for practicing a shop payment with practice money.",
-    comingSoon: true,
-  },
-  {
-    id: "coming-soon-main-street-goods",
-    name: "Main Street Goods idea",
-    kind: "retailer",
-    blurb: "Idea for practicing a store payment with practice money.",
-    comingSoon: true,
-  },
+  { id: "coming-soon-harbor-inn", name: "Harbor Inn", kind: "hotel", rule: "Holds $150 at check-in", blurb: "A hotel that puts a hold on your card for extras. Practice a check-in with a card that has room for the hold.", comingSoon: true },
+  { id: "coming-soon-north-sky", name: "North Sky Air", kind: "flight", rule: "Prepaid cards often turned away", blurb: "An airline checkout that checks the card's name and billing address. See how a Digna card handles a booking.", comingSoon: true },
+  { id: "coming-soon-roadready", name: "RoadReady Rentals", kind: "rental", rule: "$200 deposit at pickup", blurb: "A car rental counter that takes a refundable deposit. Practice the deposit, and watch it come back.", comingSoon: true },
+  { id: "coming-soon-corner-market", name: "Corner Market", kind: "retailer", rule: "Everyday tap and pay", blurb: "A neighborhood store for everyday buys. Practice paying in person with a card that never goes over its limit.", comingSoon: true },
+  { id: "coming-soon-pixelplay", name: "PixelPlay", kind: "app", rule: "Charges again every month", blurb: "A games and apps subscription. Practice a monthly charge on a card you can pause any time.", comingSoon: true },
+  { id: "coming-soon-main-street", name: "Main Street Goods", kind: "retailer", rule: "Online orders, shipped", blurb: "An online shop with shipping. Practice an online order with a card made just for it.", comingSoon: true },
 ];
 
 export const assistantStarters: string[] = [

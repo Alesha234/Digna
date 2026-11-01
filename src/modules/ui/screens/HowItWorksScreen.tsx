@@ -91,7 +91,7 @@ export function HowItWorksScreen() {
             <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
               <li>A real account, with your own cards and history.</li>
               <li>Practice money: $250 to start, and you can add more. It isn't real money and can't be cashed out.</li>
-              <li>"Try paying" lets you pay sample businesses, like a hotel or a cloud service, that follow the same rules real ones do.</li>
+              <li>"Pay a bill" lets you pay sample businesses, like a hotel or a cloud service, that follow the same rules real ones do.</li>
               <li>The money assistant and bill reading, built on Meta's AI.</li>
             </ul>
           </div>
@@ -122,7 +122,7 @@ export function HowItWorksScreen() {
         {mode === "guest" ? (
           <button type="button" style={cta} onClick={() => setScreen("signup")}>Create a free account</button>
         ) : (
-          <button type="button" style={cta} onClick={() => setScreen("checkout")}>Try paying</button>
+          <button type="button" style={cta} onClick={() => setScreen("snap-bill")}>Pay a bill</button>
         )}
         <button type="button" onClick={() => setScreen("feedback")} style={{ ...cta, background: colors.surface, border: `1px solid ${colors.line}`, fontWeight: 600 }}>
           Ask us something
