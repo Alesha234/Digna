@@ -58,7 +58,7 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
         const sample: BillScanResult = { id: `scan_${Date.now()}`, storeName: "Nimbus Cloud", amountCents: 3200, dueDate: new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10), confidence: "low" };
         setResult(sample);
         setLastScan(sample);
-        setError("The AI reads bills for people with an account. Here's an example of what it finds; create a free account to read your own.");
+        setError("Meta's Muse Spark reads bills for people with an account. Here's a practice money example of what it finds; create a free account to read your own.");
         return;
       }
       const res = await fetch("/api/ai", {
@@ -106,8 +106,8 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18, fontFamily: typography.body, color: colors.ink, maxWidth: 760 }}>
       <header>
-        <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Pay a bill</h1>
-        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>Got a bill, like a cloud service, phone or hotel invoice? Show it to Digna. Meta's AI reads who it's from, how much you owe and when it's due, then makes a card just for it, with the bill's amount as its limit. No typing it all in.</p>
+        <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Pay a practice bill</h1>
+        <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>Got a bill, like a cloud service, phone or hotel invoice? Show it to Digna. Meta&apos;s Muse Spark reads the amount, the place or business it is from and the due date, then makes a card just for it, with the bill&apos;s amount as its limit. Practice money only: no real money moves. No typing it all in.</p>
       </header>
 
       <section aria-label="Picture of the bill" style={box}>
@@ -145,6 +145,10 @@ export function AddBillScreen(props: { onMakeCard?: (bill: BillScanResult) => vo
             <strong>{money(result.amountCents)}</strong>
             {result.dueDate ? ` · due ${result.dueDate}` : ""} · {result.confidence === "high" ? "read clearly" : result.confidence === "medium" ? "mostly clear, worth a check" : "hard to read, please check"}
           </p>
+          {result.confidence === "low" ? (
+            <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.6 }}>Please check the amount and due date before making a card.</p>
+          ) : null}
+          <p style={{ margin: "8px 0 0", fontSize: 14, color: colors.muted, lineHeight: 1.6 }}>The card would use {money(result.amountCents)} as its limit.</p>
           <button type="button" onClick={() => props.onMakeCard?.(result)} style={{ ...pick, marginTop: 14, background: colors.mint, borderColor: colors.mint }}>
             Make a card for this bill
           </button>
