@@ -555,8 +555,20 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                   <strong>{p.merchant}</strong> · {methodLabel(p.method, cards.find((c) => c.id === p.cardId)?.name)}
                   {p.reason && <span style={{ display: "block", fontSize: 13, color: colors.muted }}>{p.reason}</span>}
                 </span>
-                <span style={{ whiteSpace: "nowrap", fontWeight: 700, color: p.result === "approved" ? "#067647" : "#B42318" }}>
-                  {money(p.amountCents)} · {p.result}
+                <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                  <span style={{ whiteSpace: "nowrap", fontWeight: 700, color: p.result === "approved" ? "#067647" : "#B42318" }}>
+                    {money(p.amountCents)} · {p.result}
+                  </span>
+                  {/* Every approved payment keeps its practice receipt as a PDF, right here. */}
+                  {p.result === "approved" && (
+                    <button
+                      type="button"
+                      onClick={() => downloadPracticeReceiptPdf({ placeOrBusiness: p.merchant, amountCents: p.amountCents, date: p.createdAt, receiptId: "DGN-" + p.id.replace(/[^A-Za-z0-9]/g, "").slice(0, 8).toUpperCase() })}
+                      style={{ background: "transparent", border: `1px solid ${colors.line}`, borderRadius: 999, padding: "4px 10px", fontSize: 12.5, fontWeight: 700, color: colors.ink, cursor: "pointer", whiteSpace: "nowrap" }}
+                    >
+                      Receipt PDF
+                    </button>
+                  )}
                 </span>
               </li>
             ))}

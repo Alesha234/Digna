@@ -88,9 +88,9 @@ export type AppScreen = 'welcome' | 'auth' | 'signup' | 'dashboard' | 'card-deta
 export type ComingSoonPlace = {
   id: string;
   name: string;
-  kind: 'hotel' | 'flight' | 'retailer' | 'rental' | 'app';
+  kind: 'hotel' | 'resort' | 'flight' | 'retailer' | 'rental' | 'app';
   blurb: string;
-  /** What a practice checkout there will show, in a few words ("Holds $150 at check-in"). */
+  /** The example deal, in a few words ("15% off weekend stays"). */
   rule: string;
   comingSoon: boolean;
 };

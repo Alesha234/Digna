@@ -5,7 +5,7 @@ import { comingSoonPlaces } from "@/modules/ui/data/demoData";
 import type { ComingSoonPlace } from "@/modules/ui/types";
 
 /** How each kind of coming-soon place is labelled. */
-const COMING_SOON_KIND: Record<ComingSoonPlace["kind"], string> = { hotel: "Hotel", flight: "Airline", retailer: "Shop", rental: "Car rental", app: "Apps & games" };
+const COMING_SOON_KIND: Record<ComingSoonPlace["kind"], string> = { hotel: "Hotel", resort: "Resort", flight: "Airline", retailer: "Shop", rental: "Car rental", app: "Apps & games" };
 
 /** A picture Meta's Muse Image drew for this page (app/api/picture); while it draws, or if it can't, a soft panel. */
 function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: string }) {
@@ -172,22 +172,22 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
-      {/* Coming soon: the kinds of places practice checkouts add next. Invented names, said plainly. */}
+      {/* Coming soon: member deals Digna is working toward. Invented examples, said plainly. */}
       <section aria-label="Coming soon" className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
           <div style={inner}>
             <p style={{ display: "inline-block", margin: "0 0 12px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Coming soon</p>
-            <h2 style={h2}>More places to practice, next</h2>
-            <p style={lead}>Hotels, airlines, rentals and everyday shops are the places that turn cards away most. These are the checkouts Digna adds next, each with the same rules real places use. The names are examples: Digna isn't partnered with any business yet, and it's all practice money.</p>
+            <h2 style={h2}>Member deals, coming soon</h2>
+            <p style={lead}>Digna is working on discounts for its members at the places that turn cards away most: hotels, resorts, airlines, car rentals and shops. These are examples of the kind of deals coming. None are live yet, Digna isn't partnered with these businesses, and today everything uses practice money.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
               {comingSoonPlaces.map((place: ComingSoonPlace) => (
                 <div key={place.id} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
                     <span style={{ fontFamily: typography.body, color: colors.muted, fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{COMING_SOON_KIND[place.kind]}</span>
-                    <span style={{ background: colors.primarySoft, color: colors.mintDark, borderRadius: radii.pill, padding: "3px 10px", fontSize: 12, fontWeight: 700 }}>Coming soon</span>
+                    <span style={{ background: colors.primarySoft, color: colors.mintDark, borderRadius: radii.pill, padding: "3px 10px", fontSize: 12, fontWeight: 700 }}>Example deal</span>
                   </div>
                   <div style={{ fontFamily: typography.heading, color: colors.ink, fontSize: 19, fontWeight: 700 }}>{place.name}</div>
-                  <div style={{ color: colors.ink, fontSize: 14, fontWeight: 600 }}>{place.rule}</div>
+                  <div style={{ color: colors.mintDark, fontFamily: typography.heading, fontSize: 22, fontWeight: 700, lineHeight: 1.2 }}>{place.rule}</div>
                   <p style={{ color: colors.muted, fontSize: 14.5, lineHeight: 1.55, margin: 0 }}>{place.blurb}</p>
                 </div>
               ))}
