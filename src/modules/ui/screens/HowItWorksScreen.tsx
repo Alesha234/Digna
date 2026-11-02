@@ -38,7 +38,7 @@ export function HowItWorksScreen() {
         <h1 style={{ fontFamily: typography.heading, fontSize: 36, margin: "0 0 8px", lineHeight: 1.15 }}>How Digna works</h1>
         <p style={{ margin: 0, fontSize: 18, color: colors.muted, maxWidth: 680 }}>
           Digna is for anyone whose card has been turned away at a hotel desk, a car rental counter or an online checkout, and who was never told why.
-          You make a card for one thing, give it a limit, and pay. If something says no, Digna tells you why in plain words and how to fix it.
+          You make a card for one thing, give it a limit, and pay. If something says no, Digna tells you exactly why and how to fix it.
         </p>
       </header>
 

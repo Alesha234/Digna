@@ -12,7 +12,7 @@ I stood at a hotel front desk with money in my account and watched my card get d
 
 That happens every day to people who pay with Cash App, Chime, debit and prepaid cards. Hotels, car rentals and cloud services turn those cards away, usually without a reason, often in public. It isn't about whether the money is there. It's about which cards a place trusts.
 
-**Digna gives you a card for each of those places**, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, Digna tells you exactly why, in plain words, and what to do next.
+**Digna gives you a card for each of those places**, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, Digna tells you exactly why, and what to do next.
 
 ## Why Digna is different
 
@@ -68,7 +68,7 @@ How a payment moves through Digna:
 2. **Cards issued on demand.** Virtual cards, one number per place, each with its own limit and end date.
 3. **Built around the card's BIN.** Hotels and rental counters read a card's first digits to decide credit, debit or prepaid; Digna's cards are designed for that moment.
 4. **Real-time authorization.** Limit, end date, security code and wallet are checked server-side, inside the database, before a place gets its yes.
-5. **Declines, decoded.** Bank response codes and each place's rules become plain words, with Meta's Muse Spark explaining what to do next.
+5. **Declines, decoded.** Bank response codes and each place's rules become a clear answer, with Meta's Muse Spark explaining what to do next.
 
 Today every step runs on practice money, end to end. Real cards will be issued through a licensed card partner.
 
@@ -87,4 +87,4 @@ Today every step runs on practice money, end to end. Real cards will be issued t
 
 ## How Digna was built
 
-Digna was built in **Ignesis**, an AI studio I'm building: you describe an app in plain words, a team of AI agents plans it, and Meta's Muse Code builds the changes you approve, with every change checked before you see it. Ignesis is a separate project I started before the hackathon and isn't part of this submission. More on it soon.
+Digna was built in **Ignesis**, an AI studio I'm building: you describe an app in your own words, a team of AI agents plans it, and Meta's Muse Code builds the changes you approve, with every change checked before you see it. Ignesis is a separate project I started before the hackathon and isn't part of this submission. More on it soon.
