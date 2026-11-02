@@ -14,6 +14,20 @@ That happens every day to people who pay with Cash App, Chime, debit and prepaid
 
 **Digna gives you a card for each of those places**, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, Digna tells you exactly why, in plain words, and what to do next.
 
+## Why Digna is different
+
+Most money apps stop at holding your money. Digna is built for the moment that matters: when you're at the counter.
+
+| Most money apps | Digna |
+| --- | --- |
+| One card for everything | A card for each place, each with its own limit |
+| "Declined." Nothing else. | Every no comes with the reason, and what to do next |
+| Bills are yours to keep track of | Snap a bill and Digna reads it and sets up its card |
+| Help means waiting on hold | Ask Digna anything, in your own words, any time |
+| One leaked card number puts everything at risk | Close one card; the rest keep working |
+
+*Built from one declined card at a hotel desk, for everyone who's ever felt that moment, and for a future where your money is welcome everywhere.*
+
 ## What you can do today
 
 Everything below works on [digna.dev](https://digna.dev) with a free account (or a sample account, no sign-up needed). It all uses **practice money**: no real money moves, and the site says so on every page.
@@ -43,6 +57,18 @@ Digna uses Meta's models only, through Meta's Model API.
 - **AI calls stay on the server.** The Meta key lives only in the host's settings (`META_API_KEY`). Each person has a daily limit of AI answers, and so does the whole site, to keep costs predictable.
 - **Files in the browser.** PDFs and Word files are read in the browser with its own tools (no extra packages), then only their words are sent to Muse Spark. Uploaded bills are stored in each person's own private folder.
 - **Sound with no files.** The Digna chime is made by the browser itself, plays only after you press Pay, and can be turned off.
+
+## What makes it work
+
+How a payment moves through Digna:
+
+1. **Prefunded wallet.** Every card is backed by money already set aside: no credit pull, no interest, no debt.
+2. **Cards issued on demand.** Virtual cards, one number per place, each with its own limit and end date.
+3. **Built around the card's BIN.** Hotels and rental counters read a card's first digits to decide credit, debit or prepaid; Digna's cards are designed for that moment.
+4. **Real-time authorization.** Limit, end date, security code and wallet are checked server-side, inside the database, before a place gets its yes.
+5. **Declines, decoded.** Bank response codes and each place's rules become plain words, with Meta's Muse Spark explaining what to do next.
+
+Today every step runs on practice money, end to end. Real cards will be issued through a licensed card partner.
 
 ## Run it yourself
 
