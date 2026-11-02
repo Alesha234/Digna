@@ -17,7 +17,6 @@ const navEntries: NavEntry[] = [
   { value: "add-money", label: "Add money" },
   { value: "create-card", label: "New card" },
   { value: "snap-bill", label: "Pay a bill" },
-  { value: "assistant", label: "Assistant" },
   { value: "alerts", label: "Alerts" },
   { value: "settings", label: "Settings" },
   { value: "how-it-works", label: "How it works" },

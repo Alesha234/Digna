@@ -13,21 +13,25 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const RULES =
-  "A natural, warm lifestyle photograph for a fintech website. Any people shown are invented adults who look like no real or famous person, in everyday clothes. No company logos, brands or products, and no words, letters or numbers anywhere in the picture.";
+  "A natural, warm, bright lifestyle photograph for a fintech website, shot like a professional editorial portrait. Any people shown are invented adults who look like no real or famous person, in everyday clothes, with friendly, relaxed expressions. Every face is fully in the frame with room above the head, in the upper half of the picture, never cut off at any edge. No company logos, brands or products, and no words, letters or numbers anywhere in the picture, including on any phone screen.";
 
 /**
  * Who the pictures show (Nov 1, 2026): the owner asked for a landing page where everyone can see themselves, so across
- * the set the people differ in background, age, body and ability, each shown as an ordinary customer.
+ * the set the people differ in background, age, body and ability, each shown as an ordinary customer. Since Nov 2 the top
+ * of the page shows friendly people using their phones, and every face is framed whole.
  */
 const PICTURES: Record<string, { size: string; describe: string }> = {
-  hero: { size: "1024x1024", describe: "A smiling Black woman in her forties with natural curly hair, sitting at a sunny kitchen table and holding a phone, relieved after a payment went through, soft morning light, mint green and navy accents" },
-  cloud: { size: "1536x1024", describe: "A focused young South Asian man who uses a wheelchair, working at a laptop at a desk in a cozy apartment in the evening, setting up hosting for his app, a mug of tea beside him" },
-  hotel: { size: "1536x1024", describe: "An older Latino man with a small suitcase at a bright modern hotel front desk, handing over a card to a friendly East Asian woman receptionist, both smiling" },
-  rental: { size: "1536x1024", describe: "Two friends at a car rental counter on a sunny day, a young Muslim woman wearing a hijab receiving the car keys and a tall white man with a beard beside her, both smiling" },
-  stream: { size: "1536x1024", describe: "A relaxed Indigenous couple in their thirties on a couch at night with a bowl of popcorn, watching a movie on a TV, warm lamp light" },
+  hero: { size: "1024x1024", describe: "A cheerful Black woman in her thirties with natural curly hair, sitting by a sunny cafe window, smiling down at her phone as a payment goes through, a coffee cup beside her, soft golden light, warm amber and navy tones" },
+  "phone-a": { size: "1024x1024", describe: "A smiling older East Asian man with grey hair and glasses on a park bench in autumn, holding up his phone and laughing, head and shoulders portrait" },
+  "phone-b": { size: "1024x1024", describe: "A young Latina nurse in teal scrubs on a bright city sidewalk, smiling as she taps her phone, head and shoulders portrait" },
+  "phone-c": { size: "1024x1024", describe: "A young man with Down syndrome in a bright kitchen, grinning as he looks at his phone, head and shoulders portrait" },
+  cloud: { size: "1536x1024", describe: "A focused young South Asian man who uses a wheelchair, working at a laptop at a desk in a cozy apartment in the evening, setting up hosting for his app, a mug of tea beside him, his whole face clearly visible" },
+  hotel: { size: "1536x1024", describe: "An older Latino man with a small suitcase at a bright modern hotel front desk, handing over a card to a friendly East Asian woman receptionist, both smiling, both faces clearly visible, seen from the side at a slight distance" },
+  rental: { size: "1536x1024", describe: "Two friends at a car rental counter on a sunny day, a young Muslim woman wearing a hijab receiving the car keys and a tall white man with a beard beside her, both smiling, both faces clearly visible, seen from a slight distance" },
+  stream: { size: "1536x1024", describe: "A relaxed Indigenous couple in their thirties on a couch at night with a bowl of popcorn, smiling at each other while a movie plays, warm lamp light, both faces clearly visible" },
 };
 /** Changing what a picture shows means drawing it again: kept pictures carry this version in their name. */
-const VERSION = "v2";
+const VERSION = "v3";
 
 const made = new Map<string, Promise<Uint8Array>>();
 const DIR = join(tmpdir(), "payproxy-pictures");

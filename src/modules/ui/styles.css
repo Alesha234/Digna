@@ -569,3 +569,311 @@ a {
     transform: none !important;
   }
 }
+
+/* Hero, split (Nov 2, 2026): the promise on the left, a friendly person on their phone on the right. */
+.pp-hero-split {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 56px;
+  align-items: center;
+}
+.pp-hero-copy {
+  position: relative;
+  text-align: left;
+}
+.pp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #FFF3D6;
+  color: var(--pp-mint-dark);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.pp-hero-title-left {
+  text-align: left;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.pp-hero-lead {
+  color: var(--pp-muted);
+  font-size: 18px;
+  line-height: 1.65;
+  max-width: 540px;
+  margin: 0;
+}
+.pp-hero-cta-left {
+  justify-content: flex-start;
+  margin: 32px 0 0;
+}
+.pp-micro-left {
+  text-align: left;
+}
+.pp-faces {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--pp-line);
+}
+.pp-face-row {
+  display: flex;
+}
+.pp-face {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid var(--pp-surface);
+  box-shadow: 0 4px 12px rgba(14, 23, 38, 0.12);
+  overflow: hidden;
+  margin-left: -10px;
+  background: #FFF3D6;
+}
+.pp-face:first-child {
+  margin-left: 0;
+}
+.pp-faces-text {
+  margin: 0;
+  color: var(--pp-muted);
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 260px;
+}
+.pp-hero-visual {
+  position: relative;
+  padding: 0 0 44px 28px;
+}
+.pp-hero-photo {
+  position: relative;
+  border-radius: 28px;
+  box-shadow: 0 30px 60px rgba(14, 23, 38, 0.18);
+}
+.pp-hero-toast {
+  position: absolute;
+  left: 0;
+  top: 18%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 36px rgba(14, 23, 38, 0.16);
+  font-size: 14px;
+  color: var(--pp-ink);
+  animation: pp-float 6s ease-in-out infinite;
+}
+.pp-hero-toast-check {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #12B76A;
+  color: #FFFFFF;
+  font-weight: 800;
+}
+.pp-hero-toast-sub {
+  display: block;
+  color: var(--pp-muted);
+  font-size: 12.5px;
+  margin-top: 2px;
+}
+.pp-hero-float-card {
+  position: absolute;
+  right: -12px;
+  bottom: 0;
+  width: 250px;
+  rotate: -4deg;
+  animation: pp-float 7s ease-in-out infinite reverse;
+}
+.pp-hero-float-card .pp-vcard {
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  font-size: 13px;
+}
+@keyframes pp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-hero-toast, .pp-hero-float-card { animation: none; }
+}
+@media (max-width: 900px) {
+  .pp-hero-split {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .pp-hero-visual {
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+@media (max-width: 620px) {
+  .pp-hero-visual { padding: 0 0 56px 0; }
+  .pp-hero-toast { left: -4px; top: 12%; font-size: 13px; }
+  .pp-hero-float-card { width: 210px; right: -4px; }
+  .pp-faces { flex-direction: row; }
+}
+
+/* Sections, a little more grown-up (Nov 2, 2026): a label over each heading, calmer cards, steady spacing. */
+.pp-kicker {
+  display: block;
+  margin: 0 0 10px;
+  color: var(--pp-mint-dark);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.pp-section h2 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.pp-feature {
+  position: relative;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 1px 2px rgba(14, 23, 38, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.pp-feature:hover {
+  box-shadow: 0 14px 32px rgba(14, 23, 38, 0.08);
+  transform: translateY(-2px);
+}
+.pp-feature-num {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #FFF3D6;
+  color: var(--pp-mint-dark);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.pp-story-photo {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(14, 23, 38, 0.1);
+}
+
+/* The money assistant, one tap away on every screen (Nov 2, 2026). */
+.pp-ask-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 20px 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pp-midnight);
+  color: #FFFFFF;
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: 0 16px 36px rgba(14, 23, 38, 0.28);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.pp-ask-fab:hover { transform: translateY(-2px); }
+.pp-ask-fab:focus-visible { outline: 3px solid var(--pp-mint); outline-offset: 3px; }
+.pp-ask-fab-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--pp-mint);
+  color: var(--pp-midnight);
+}
+.pp-ask-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 88px;
+  z-index: 41;
+  width: min(420px, calc(100vw - 32px));
+  height: min(640px, calc(100dvh - 120px));
+  display: flex;
+  flex-direction: column;
+  background: var(--pp-page);
+  border: 1px solid var(--pp-line);
+  border-radius: 24px;
+  box-shadow: 0 30px 70px rgba(14, 23, 38, 0.28);
+  overflow: hidden;
+  animation: pp-rise 0.18s ease-out;
+}
+.pp-ask-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--pp-midnight);
+  color: #FFFFFF;
+}
+.pp-ask-head strong { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; }
+.pp-ask-head span { display: block; font-size: 12.5px; opacity: 0.8; }
+.pp-ask-close {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+}
+.pp-ask-body {
+  flex: 1;
+  overflow-y: auto;
+}
+@keyframes pp-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 620px) {
+  .pp-ask-fab { right: 14px; bottom: 14px; }
+  .pp-ask-fab-label { display: none; }
+  .pp-ask-fab { padding: 0 13px; }
+  .pp-ask-panel { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; border: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-ask-panel { animation: none; }
+}
+/* The split hero needs no soft circle behind its headline; on a phone the people come first, a little shorter. */
+.pp-hero-split .pp-blob-left { display: none; }
+@media (max-width: 620px) {
+  .pp-hero-visual { order: -1; max-width: 100%; }
+  .pp-hero-photo > div { aspect-ratio: 4 / 3.4 !important; }
+  .pp-hero-split { gap: 28px; }
+}
+@media (max-width: 620px) {
+  /* On a phone the person's photo leads: the example card stays in the section below. */
+  .pp-hero-float-card { display: none; }
+  .pp-hero-visual { padding-bottom: 0; }
+  .pp-hero-toast { top: auto; bottom: 14px; left: 12px; }
+}
+@media (max-width: 620px) {
+  .pp-hero-split .pp-blob-right { display: none; }
+}
