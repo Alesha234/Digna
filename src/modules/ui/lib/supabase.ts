@@ -24,8 +24,9 @@ export function plainError(e: unknown): string {
   const msg = e && typeof e === "object" && "message" in e ? String((e as { message: unknown }).message) : String(e ?? "");
   if (/Invalid login credentials/i.test(msg)) return "That email and password don't match an account. Check them, or create an account.";
   if (/User already registered/i.test(msg)) return "There's already an account with that email. Sign in instead.";
-  if (/Email not confirmed/i.test(msg)) return "Confirm your email first: open the link Supabase sent you, then sign in.";
-  if (/Password should be at least/i.test(msg)) return "Use a password of at least 6 characters.";
+  if (/Email not confirmed/i.test(msg)) return "Confirm your email first: open the link Digna sent you, then sign in.";
+  if (/Password should be at least|weak password|Password should contain/i.test(msg)) return "Choose a stronger password: at least 8 characters, with letters and at least one number.";
+  if (/same password|different from the old/i.test(msg)) return "Choose a new password that's different from your old one.";
   if (/rate limit/i.test(msg)) return "Too many tries just now. Wait a minute and try again.";
   if (/Failed to fetch|NetworkError/i.test(msg)) return "Couldn't reach Digna's server. Check your connection and try again.";
   return msg.length > 0 && msg.length < 200 ? msg : "Something went wrong. Try again.";
