@@ -11,6 +11,7 @@ import { CreateCardScreen } from "@/modules/ui/screens/CreateCardScreen";
 import { AddMoneyScreen } from "@/modules/ui/screens/AddMoneyScreen";
 import { HowItWorksScreen } from "@/modules/ui/screens/HowItWorksScreen";
 import { AssistantScreen } from "@/modules/ui/screens/AssistantScreen";
+import { AssistantBubble } from "@/modules/ui/components/AssistantBubble";
 import { SettingsScreen } from "@/modules/ui/screens/SettingsScreen";
 import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
 import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
@@ -25,6 +26,8 @@ function InnerApp() {
   const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard } = usePayProxy();
   const [question, setQuestion] = useState<string | undefined>(undefined);
   const [bill, setBill] = useState<BillScanResult | null>(null);
+  // The money assistant opens over the page from its floating button (Nov 2, 2026), not as a page of its own.
+  const [askOpen, setAskOpen] = useState(false);
   // The protected page a guest tried to open: signing in returns there when it is safe, otherwise stays put.
   const [pendingReturn, setPendingReturn] = useState<string | null>(null);
   const isSignedIn = mode !== "guest";
@@ -38,6 +41,13 @@ function InnerApp() {
   }, [mode, screen]);
 
   function go(next: AppScreen | string): void {
+    // The assistant's old address (the footer link, an old bookmark) opens the panel where you are.
+    if (next === "assistant") {
+      setQuestion(undefined);
+      setAskOpen(true);
+      return;
+    }
+    setAskOpen(false);
     clearNotice();
     setBill(null);
     setScreen(next as AppScreen);
@@ -59,7 +69,7 @@ function InnerApp() {
   }
   function ask(q: string): void {
     setQuestion(q);
-    go("assistant");
+    setAskOpen(true);
   }
 
   function page() {
@@ -114,6 +124,18 @@ function InnerApp() {
         </p>
       )}
       {page()}
+      <AssistantBubble
+        open={askOpen}
+        question={question}
+        signedIn={isSignedIn}
+        onOpen={() => setAskOpen(true)}
+        onClose={() => setAskOpen(false)}
+        onSignUp={() => go("signup")}
+        onTryDemo={() => {
+          setAskOpen(false);
+          signInDemo();
+        }}
+      />
     </AppShell>
   );
 }

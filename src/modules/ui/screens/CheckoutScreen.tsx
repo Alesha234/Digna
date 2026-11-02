@@ -52,8 +52,8 @@ function BizPicture({ name }: { name: string }) {
     <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #FFF3D6, #DDEAF3)" }}>
       {mounted && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/api/picture/${name}?v=2`} alt="" onLoad={() => setOk(true)} onError={() => setOk(false)}
-          style={{ width: "100%", height: "100%", objectFit: "cover", opacity: ok ? 1 : 0, transition: "opacity .4s" }} />
+        <img src={`/api/picture/${name}?v=3`} alt="" onLoad={() => setOk(true)} onError={() => setOk(false)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 30%", opacity: ok ? 1 : 0, transition: "opacity .4s" }} />
       )}
     </div>
   );
@@ -358,9 +358,10 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
           <div style={{ padding: "8px 16px", fontSize: 12, color: colors.muted, background: colors.page, borderBottom: `1px solid ${colors.line}` }}>
             Sample business · practice checkout
           </div>
-          <div style={{ position: "relative", height: 150 }}>
+          {/* Tall enough, and kept on the picture's upper part, that people's faces show whole (Nov 2, 2026). */}
+          <div style={{ position: "relative", height: "clamp(200px, 26vw, 260px)" }}>
             <BizPicture name={shop.picture} />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,23,38,0) 30%, rgba(14,23,38,0.75))" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,23,38,0) 55%, rgba(14,23,38,0.78))" }} />
             <div style={{ position: "absolute", left: 20, bottom: 14, color: "#FFFFFF" }}>
               <div style={{ fontFamily: typography.heading, fontSize: 24, fontWeight: 700 }}>{merchant.name}</div>
               <div style={{ fontSize: 13, opacity: 0.9 }}>{merchant.kind}</div>

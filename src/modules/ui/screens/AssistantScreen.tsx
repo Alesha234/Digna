@@ -99,7 +99,8 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
   return "That " + amount + " payment at " + txn.storeName + " on " + day(txn.occurredAt) + " was declined because " + cause + ". Digna said no to protect you from spending more than you planned. Next step: " + next;
 }
 
-export function AssistantScreen(props: { initialPrompt?: string }) {
+/** inPanel: shown in the floating assistant panel (Nov 2, 2026), whose header already names it. */
+export function AssistantScreen(props: { initialPrompt?: string; inPanel?: boolean }) {
   const { cards, transactions, payments, balance, mode } = usePayProxy();
   const [messages, setMessages] = useState<ChatMsg[]>(function () {
     const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your Digna helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.";
@@ -237,8 +238,9 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
   const disabled: boolean = input.trim().length === 0 || loading;
 
   return (
-    <section className="pp-section" style={{ backgroundColor: colors.page, minHeight: "100vh", padding: spacing.md, fontFamily: typography.body }}>
+    <section className="pp-section" style={{ backgroundColor: colors.page, minHeight: props.inPanel ? "auto" : "100vh", padding: spacing.md, fontFamily: typography.body }}>
       <div style={{ maxWidth: 640, margin: "0 auto", display: "flex", flexDirection: "column", gap: spacing.md }}>
+        {!props.inPanel && (
         <RevealOnScroll>
           <div className="pp-card pp-lift" style={{ backgroundColor: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg }}>
             <h1 style={{ fontFamily: typography.heading, color: colors.ink, margin: 0, marginBottom: spacing.sm }}>Money assistant</h1>
@@ -246,6 +248,7 @@ export function AssistantScreen(props: { initialPrompt?: string }) {
             <p style={{ color: colors.muted, margin: 0, marginTop: spacing.sm, fontSize: 13 }}>Practice money for now: nothing real is charged.</p>
           </div>
         </RevealOnScroll>
+        )}
         <RevealOnScroll delayMs={80}>
           <div className="pp-card pp-lift" style={{ backgroundColor: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg, display: "flex", flexDirection: "column", gap: spacing.md }}>
             {declined.length > 0 ? (

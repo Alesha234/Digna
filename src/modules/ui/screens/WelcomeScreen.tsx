@@ -8,7 +8,7 @@ import type { ComingSoonPlace } from "@/modules/ui/types";
 const COMING_SOON_KIND: Record<ComingSoonPlace["kind"], string> = { hotel: "Hotel", resort: "Resort", flight: "Airline", retailer: "Shop", rental: "Car rental", app: "Apps & games" };
 
 /** A picture Meta's Muse Image drew for this page (app/api/picture); while it draws, or if it can't, a soft panel. */
-function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: string }) {
+function Picture({ name, alt, ratio, round = 18, position = "50% 30%", eager = false }: { name: string; alt: string; ratio: string; round?: number | string; position?: string; eager?: boolean }) {
   // Shown only once it has loaded: until then, or if it can't be drawn, the soft panel stays (never a broken image).
   const [loaded, setLoaded] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -16,10 +16,10 @@ function Picture({ name, alt, ratio }: { name: string; alt: string; ratio: strin
     setMounted(true);
   }, []);
   return (
-    <div style={{ aspectRatio: ratio, borderRadius: 18, overflow: "hidden", background: "linear-gradient(135deg, #FFF3D6, #D6E8F0)" }}>
+    <div style={{ aspectRatio: ratio, borderRadius: round, overflow: "hidden", background: "linear-gradient(135deg, #FFF3D6, #D6E8F0)" }}>
       {mounted && (
-        <img src={`/api/picture/${name}?v=2`} alt={alt} loading="lazy" onLoad={() => setLoaded(true)} onError={() => setLoaded(false)}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: loaded ? 1 : 0, transition: "opacity .4s ease", color: "transparent" }} />
+        <img src={`/api/picture/${name}?v=3`} alt={alt} loading={eager ? "eager" : "lazy"} onLoad={() => setLoaded(true)} onError={() => setLoaded(false)}
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: position, display: "block", opacity: loaded ? 1 : 0, transition: "opacity .4s ease", color: "transparent" }} />
       )}
     </div>
   );
@@ -67,53 +67,72 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
   const { onGetStarted, onSignIn, onTryDemo, isSignedIn, onDashboard, onPayBill } = props;
   const section: React.CSSProperties = { padding: `${spacing.xxl} ${spacing.lg}` };
   const inner: React.CSSProperties = { maxWidth: 1080, margin: "0 auto" };
-  const h2: React.CSSProperties = { fontFamily: typography.heading, color: colors.ink, fontSize: "clamp(26px, 3.4vw, 36px)", lineHeight: 1.15, margin: "0 0 12px" };
+  const h2: React.CSSProperties = { fontFamily: typography.heading, color: colors.ink, fontSize: "clamp(28px, 3.6vw, 40px)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.12, margin: "0 0 14px" };
   const lead: React.CSSProperties = { color: colors.muted, fontSize: 17, lineHeight: 1.6, maxWidth: 640, margin: "0 0 28px" };
   const primary: React.CSSProperties = { background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: shadows.soft };
   const secondary: React.CSSProperties = { background: colors.surface, color: colors.ink, border: "1px solid " + colors.line, borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 600, fontSize: 16, cursor: "pointer" };
 
   return (
     <div style={{ background: colors.page, color: colors.ink, fontFamily: typography.body }}>
-      {/* Hero: centered, playful yet calm */}
+      {/* Hero (Nov 2, 2026): the promise on the left; on the right, a friendly person paying on their phone, drawn by Muse Image. */}
       <section className="pp-hero" style={section}>
         <RevealOnScroll delayMs={0}>
-          <div className="pp-hero-center">
-            <span className="pp-blob pp-blob-left" aria-hidden="true" />
-            <span className="pp-blob pp-blob-right" aria-hidden="true" />
-            <p className="pp-pill-toggle" style={{ margin: "0 0 14px", background: colors.primarySoft, color: colors.mintDark }}>
-              <span className="pp-pill-toggle-dot" aria-hidden="true" />
-              Cards with limits you choose · Free to try
-            </p>
-            <h1 className="pp-hero-title">Dignity at every checkout.</h1>
-            <p style={{ ...lead, fontSize: 18, maxWidth: 640, margin: "0 auto" }}>
-              Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
-            </p>
-            {isSignedIn ? (
-              <>
-                <div className="pp-hero-cta-row">
-                  <button type="button" className="pp-btn-mint" onClick={onDashboard} style={primary}>Dashboard</button>
-                  <button type="button" className="pp-btn-secondary" onClick={onPayBill} style={secondary}>Pay a bill</button>
+          <div className="pp-hero-split">
+            <div className="pp-hero-copy">
+              <span className="pp-blob pp-blob-left" aria-hidden="true" />
+              <p className="pp-eyebrow">
+                <span className="pp-pill-toggle-dot" aria-hidden="true" />
+                Cards with limits you choose · Free to try
+              </p>
+              <h1 className="pp-hero-title pp-hero-title-left">Dignity at every checkout.</h1>
+              <p className="pp-hero-lead">
+                Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
+              </p>
+              {isSignedIn ? (
+                <>
+                  <div className="pp-hero-cta-row pp-hero-cta-left">
+                    <button type="button" className="pp-btn-mint" onClick={onDashboard} style={primary}>Dashboard</button>
+                    <button type="button" className="pp-btn-secondary" onClick={onPayBill} style={secondary}>Pay a bill</button>
+                  </div>
+                  <p className="pp-micro pp-micro-left">Practice money for now: nothing real is charged.</p>
+                </>
+              ) : (
+                <>
+                  <div className="pp-hero-cta-row pp-hero-cta-left">
+                    <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
+                    <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
+                  </div>
+                  <p className="pp-micro pp-micro-left">
+                    Already have an account?{" "}
+                    <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
+                    {" · "}Starts with $250 in practice money.
+                  </p>
+                </>
+              )}
+              <div className="pp-faces" aria-label="Digna is made for everyone">
+                <div className="pp-face-row" aria-hidden="true">
+                  {["phone-a", "phone-b", "phone-c"].map((n) => (
+                    <div key={n} className="pp-face">
+                      <Picture name={n} alt="" ratio="1 / 1" round="50%" position="50% 35%" eager />
+                    </div>
+                  ))}
                 </div>
-                <p className="pp-micro">Practice money for now: nothing real is charged.</p>
-              </>
-            ) : (
-              <>
-                <div className="pp-hero-cta-row">
-                  <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
-                  <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
-                </div>
-                <p className="pp-micro">
-                  Already have an account?{" "}
-                  <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
-                  {" · "}Starts with $250 in practice money.
-                </p>
-              </>
-            )}
-            <div className="pp-hero-cards" aria-label="Example cards">
-              <div className="pp-hero-card-a">
-                <SampleCard name="Cloud hosting" spent={32} cap={50} last="4242" bg="linear-gradient(135deg, #0E1726, #17405C)" />
+                <p className="pp-faces-text">Made for everyone who's ever been turned away at a counter.</p>
               </div>
-              <div className="pp-hero-card-b">
+            </div>
+            <div className="pp-hero-visual">
+              <span className="pp-blob pp-blob-right" aria-hidden="true" />
+              <div className="pp-hero-photo">
+                <Picture name="hero" alt="A smiling woman paying on her phone in a sunny cafe" ratio="4 / 5" round={28} position="50% 35%" eager />
+              </div>
+              <div className="pp-hero-toast" aria-label="Example notification">
+                <span className="pp-hero-toast-check" aria-hidden="true">✓</span>
+                <span>
+                  <strong>Approved · Harborview Hotel</strong>
+                  <span className="pp-hero-toast-sub">$150.00 · Hotel card · Example</span>
+                </span>
+              </div>
+              <div className="pp-hero-float-card">
                 <SampleCard name="Hotel check-in" spent={150} cap={200} last="1881" bg="linear-gradient(135deg, #17405C, #0E1726)" />
               </div>
             </div>
@@ -128,9 +147,10 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             { t: "The problem", b: "Cash App, Chime, debit and prepaid cards get turned away by many hotels, car rentals and cloud services, and nobody explains why." },
             { t: "What Digna does", b: "Gives you a card for each of those places. It works like a credit card, pays from your Digna wallet, and can never spend past the limit you choose." },
             { t: "What you can do today", b: "Make an account, get $250 in practice money, make cards, and see what real-world checkouts say to your everyday card versus a Digna card. Real cards are coming." },
-          ].map((f) => (
-            <article key={f.t} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg }}>
-              <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 8px", color: colors.ink }}>{f.t}</h2>
+          ].map((f, i) => (
+            <article key={f.t} className="pp-feature">
+              <span className="pp-feature-num" aria-hidden="true">{i + 1}</span>
+              <h2 style={{ fontFamily: typography.heading, fontSize: 18, fontWeight: 600, margin: "0 0 8px", color: colors.ink }}>{f.t}</h2>
               <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{f.b}</p>
             </article>
           ))}
@@ -165,12 +185,15 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section className="pp-section" style={{ ...section, background: colors.surface, borderTop: "1px solid " + colors.line, borderBottom: "1px solid " + colors.line }}>
         <RevealOnScroll delayMs={60}>
           <div style={inner}>
+            <span className="pp-kicker">Where Digna helps</span>
             <h2 style={h2}>Made for the moments your card gets turned away</h2>
             <p style={lead}>One card for each place, each with its own limit. Paid from your Digna wallet, and works like a credit card.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
               {STORIES.map((s) => (
                 <article key={s.title}>
-                  <Picture name={s.picture} alt={s.alt} ratio="3 / 2" />
+                  <div className="pp-story-photo">
+                    <Picture name={s.picture} alt={s.alt} ratio="3 / 2" round={20} />
+                  </div>
                   <h3 style={{ fontFamily: typography.heading, fontSize: 20, margin: "16px 0 6px" }}>{s.title}</h3>
                   <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{s.text}</p>
                 </article>
@@ -208,6 +231,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
           <div style={inner}>
+            <span className="pp-kicker">Three steps</span>
             <h2 style={h2}>How it works</h2>
             <ol style={{ listStyle: "none", margin: "24px 0 0", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: spacing.md }}>
               {[
@@ -215,7 +239,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
                 { t: "Make a card", b: "One for each place: name it, choose its limit and the day it stops." },
                 { t: "Pay and stay in control", b: "Use it at checkout. Pause it in one tap; it can never spend past its limit." },
               ].map((s, i) => (
-                <li key={s.t} className="pp-card" style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg, boxShadow: shadows.soft }}>
+                <li key={s.t} className="pp-feature">
                   <div style={{ fontFamily: typography.heading, background: colors.mint, color: colors.midnight, width: 34, height: 34, borderRadius: radii.pill, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, marginBottom: spacing.md }}>{i + 1}</div>
                   <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18 }}>{s.t}</h3>
                   <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{s.b}</p>
@@ -231,6 +255,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         <RevealOnScroll delayMs={0}>
           <div className="pp-hero-grid" style={{ alignItems: "center" }}>
             <div>
+              <span className="pp-kicker">Pay a bill</span>
               <h2 style={h2}>Try it before you need it</h2>
               <p style={lead}>
                 Pay a bill has sample businesses that follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards, a car rental counter and a streaming service. Pay with an example Chime debit card, Cash App Card or prepaid card, then with a Digna card, and see what each one says, and why.
@@ -257,6 +282,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
           <div style={inner}>
+            <span className="pp-kicker">Under the hood</span>
             <h2 style={h2}>Built on Meta's AI</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md, marginTop: 20 }}>
               {[
@@ -264,7 +290,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
                 { t: "Pay a bill", b: "Show Digna a bill (a photo, a screenshot or pasted text) and Muse Spark reads who it's from, how much and when it's due, then sets up a card for it." },
                 { t: "This page's pictures", b: "Drawn by Muse Image. The people in them are invented." },
               ].map((f) => (
-                <article key={f.t} className="pp-card" style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, padding: spacing.lg }}>
+                <article key={f.t} className="pp-feature">
                   <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18 }}>{f.t}</h3>
                   <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{f.b}</p>
                 </article>
@@ -277,6 +303,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       {/* FAQ */}
       <section className="pp-section" style={{ ...section, background: colors.surface, borderTop: "1px solid " + colors.line }}>
         <div style={{ ...inner, maxWidth: 760 }}>
+          <span className="pp-kicker">Good to know</span>
           <h2 style={h2}>Questions</h2>
           {FAQS.map((f) => (
             <details key={f.q} style={{ borderTop: "1px solid " + colors.line, padding: "16px 0" }}>
