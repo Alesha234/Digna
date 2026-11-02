@@ -183,19 +183,30 @@ export function PayMoment(props: { moment: Moment; onClose: () => void }) {
             </svg>
           </div>
         )}
+        {!ok && (
+          <div className="pp-moment-nope" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 40 40">
+              <path d="M15 11 L9 17 L15 23" fill="none" stroke="#FFE2B8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M9 17 H24 a7 7 0 0 1 0 14 H19" fill="none" stroke="#FFE2B8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        )}
         <div className={`pp-moment-msg ${ok ? "" : "is-no"}`}>
           <div className="pp-moment-big">{ok ? "Approved" : "Not this card"}</div>
           {ok ? (
-            <div className="pp-moment-small">
-              {money(m.amountCents)} at {m.merchant}
-              {left != null ? (
-                <>
-                  {" · "}
-                  <b>{money(Math.max(0, left))}</b> left on this card
-                </>
-              ) : (
-                ` · ${m.cardName} ···· ${m.last4}`
-              )}
+            <>
+              <div className="pp-moment-small">
+                {money(m.amountCents)} at {m.merchant}
+              </div>
+              <div className="pp-moment-left">
+                {left != null ? (
+                  <>
+                    <b>{money(Math.max(0, left))}</b> left on this card
+                  </>
+                ) : (
+                  `${m.cardName} ···· ${m.last4}`
+                )}
+              </div>
               <div className="pp-moment-tag">
                 {words.map((w, i) => (
                   <span key={i} className="pp-moment-word" style={{ animationDelay: `${1.7 + i * 0.12}s` }}>
@@ -203,7 +214,7 @@ export function PayMoment(props: { moment: Moment; onClose: () => void }) {
                   </span>
                 ))}
               </div>
-            </div>
+            </>
           ) : (
             <div className="pp-moment-small">{m.reason ?? "This card can't be used here."}</div>
           )}
