@@ -18,6 +18,7 @@ import { BILL_FILE_ACCEPT, BILL_FILE_MAX_BYTES, PRACTICE_DOCS, billFileKind, doc
 import { downloadPracticeReceipt } from "@/modules/ui/components/TransactionList";
 import { downloadPracticeReceiptPdf } from "@/modules/ui/lib/practicePdf";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
+import { PayMoment, type Moment } from "@/modules/ui/components/PayMoment";
 
 const box: React.CSSProperties = { background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20 };
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -140,6 +141,8 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
   const [billError, setBillError] = useState<string | null>(null);
   const [justAdded, setJustAdded] = useState<string | null>(null);
   const checkoutRefEl = useRef<HTMLDivElement | null>(null);
+  // The Digna moment after each payment (Nov 2, 2026).
+  const [moment, setMoment] = useState<Moment | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
   // The latest checkout, so a retry right after raising a limit uses the raised limit.
@@ -241,6 +244,20 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
       // A real card network takes a moment; so does this one, so the answer doesn't feel instant and fake.
       await new Promise((r) => setTimeout(r, Math.max(0, 1300 - (Date.now() - started))));
       const at = new Date();
+      // What was left on the Digna card, read back after the payment, for the moment's countdown.
+      const paidCard = out.method === "payproxy" ? cardsRef.current.find((c) => c.id === out.cardId) : undefined;
+      const leftAfter = paidCard ? Math.max(0, paidCard.capCents - paidCard.spentCents) : null;
+      setMoment({
+        result: out.result,
+        merchant: merchant.name,
+        amountCents: cents,
+        cardName: out.method === "payproxy" ? `Digna card: ${out.cardName}` : out.cardName.replace(" (sample)", ""),
+        last4: out.last4,
+        digna: out.method === "payproxy",
+        leftAfter: out.result === "approved" ? leftAfter : null,
+        leftBefore: out.result === "approved" && leftAfter !== null ? leftAfter + cents : null,
+        reason: out.reason,
+      });
       setLast({ ...out, merchant: merchant.name, amountCents: cents, receipt: `DG-${at.getTime().toString(36).toUpperCase().slice(-8)}`, at: at.toLocaleString(), atIso: at.toISOString() });
       if (out.method === "payproxy") {
         // By now the card has been read back after the payment, so what's left is what the database holds.
@@ -642,6 +659,8 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         )}
         </Fold>
       </section>
+
+      {moment && <PayMoment moment={moment} onClose={() => setMoment(null)} />}
 
       {toast && (
         <div role="status" aria-label="Digna notification" style={{ position: "fixed", top: 116, right: 16, left: "auto", maxWidth: 360, zIndex: 50, background: colors.midnight, color: "#FFFFFF", borderRadius: 14, padding: "12px 16px", boxShadow: "0 12px 30px rgba(14,23,38,0.35)", animation: "pp-toast .25s ease-out", display: "flex", gap: 12, alignItems: "flex-start" }}>
