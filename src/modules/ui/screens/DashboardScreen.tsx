@@ -20,6 +20,7 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
   const balanceCents: number = balance.availableCents;
   const warnings = buildWarnings(cards, balance);
   const featured: VirtualCard | undefined = cards.find((c: VirtualCard) => c.status === "active") ?? cards[0];
+  const firstName: string = typeof user?.displayName === "string" && user.displayName.length > 0 ? user.displayName.split(" ")[0] : "there";
 
   function handleWarningAction(w: { cardId?: string }): void {
     if (typeof w.cardId === "string" && w.cardId.length > 0) {
@@ -41,6 +42,7 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
       }}
     >
       <div
+        className="pp-dash-stack"
         style={{
           width: "100%",
           maxWidth: 720,
@@ -50,10 +52,30 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
           paddingBottom: spacing.xl,
           display: "flex",
           flexDirection: "column",
-          gap: spacing.lg,
+          gap: 20,
         }}
       >
-        <header style={{ display: "flex", flexDirection: "column", gap: spacing.md }}>
+        <style>{`@media (max-width: 560px){.pp-dash-cards{grid-template-columns:1fr !important;}}`}</style>
+        <header style={{ display: "flex", flexDirection: "column", gap: spacing.sm }}>
+          <div style={{ display: "flex", alignItems: "center", gap: spacing.sm, flexWrap: "wrap" }}>
+            <p style={{ fontFamily: typography.body, color: colors.muted, fontSize: 14, margin: 0 }}>
+              Welcome back, {firstName}
+            </p>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                borderRadius: radii.pill,
+                padding: "4px 10px",
+                background: colors.primarySoft,
+                color: colors.mintDark,
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              Practice money
+            </span>
+          </div>
           <h1 style={{ fontFamily: typography.heading, color: colors.ink, fontSize: 28, lineHeight: 1.2, margin: 0 }}>
             Dashboard
           </h1>
@@ -62,43 +84,25 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
           </p>
         </header>
 
-        {featured ? (
-          <LedgerBand
-            card={featured}
-            balanceCents={balanceCents}
-            onFreeze={() => freezeCard(featured.id)}
-            onUnfreeze={() => unfreezeCard(featured.id)}
-            onViewHistory={() => onOpenCard(featured.id)}
-          />
-        ) : null}
-
-        <BalanceCard balanceCents={balanceCents} onAddMoney={onAddMoney} />
+        <BalanceCard balanceCents={balanceCents} onAddMoney={onAddMoney} onCreateCard={onCreateCard} />
 
         <WarningBanner warnings={warnings} onAction={(w) => handleWarningAction(w)} />
 
-        <div style={{ display: "flex", gap: spacing.md, flexWrap: "wrap" }}>
-          <button
-            type="button"
-            className="pp-btn-mint"
-            onClick={onCreateCard}
-            style={{
-              flex: "1 1 160px",
-              backgroundColor: colors.surface,
-              color: colors.ink,
-              border: `1px solid ${colors.line}`,
-              borderRadius: radii.pill,
-              padding: `${spacing.md} ${spacing.lg}`,
-              fontFamily: typography.body,
-              fontSize: 15,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            New card
-          </button>
-        </div>
+        {featured ? (
+          <div style={{ position: "relative", zIndex: 2, marginBottom: -18 }}>
+            <VirtualCardView
+              card={featured}
+              selected={false}
+              tone="dark"
+              onOpen={() => onOpenCard(featured.id)}
+              onFreeze={() => freezeCard(featured.id)}
+              onUnfreeze={() => unfreezeCard(featured.id)}
+              onClose={() => closeCard(featured.id)}
+            />
+          </div>
+        ) : null}
 
-        <section aria-label="Cards" style={{ display: "flex", flexDirection: "column", gap: spacing.md }}>
+        <section aria-label="Cards" style={{ display: "flex", flexDirection: "column", gap: spacing.md, paddingTop: featured ? 34 : 0 }}>
           <h2 style={{ fontFamily: typography.heading, color: colors.ink, fontSize: 20, margin: 0 }}>
             Cards
           </h2>
@@ -121,10 +125,11 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
             </div>
           ) : (
             <div
+              className="pp-dash-cards"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: spacing.md,
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 16,
               }}
             >
               {cards.map((card: VirtualCard) => (
@@ -142,6 +147,16 @@ export function DashboardScreen(props: { onOpenCard: (cardId: string) => void; o
             </div>
           )}
         </section>
+
+        {featured ? (
+          <LedgerBand
+            card={featured}
+            balanceCents={balanceCents}
+            onFreeze={() => freezeCard(featured.id)}
+            onUnfreeze={() => unfreezeCard(featured.id)}
+            onViewHistory={() => onOpenCard(featured.id)}
+          />
+        ) : null}
 
       </div>
     </div>

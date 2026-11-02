@@ -8,8 +8,8 @@ void theme;
 const _balanceTypeGuard: BalanceTypeRefs | null = null;
 void _balanceTypeGuard;
 
-export function BalanceCard(props: { balanceCents: number; onAddMoney: () => void; showAddMoney?: boolean }) {
-  const { balanceCents, onAddMoney, showAddMoney = true } = props as { balanceCents: number; onAddMoney: () => void; showAddMoney?: boolean };
+export function BalanceCard(props: { balanceCents: number; onAddMoney: () => void; showAddMoney?: boolean; onCreateCard?: () => void }) {
+  const { balanceCents, onAddMoney, showAddMoney = true, onCreateCard } = props as { balanceCents: number; onAddMoney: () => void; showAddMoney?: boolean; onCreateCard?: () => void };
   return (
     <section
       className="pp-card"
@@ -22,7 +22,7 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
         border: `1px solid ${colors.line}`,
         borderRadius: radii.card,
         boxShadow: shadows.soft,
-        padding: spacing.lg,
+        padding: 20,
         fontFamily: typography.body,
         transition: "transform 160ms ease, box-shadow 160ms ease",
       }}
@@ -33,8 +33,8 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
           color: colors.muted,
           fontFamily: typography.body,
           fontSize: "13px",
-          fontWeight: 600,
-          letterSpacing: "0.02em",
+          fontWeight: 700,
+          letterSpacing: "0.08em",
           textTransform: "uppercase",
         }}
       >
@@ -44,10 +44,10 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
         style={{
           color: colors.ink,
           fontFamily: typography.heading,
-          fontSize: "34px",
+          fontSize: "44px",
           lineHeight: 1.1,
           fontWeight: 700,
-          marginTop: spacing.md,
+          marginTop: spacing.sm,
         }}
       >
         {formatCurrency(balanceCents)}
@@ -57,37 +57,70 @@ export function BalanceCard(props: { balanceCents: number; onAddMoney: () => voi
           color: colors.muted,
           fontFamily: typography.body,
           fontSize: "14px",
-          marginTop: spacing.md,
+          marginTop: spacing.sm,
         }}
       >
         Practice money — nothing real is charged.
       </div>
-      {showAddMoney ? (
-      <button
-        type="button"
-        className="pp-btn-mint"
-        aria-label="Add money"
-        onClick={onAddMoney}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          backgroundColor: colors.mint,
-          color: "#0E1726",
-          border: `1px solid ${colors.mint}`,
-          borderRadius: 999,
-          padding: `${spacing.md} ${spacing.lg}`,
-          fontFamily: typography.body,
-          fontSize: "15px",
-          fontWeight: 700,
-          marginTop: spacing.lg,
-          cursor: "pointer",
-        }}
-      >
-        Add money
-      </button>
+      {showAddMoney || typeof onCreateCard === "function" ? (
+        <div className="pp-balance-actions">
+          {showAddMoney ? (
+            <button
+              type="button"
+              className="pp-btn-mint"
+              aria-label="Add money"
+              onClick={onAddMoney}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flex: "1 1 160px",
+                minHeight: 44,
+                backgroundColor: colors.mint,
+                color: colors.midnight,
+                border: `1px solid ${colors.mint}`,
+                borderRadius: radii.pill,
+                padding: `${spacing.md} ${spacing.lg}`,
+                fontFamily: typography.body,
+                fontSize: "15px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Add money
+            </button>
+          ) : null}
+          {typeof onCreateCard === "function" ? (
+            <button
+              type="button"
+              className="pp-btn-secondary"
+              aria-label="New card"
+              onClick={onCreateCard}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flex: "1 1 160px",
+                minHeight: 44,
+                backgroundColor: colors.midnight,
+                color: colors.surface,
+                border: `1px solid ${colors.midnight}`,
+                borderRadius: radii.pill,
+                padding: `${spacing.md} ${spacing.lg}`,
+                fontFamily: typography.body,
+                fontSize: "15px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              New card
+            </button>
+          ) : null}
+        </div>
       ) : null}
+      <div className="pp-notice-amber" role="note">
+        Practice money only. Add money tops up your practice balance — no real bank moves any real dollars.
+      </div>
     </section>
   );
 }

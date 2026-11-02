@@ -32,7 +32,7 @@ export const spacing = {
 } as const;
 
 export const radii = {
-  card: 14,
+  card: 16,
   pill: 999,
   sm: 8,
   md: 12,
