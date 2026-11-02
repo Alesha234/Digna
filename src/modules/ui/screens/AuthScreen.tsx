@@ -16,16 +16,16 @@ const field: React.CSSProperties = {
 };
 
 /**
- * A new password's rules (Nov 2, 2026): at least 8 characters, with letters and at least one number. Signing in only
+ * A new password's rules (Nov 2, 2026; 16 characters to match Digna's sign-in service): at least 16 characters, with letters and at least one number. Signing in only
  * needs the password the person already has, so older, shorter ones still work.
  */
 export const PASSWORD_RULES: { label: string; ok: (p: string) => boolean }[] = [
-  { label: "At least 8 characters", ok: (p) => p.length >= 8 },
+  { label: "At least 16 characters", ok: (p) => p.length >= 16 },
   { label: "Letters", ok: (p) => /[A-Za-z]/.test(p) },
   { label: "At least one number", ok: (p) => /\d/.test(p) },
 ];
 export const passwordProblem = (p: string): string | null =>
-  PASSWORD_RULES.every((r) => r.ok(p)) ? null : "Choose a stronger password: at least 8 characters, with letters and at least one number.";
+  PASSWORD_RULES.every((r) => r.ok(p)) ? null : "Choose a stronger password: at least 16 characters, with letters and at least one number.";
 
 /** A password box with a Show/Hide switch, so people can check what they typed. */
 function PasswordField(props: { name: string; label: string; autoComplete: string; value?: string; onChange?: (v: string) => void }) {
@@ -133,6 +133,7 @@ export function AuthScreen(props: { startWith?: "signin" | "signup"; returnTo?: 
             <>
               <PasswordField name="password" label="Choose a password" autoComplete="new-password" value={newPassword} onChange={setNewPassword} />
               <PasswordRules value={newPassword} />
+              <p style={{ margin: "-4px 0 0", fontSize: 12.5, color: colors.muted, lineHeight: 1.5 }}>Tip: a short sentence is easy to remember and hard to guess, like &ldquo;blue bike rides fast 7&rdquo;.</p>
             </>
           )}
           {signingIn && (

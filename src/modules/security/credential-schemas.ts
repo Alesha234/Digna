@@ -14,10 +14,10 @@ export const SignupSchema = z
       .max(254, "That email address is too long."),
     password: z
       .string({
-        required_error: "Password needs at least 8 characters.",
-        invalid_type_error: "Password needs at least 8 characters.",
+        required_error: "Password needs at least 16 characters.",
+        invalid_type_error: "Password needs at least 16 characters.",
       })
-      .min(8, "Password needs at least 8 characters.")
+      .min(16, "Password needs at least 16 characters.")
       .max(72, "Please use a password with 72 characters or fewer."),
   })
   .strict();

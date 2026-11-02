@@ -20,9 +20,9 @@ export const PasswordResetConfirmSchema = z
       .min(10, { message: "Invalid reset link." })
       .max(500, { message: "Invalid reset link." }),
     newPassword: z
-      .string({ message: "Choose a password with at least 8 characters." })
-      .min(8, { message: "Choose a password with at least 8 characters." })
-      .max(72, { message: "Choose a password with at least 8 characters." }),
+      .string({ message: "Choose a password with at least 16 characters." })
+      .min(16, { message: "Choose a password with at least 16 characters." })
+      .max(72, { message: "Choose a password with at least 16 characters." }),
     confirmPassword: z.string({ message: "Passwords need to match." }),
   })
   .strict()
