@@ -918,3 +918,20 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .pp-moment *, .pp-moment *::after { animation-duration: .01s !important; animation-delay: 0s !important; }
 }
+
+/* Why Digna (Nov 2, 2026): most money apps, side by side with Digna. On a phone each row stacks. */
+.pp-compare { border: 1px solid var(--pp-line); border-radius: 20px; overflow: hidden; background: var(--pp-surface); margin-top: 8px; }
+.pp-compare-row { display: grid; grid-template-columns: 1fr 1.15fr; gap: 20px; padding: 16px 24px; border-top: 1px solid var(--pp-line); align-items: center; }
+.pp-compare-row:first-child { border-top: 0; }
+.pp-compare-head { background: var(--pp-page); font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pp-muted); padding-top: 12px; padding-bottom: 12px; }
+.pp-compare-head span:last-child { color: var(--pp-mint-dark); }
+.pp-compare-them { color: var(--pp-muted); font-size: 15px; line-height: 1.5; }
+.pp-compare-us { display: flex; gap: 10px; align-items: flex-start; color: var(--pp-ink); font-weight: 600; font-size: 15.5px; line-height: 1.5; }
+.pp-compare-check { flex: 0 0 auto; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #FFF3D6; color: var(--pp-mint-dark); font-size: 12px; font-weight: 800; }
+.pp-compare-close { margin: 20px 0 0; color: var(--pp-muted); font-style: italic; font-size: 15.5px; line-height: 1.6; max-width: 720px; }
+@media (max-width: 620px) {
+  .pp-compare-row { grid-template-columns: 1fr; gap: 6px; padding: 14px 18px; }
+  .pp-compare-head { display: none; }
+  .pp-compare-them { font-size: 13.5px; }
+  .pp-compare-them::before { content: "Most money apps: "; font-weight: 700; }
+}

@@ -54,6 +54,15 @@ const STORIES = [
   { picture: "rental", alt: "Two friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna card covers the deposit, and you can pause it in one tap when you bring the car back." },
 ];
 
+/** How Digna differs from the money apps people already use (Nov 2, 2026): theirs, then Digna's. */
+const COMPARE: [string, string][] = [
+  ["One card for everything", "A card for each place, each with its own limit"],
+  ["\u201cDeclined.\u201d Nothing else.", "Every no comes with the reason, and what to do next"],
+  ["Bills are yours to keep track of", "Snap a bill and Digna reads it and sets up its card"],
+  ["Help means waiting on hold", "Ask Digna anything, in your own words, any time"],
+  ["One leaked card number puts everything at risk", "Close one card; the rest keep working"],
+];
+
 const FAQS = [
   { q: "Is this real money?", a: "Not yet. Your account, cards and history are real and saved, but for now every dollar is practice money, so you can try everything without risk. Real cards are on the way, and we'll say so clearly here when they arrive." },
   { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Pay a bill to pay sample businesses with an everyday card or a Digna card and see what each would say, and why." },
@@ -155,6 +164,33 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             </article>
           ))}
         </div>
+      </section>
+
+      {/* Why Digna (Nov 2, 2026): what makes it different from the money apps people already use, in plain words. */}
+      <section aria-label="Why Digna" className="pp-section" style={section}>
+        <RevealOnScroll delayMs={0}>
+          <div style={inner}>
+            <span className="pp-kicker">Why Digna</span>
+            <h2 style={h2}>More than a place to keep your money</h2>
+            <p style={lead}>Most money apps stop at holding your money. Digna is built for the moment that matters: when you're at the counter.</p>
+            <div className="pp-compare" role="table" aria-label="Most money apps compared with Digna">
+              <div className="pp-compare-row pp-compare-head" role="row">
+                <span role="columnheader">Most money apps</span>
+                <span role="columnheader">Digna</span>
+              </div>
+              {COMPARE.map(([them, us]) => (
+                <div key={us} className="pp-compare-row" role="row">
+                  <span role="cell" className="pp-compare-them">{them}</span>
+                  <span role="cell" className="pp-compare-us">
+                    <span className="pp-compare-check" aria-hidden="true">✓</span>
+                    {us}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <p className="pp-compare-close">Built from one declined card at a hotel desk, for everyone who's ever felt that moment, and for a future where your money is welcome everywhere.</p>
+          </div>
+        </RevealOnScroll>
       </section>
 
       {/* Dignity by design */}
@@ -283,12 +319,14 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         <RevealOnScroll delayMs={0}>
           <div style={inner}>
             <span className="pp-kicker">Under the hood</span>
-            <h2 style={h2}>Built on Meta's AI</h2>
+            <h2 style={h2}>The smart parts, in plain words</h2>
+            <p style={lead}>Digna runs on Meta's AI, quietly doing the paperwork so you don't have to.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md, marginTop: 20 }}>
               {[
-                { t: "Money assistant", b: "Muse Spark explains why a payment was declined, in plain words, using your own cards and payments." },
-                { t: "Pay a bill", b: "Show Digna a bill (a photo, a screenshot or pasted text) and Muse Spark reads who it's from, how much and when it's due, then sets up a card for it." },
-                { t: "This page's pictures", b: "Drawn by Muse Image. The people in them are invented." },
+                { t: "It reads your bills", b: "A photo, a screenshot, a PDF or a Word file: Meta's Muse Spark finds who it's from, how much and when it's due, then sets up a card just for it." },
+                { t: "It understands you", b: "Ask in your own words. Meta's Muse Spark answers like a person, using your own cards and payments." },
+                { t: "It explains every no", b: "When a card is turned down, Digna says exactly why, in plain words, and what to do next." },
+                { t: "Every picture here", b: "Drawn by Meta's Muse Image. The people in them are invented." },
               ].map((f) => (
                 <article key={f.t} className="pp-feature">
                   <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18 }}>{f.t}</h3>

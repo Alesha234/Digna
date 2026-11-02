@@ -14,6 +14,20 @@ That happens every day to people who pay with Cash App, Chime, debit and prepaid
 
 **Digna gives you a card for each of those places**, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, Digna tells you exactly why, in plain words, and what to do next.
 
+## Why Digna is different
+
+Most money apps stop at holding your money. Digna is built for the moment that matters: when you're at the counter.
+
+| Most money apps | Digna |
+| --- | --- |
+| One card for everything | A card for each place, each with its own limit |
+| "Declined." Nothing else. | Every no comes with the reason, and what to do next |
+| Bills are yours to keep track of | Snap a bill and Digna reads it and sets up its card |
+| Help means waiting on hold | Ask Digna anything, in your own words, any time |
+| One leaked card number puts everything at risk | Close one card; the rest keep working |
+
+*Built from one declined card at a hotel desk, for everyone who's ever felt that moment, and for a future where your money is welcome everywhere.*
+
 ## What you can do today
 
 Everything below works on [digna.dev](https://digna.dev) with a free account (or a sample account, no sign-up needed). It all uses **practice money**: no real money moves, and the site says so on every page.
