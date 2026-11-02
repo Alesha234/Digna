@@ -94,3 +94,18 @@ export type ComingSoonPlace = {
   rule: string;
   comingSoon: boolean;
 };
+
+/** A bill or invoice the person added on Pay a bill (Nov 2, 2026): what Muse Spark read, its file, and whether it's paid. */
+export type SavedBill = {
+  id: string;
+  business: string;
+  amountCents: number;
+  dueDate: string | null;
+  fileName: string | null;
+  filePath: string | null;
+  fileKind: 'photo' | 'pdf' | 'word' | 'text';
+  status: 'unpaid' | 'paid';
+  cardId: string | null;
+  paidAt: string | null;
+  createdAt: string;
+};

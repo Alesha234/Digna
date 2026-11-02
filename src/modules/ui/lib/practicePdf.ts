@@ -128,6 +128,11 @@ function safeFileId(d: PracticePdfDetails): string {
   return id.length > 0 ? id : "practice";
 }
 
+/** Downloads any practice paper (a sample bill or invoice) as a one-page PDF with these lines. */
+export function downloadPdf(fileName: string, title: string, lines: string[]): void {
+  savePdf(fileName, buildPdf(title, lines));
+}
+
 /** Downloads the practice receipt for an approved payment as a PDF. */
 export function downloadPracticeReceiptPdf(d: PracticePdfDetails): void {
   savePdf(

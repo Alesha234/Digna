@@ -14,6 +14,8 @@ export const MERCHANTS: Merchant[] = [
   { id: "roadready_rentals", name: "RoadReady Car Rental", kind: "Car rental deposit", accepts: ["credit"], rule: "Credit cards only. The rental counter holds a security deposit, and most rental companies only trust a credit card for it.", suggestCents: 20000 },
   { id: "streambox", name: "StreamBox", kind: "Streaming subscription", accepts: ["credit", "debit", "prepaid"], rule: "Any card works here.", suggestCents: 1599 },
 ];
+/** Where a bill you added is paid (Nov 2, 2026): any card works; the payment takes the bill's own name. Not in the sample list. */
+export const YOUR_BILL: Merchant = { id: "your_bill", name: "Your bill", kind: "A bill you added", accepts: ["credit", "debit", "prepaid"], rule: "Any card works for a bill you added.", suggestCents: 0 };
 
 export type PayMethod = "payproxy" | "chime_debit" | "cash_app_card" | "prepaid_card" | "chime_credit_builder";
 
