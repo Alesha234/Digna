@@ -19,6 +19,49 @@ import { downloadPracticeReceipt } from "@/modules/ui/components/TransactionList
 import { downloadPracticeReceiptPdf } from "@/modules/ui/lib/practicePdf";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
 import { PayMoment, type Moment } from "@/modules/ui/components/PayMoment";
+import { accessToken } from "@/modules/ui/lib/supabase";
+
+/** Where SAM 3.1 found the bill, as parts of the picture (0 to 1), for the outline and the crop. */
+type FoundBox = { left: number; top: number; width: number; height: number };
+
+/**
+ * Meta's SAM 3.1 finds the bill in a messy photo (Nov 2, 2026), through /api/find-bill; null when it can't be asked or
+ * finds nothing, and the whole photo is read as before.
+ */
+async function findBill(image: string): Promise<FoundBox | null> {
+  const token = await accessToken();
+  if (!token) return null;
+  const res = await fetch("/api/find-bill", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ image }) }).catch(() => null);
+  if (!res || !res.ok) return null;
+  const data = (await res.json().catch(() => ({}))) as { box?: { x1: number; y1: number; x2: number; y2: number; w: number; h: number } | null };
+  const b = data.box;
+  if (!b || !(b.w > 0 && b.h > 0)) return null;
+  const box = { left: b.x1 / b.w, top: b.y1 / b.h, width: (b.x2 - b.x1) / b.w, height: (b.y2 - b.y1) / b.h };
+  // A box that is nearly the whole picture tells nothing new; a tiny one is more likely a mistake.
+  if (box.width * box.height > 0.92 || box.width * box.height < 0.02) return null;
+  return box;
+}
+
+/** The photo cut to the bill, with a small margin, as a JPEG data URL. */
+function cropTo(image: string, box: FoundBox): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const m = 0.04;
+      const x = Math.max(0, box.left - m) * img.width;
+      const y = Math.max(0, box.top - m) * img.height;
+      const w = Math.min(1, box.left + box.width + m) * img.width - x;
+      const h = Math.min(1, box.top + box.height + m) * img.height - y;
+      const c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(w));
+      c.height = Math.max(1, Math.round(h));
+      c.getContext("2d")?.drawImage(img, x, y, w, h, 0, 0, c.width, c.height);
+      resolve(c.toDataURL("image/jpeg", 0.9));
+    };
+    img.onerror = () => resolve(image);
+    img.src = image;
+  });
+}
 
 const box: React.CSSProperties = { background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20 };
 const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -140,6 +183,8 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
   const [billBusy, setBillBusy] = useState<string | null>(null);
   const [billError, setBillError] = useState<string | null>(null);
   const [justAdded, setJustAdded] = useState<string | null>(null);
+  // SAM 3.1 finding the bill in a photo (Nov 2, 2026): the photo, the box it found, and which step is done.
+  const [sam, setSam] = useState<{ src: string; box: FoundBox | null; step: number; missed?: boolean } | null>(null);
   const checkoutRefEl = useRef<HTMLDivElement | null>(null);
   // The Digna moment after each payment (Nov 2, 2026).
   const [moment, setMoment] = useState<Moment | null>(null);
@@ -195,6 +240,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
     if (!file) return;
     setBillError(null);
     setJustAdded(null);
+    setSam(null);
     const kind = billFileKind(file);
     if (typeof kind !== "string") return setBillError(kind.problem);
     if (file.size > BILL_FILE_MAX_BYTES) return setBillError("That file is over 10 MB. Try a smaller one, or a screenshot of the bill.");
@@ -206,12 +252,22 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         image = await shrinkToDataUrl(file);
         if (!image) throw new Error("Couldn't open that picture. Try a PNG or JPEG screenshot.");
         if (image.length > 2000000) throw new Error("That photo is too big. Try a smaller screenshot.");
+        if (mode === "live") {
+          // Step 1: SAM 3.1 looks for the bill; found, the photo is cut to it before Muse Spark reads it.
+          setSam({ src: image, box: null, step: 0 });
+          setBillBusy("Finding the bill in your photo with Meta's SAM 3.1…");
+          const box = await findBill(image);
+          setSam({ src: image, box, step: 1, missed: !box });
+          if (box) image = await cropTo(image, box);
+          setBillBusy(`Reading ${file.name} with Meta's Muse Spark…`);
+        }
       } else {
         const bytes = new Uint8Array(await file.arrayBuffer());
         text = kind === "pdf" ? await pdfText(bytes) : await docxText(bytes);
         if (text.trim().length < 10) throw new Error(kind === "pdf" ? "That PDF has no words to read (it may be a scan). Upload a screenshot or photo of it instead." : "That Word file has no words to read.");
       }
       const out = await readBillViaAi({ image, text });
+      setSam((s) => (s ? { ...s, step: 2 } : s));
       let read = { business: out.scan.storeName, amountCents: out.scan.amountCents, dueDate: out.scan.dueDate };
       if (out.practice) {
         // Without an account Muse Spark isn't asked: Digna's own practice papers are still recognized, nothing else.
@@ -221,6 +277,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
       }
       const saved = await addBill({ business: read.business, amountCents: read.amountCents, dueDate: /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : null, fileName: file.name, fileKind: kind, file });
       setJustAdded(saved.id);
+      setSam((s) => (s ? { ...s, step: 3 } : s));
       if (out.scan.confidence === "low") setBillError(`It was hard to read. Please check ${money(saved.amountCents)} from ${saved.business} before paying.`);
     } catch (e: unknown) {
       setBillError(e instanceof Error && e.message ? e.message : "Muse Spark couldn't read that bill. Try again in a moment.");
@@ -336,6 +393,27 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         <p style={{ margin: "8px 0 0", fontSize: 13, color: colors.muted }}>Screenshots or photos (PNG, JPEG), PDFs and Word files (.docx), up to 10 MB.</p>
         {billBusy && <p role="status" style={{ margin: "10px 0 0", fontSize: 14, color: colors.muted }}>{billBusy}</p>}
         {billError && <p role="alert" style={{ margin: "10px 0 0", fontSize: 14, color: "#B42318" }}>{billError}</p>}
+        {sam && (
+          <div className="pp-sam" aria-label="How your photo was read">
+            <div className="pp-sam-photo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={sam.src} alt="Your bill photo" />
+              {sam.box && (
+                <span className="pp-sam-box" style={{ left: `${sam.box.left * 100}%`, top: `${sam.box.top * 100}%`, width: `${sam.box.width * 100}%`, height: `${sam.box.height * 100}%` }}>
+                  <span className="pp-sam-label">SAM 3.1 · found the bill</span>
+                </span>
+              )}
+            </div>
+            <ol className="pp-steps">
+              {[sam.missed ? "Couldn't spot the bill's edges, so the whole photo was read" : "Found it · SAM 3.1", "Read it · Muse Spark", "Saved · Your bills"].map((t, i) => (
+                <li key={t} className={sam.step > i ? "is-done" : sam.step === i ? "is-now" : ""}>
+                  <span aria-hidden="true">{sam.step > i ? "✓" : ""}</span>
+                  {t}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
 
         <div style={{ marginTop: 18 }}>
           <Fold title="Practice bills and invoices to try" count={PRACTICE_DOCS.length} open={bills.length === 0}>
