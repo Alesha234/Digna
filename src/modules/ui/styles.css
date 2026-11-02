@@ -1081,3 +1081,35 @@ a {
 .pp-scene-chat { gap: 7px; padding: 10px 12px; }
 .pp-scene-chat .pp-bubble { font-size: 12px; padding: 6px 10px; }
 .pp-bubble-action { gap: 2px; }
+
+/* Green rubber "Paid" stamp on paid bills in the Saved bills list. */
+.pp-paid-stamp {
+  position: absolute;
+  right: 230px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-12deg);
+  color: #12B76A;
+  border: 3px solid #12B76A;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  padding: 4px 10px 4px 12px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.pp-paid-stamp.is-new {
+  animation: pp-paid-stamp-thunk 0.35s ease-out;
+}
+@keyframes pp-paid-stamp-thunk {
+  0% { opacity: 0; transform: translateY(-50%) rotate(-12deg) scale(1.6); }
+  60% { opacity: 1; transform: translateY(-50%) rotate(-12deg) scale(0.94); }
+  100% { opacity: 0.85; transform: translateY(-50%) rotate(-12deg) scale(1); }
+}
+@media (max-width: 520px) {
+  .pp-paid-stamp { right: 12px; top: 10px; transform: rotate(-12deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-paid-stamp.is-new { animation: none; }
+}

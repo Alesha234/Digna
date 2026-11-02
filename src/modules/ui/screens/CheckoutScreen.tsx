@@ -190,6 +190,21 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
   const [moment, setMoment] = useState<Moment | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
+  // Green "Paid" stamp: bills already paid show it still; bills that turn paid while open thunk on once.
+  const seenPaidRef = useRef<Set<string> | null>(null);
+  const [newlyPaidIds, setNewlyPaidIds] = useState<ReadonlySet<string>>(() => new Set());
+  useEffect(() => {
+    const paidIds = bills.filter((b) => b.status === "paid").map((b) => b.id);
+    if (seenPaidRef.current === null) {
+      seenPaidRef.current = new Set(paidIds);
+      return;
+    }
+    const fresh = paidIds.filter((id) => !seenPaidRef.current!.has(id));
+    if (fresh.length > 0) {
+      for (const id of fresh) seenPaidRef.current.add(id);
+      setNewlyPaidIds((prev) => new Set([...prev, ...fresh]));
+    }
+  }, [bills]);
   // The latest checkout, so a retry right after raising a limit uses the raised limit.
   const checkoutRef = useRef(checkout);
   checkoutRef.current = checkout;
@@ -441,7 +456,10 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                   const card = b.cardId ? cards.find((c) => c.id === b.cardId) : undefined;
                   const fresh = b.id === justAdded;
                   return (
-                    <li key={b.id} style={{ border: `1px solid ${fresh ? colors.mint : colors.line}`, background: fresh ? "#FFF9EB" : colors.surface, borderRadius: 14, padding: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+                    <li key={b.id} style={{ position: "relative", border: `1px solid ${fresh ? colors.mint : colors.line}`, background: fresh ? "#FFF9EB" : colors.surface, borderRadius: 14, padding: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+                      {b.status === "paid" && (
+                        <span aria-hidden="true" className={newlyPaidIds.has(b.id) ? "pp-paid-stamp is-new" : "pp-paid-stamp"}>PAID</span>
+                      )}
                       <div style={{ minWidth: 0, flex: "1 1 220px" }}>
                         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                           <strong style={{ fontSize: 16 }}>{b.business}</strong>
