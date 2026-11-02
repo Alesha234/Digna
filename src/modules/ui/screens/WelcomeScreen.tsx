@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
 import { colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
 import { comingSoonPlaces } from "@/modules/ui/data/demoData";
@@ -54,6 +54,28 @@ const STORIES = [
   { picture: "rental", alt: "Two friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna card covers the deposit, and you can pause it in one tap when you bring the car back." },
 ];
 
+/** Turns true the first time the element scrolls into view, so a section plays its little scene once (Nov 2, 2026). */
+function useSeen<T extends Element>(): [React.RefObject<T | null>, boolean] {
+  const ref = useRef<T | null>(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || seen) return;
+    if (typeof IntersectionObserver === "undefined") return setSeen(true);
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && (setSeen(true), io.disconnect()), { threshold: 0.25 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [seen]);
+  return [ref, seen];
+}
+
+/** Small line icons for the three intro cards. */
+const ICONS: Record<string, React.ReactNode> = {
+  no: <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm-6 9h12" />,
+  card: <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h13A2.5 2.5 0 0 1 21 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5v-9ZM3 10h18M7 15h4" />,
+  spark: <path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7L12 3Z" />,
+};
+
 /** How Digna differs from the money apps people already use (Nov 2, 2026): theirs, then Digna's. */
 const COMPARE: [string, string][] = [
   ["One card for everything", "A card for each place, each with its own limit"],
@@ -79,6 +101,8 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
   const h2: React.CSSProperties = { fontFamily: typography.heading, color: colors.ink, fontSize: "clamp(28px, 3.6vw, 40px)", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.12, margin: "0 0 14px" };
   const lead: React.CSSProperties = { color: colors.muted, fontSize: 17, lineHeight: 1.6, maxWidth: 640, margin: "0 0 28px" };
   const primary: React.CSSProperties = { background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: shadows.soft };
+  const [whyRef, whySeen] = useSeen<HTMLDivElement>();
+  const [smartRef, smartSeen] = useSeen<HTMLElement>();
   const secondary: React.CSSProperties = { background: colors.surface, color: colors.ink, border: "1px solid " + colors.line, borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 600, fontSize: 16, cursor: "pointer" };
 
   return (
@@ -153,12 +177,14 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section aria-label="Digna in 30 seconds" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
         <div style={{ ...inner, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md }}>
           {[
-            { t: "The problem", b: "Cash App, Chime, debit and prepaid cards get turned away by many hotels, car rentals and cloud services, and nobody explains why." },
-            { t: "What Digna does", b: "Gives you a card for each of those places. It works like a credit card, pays from your Digna wallet, and can never spend past the limit you choose." },
-            { t: "What you can do today", b: "Make an account, get $250 in practice money, make cards, and see what real-world checkouts say to your everyday card versus a Digna card. Real cards are coming." },
+            { t: "The problem", icon: "no", b: "Cash App, Chime, debit and prepaid cards get turned away by many hotels, car rentals and cloud services, and nobody explains why." },
+            { t: "What Digna does", icon: "card", b: "Gives you a card for each of those places. It works like a credit card, pays from your Digna wallet, and can never spend past the limit you choose." },
+            { t: "What you can do today", icon: "spark", b: "Make an account, get $250 in practice money, make cards, and see what real-world checkouts say to your everyday card versus a Digna card. Real cards are coming." },
           ].map((f, i) => (
-            <article key={f.t} className="pp-feature">
-              <span className="pp-feature-num" aria-hidden="true">{i + 1}</span>
+            <article key={f.t} className={`pp-feature pp-intro pp-intro-${i}`}>
+              <span className="pp-intro-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">{ICONS[f.icon]}</svg>
+              </span>
               <h2 style={{ fontFamily: typography.heading, fontSize: 18, fontWeight: 600, margin: "0 0 8px", color: colors.ink }}>{f.t}</h2>
               <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{f.b}</p>
             </article>
@@ -169,17 +195,17 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       {/* Why Digna (Nov 2, 2026): what makes it different from the money apps people already use, in plain words. */}
       <section aria-label="Why Digna" className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
-          <div style={inner}>
+          <div style={inner} ref={whyRef}>
             <span className="pp-kicker">Why Digna</span>
             <h2 style={h2}>More than a place to keep your money</h2>
             <p style={lead}>Most money apps stop at holding your money. Digna is built for the moment that matters: when you're at the counter.</p>
-            <div className="pp-compare" role="table" aria-label="Most money apps compared with Digna">
+            <div className={`pp-compare${whySeen ? " is-seen" : ""}`} role="table" aria-label="Most money apps compared with Digna">
               <div className="pp-compare-row pp-compare-head" role="row">
                 <span role="columnheader">Most money apps</span>
                 <span role="columnheader">Digna</span>
               </div>
-              {COMPARE.map(([them, us]) => (
-                <div key={us} className="pp-compare-row" role="row">
+              {COMPARE.map(([them, us], i) => (
+                <div key={us} className="pp-compare-row" role="row" style={{ "--i": i } as React.CSSProperties}>
                   <span role="cell" className="pp-compare-them">{them}</span>
                   <span role="cell" className="pp-compare-us">
                     <span className="pp-compare-check" aria-hidden="true">✓</span>
@@ -314,28 +340,55 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
-      {/* Built with Meta */}
-      <section className="pp-section" style={section}>
-        <RevealOnScroll delayMs={0}>
-          <div style={inner}>
-            <span className="pp-kicker">Under the hood</span>
-            <h2 style={h2}>The smart parts, in plain words</h2>
-            <p style={lead}>Digna runs on Meta's AI, quietly doing the paperwork so you don't have to.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md, marginTop: 20 }}>
-              {[
-                { t: "It reads your bills", b: "A photo, a screenshot, a PDF or a Word file: Meta's Muse Spark finds who it's from, how much and when it's due, then sets up a card just for it." },
-                { t: "It understands you", b: "Ask in your own words. Meta's Muse Spark answers like a person, using your own cards and payments." },
-                { t: "It explains every no", b: "When a card is turned down, Digna says exactly why, in plain words, and what to do next." },
-                { t: "Every picture here", b: "Drawn by Meta's Muse Image. The people in them are invented." },
-              ].map((f) => (
-                <article key={f.t} className="pp-feature">
-                  <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18 }}>{f.t}</h3>
-                  <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6 }}>{f.b}</p>
-                </article>
-              ))}
-            </div>
+      {/* The smart parts (Nov 2, 2026): four small live scenes on a dark band, instead of plain cards. */}
+      <section aria-label="The smart parts" className="pp-section pp-smart" ref={smartRef}>
+        <div style={inner}>
+          <span className="pp-kicker" style={{ color: colors.mint }}>Under the hood</span>
+          <h2 style={{ ...h2, color: "#FFFFFF" }}>The smart parts, in plain words</h2>
+          <p style={{ ...lead, color: colors.midnightInk }}>Digna runs on Meta's AI, quietly doing the paperwork so you don't have to.</p>
+          <div className={`pp-smart-grid${smartSeen ? " is-seen" : ""}`}>
+            <article className="pp-smart-card">
+              <div className="pp-scene pp-scene-bill" aria-hidden="true">
+                <div className="pp-bill-paper">
+                  <i style={{ width: "62%" }} /><i style={{ width: "40%" }} /><i style={{ width: "78%" }} /><i style={{ width: "52%" }} /><i style={{ width: "66%" }} />
+                  <span className="pp-bill-scan" />
+                </div>
+                <div className="pp-bill-chips">
+                  <span>Harbor Hotel</span><span>$148.20</span><span>Due Nov 20</span>
+                </div>
+              </div>
+              <h3>It reads your bills</h3>
+              <p>A photo, a screenshot, a PDF or a Word file: Meta's Muse Spark finds who it's from, how much and when it's due, then sets up a card just for it.</p>
+            </article>
+            <article className="pp-smart-card">
+              <div className="pp-scene pp-scene-chat" aria-hidden="true">
+                <span className="pp-bubble pp-bubble-me">Why did my hotel card get turned down?</span>
+                <span className="pp-bubble pp-bubble-digna">It's $30 over its limit. Raise it to $180 and you're set.</span>
+              </div>
+              <h3>It understands you</h3>
+              <p>Ask in your own words. Meta's Muse Spark answers like a person, using your own cards and payments.</p>
+            </article>
+            <article className="pp-smart-card">
+              <div className="pp-scene pp-scene-no" aria-hidden="true">
+                <span className="pp-no-old">Declined</span>
+                <span className="pp-no-new"><b>Here's why:</b> this hotel doesn't take prepaid cards for its check-in hold. Your Digna hotel card will work.</span>
+              </div>
+              <h3>It explains every no</h3>
+              <p>When a card is turned down, Digna says exactly why, in plain words, and what to do next.</p>
+            </article>
+            <article className="pp-smart-card">
+              <div className="pp-scene pp-scene-faces" aria-hidden="true">
+                {["phone-a", "hero", "phone-b", "phone-c"].map((n, i) => (
+                  <div key={n} className="pp-fan" style={{ "--i": i } as React.CSSProperties}>
+                    <Picture name={n} alt="" ratio="3 / 4" round={14} position="50% 30%" />
+                  </div>
+                ))}
+              </div>
+              <h3>Every picture here</h3>
+              <p>Drawn by Meta's Muse Image. The people in them are invented.</p>
+            </article>
           </div>
-        </RevealOnScroll>
+        </div>
       </section>
 
       {/* FAQ */}

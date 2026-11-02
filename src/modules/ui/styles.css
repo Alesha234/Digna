@@ -935,3 +935,79 @@ a {
   .pp-compare-them { font-size: 13.5px; }
   .pp-compare-them::before { content: "Most money apps: "; font-weight: 700; }
 }
+
+/* Intro cards with icons and a touch of color (Nov 2, 2026). */
+.pp-intro { overflow: hidden; }
+.pp-intro::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #FFB020, #FFD27A); }
+.pp-intro-1::before { background: linear-gradient(90deg, #17405C, #2F6FA0); }
+.pp-intro-2::before { background: linear-gradient(90deg, #12B76A, #7BE0B0); }
+.pp-intro-icon { display: inline-flex; width: 42px; height: 42px; border-radius: 12px; align-items: center; justify-content: center; margin-bottom: 14px; background: #FFF3D6; color: #8A5300; }
+.pp-intro-1 .pp-intro-icon { background: #E6EEF6; color: #17405C; }
+.pp-intro-2 .pp-intro-icon { background: #E7F8EF; color: #067647; }
+
+/* Why Digna plays once when it scrolls into view: the old way is crossed out, the Digna way slides in. */
+.pp-compare-them { text-decoration: line-through; text-decoration-color: transparent; text-decoration-thickness: 1.5px; transition: color .4s ease calc(var(--i, 0) * 140ms + 200ms), text-decoration-color .45s ease calc(var(--i, 0) * 140ms + 150ms); }
+.pp-compare.is-seen .pp-compare-them { color: #98A0AE; text-decoration-color: #B6BCC8; }
+.pp-compare-us { opacity: 0; transform: translateX(-10px); transition: opacity .45s ease calc(var(--i, 0) * 140ms + 450ms), transform .45s cubic-bezier(.2,.9,.3,1.2) calc(var(--i, 0) * 140ms + 450ms); }
+.pp-compare.is-seen .pp-compare-us { opacity: 1; transform: none; }
+.pp-compare-row { transition: background .25s ease; }
+.pp-compare-row:not(.pp-compare-head):hover { background: #FFFBF2; }
+.pp-compare-check { transform: scale(0); transition: transform .35s cubic-bezier(.2,.9,.3,1.6) calc(var(--i, 0) * 140ms + 650ms); }
+.pp-compare.is-seen .pp-compare-check { transform: scale(1); }
+@media (max-width: 620px) { .pp-compare-them { text-decoration: none; } }
+
+/* The smart parts: four small live scenes on a dark band. */
+.pp-smart { background: radial-gradient(120% 120% at 15% 0%, #17405C 0%, #0E1726 60%); padding: 64px 24px; margin: 0 24px 48px; border-radius: 28px; }
+.pp-smart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 24px; }
+.pp-smart-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 16px 16px 20px; color: #E9ECF3; transition: transform .25s ease, background .25s ease; }
+.pp-smart-card:hover { transform: translateY(-4px); background: rgba(255,255,255,.08); }
+.pp-smart-card h3 { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 18px; font-weight: 600; color: #FFFFFF; margin: 16px 4px 6px; }
+.pp-smart-card p { margin: 0 4px; font-size: 14.5px; line-height: 1.6; color: #C9CFDB; }
+.pp-scene { position: relative; height: 150px; border-radius: 14px; background: rgba(0,0,0,.22); overflow: hidden; }
+
+/* A bill being read: an amber line scans down, then what was read pops out. */
+.pp-bill-paper { position: absolute; left: 14px; top: 16px; width: 74px; height: 118px; border-radius: 8px; background: #FDFBF6; padding: 14px 10px; display: flex; flex-direction: column; gap: 9px; transform: rotate(-4deg); box-shadow: 0 8px 20px rgba(0,0,0,.35); overflow: hidden; }
+.pp-bill-paper i { display: block; height: 6px; border-radius: 3px; background: #D9D4C7; }
+.pp-bill-scan { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: #FFB020; box-shadow: 0 0 12px 3px rgba(255,176,32,.7); opacity: 0; }
+.is-seen .pp-bill-scan { animation: pp-scan 2.4s ease-in-out .3s infinite; }
+@keyframes pp-scan { 0% { top: 0; opacity: 1; } 45% { top: 112px; opacity: 1; } 55%, 100% { top: 112px; opacity: 0; } }
+.pp-bill-chips { position: absolute; right: 12px; top: 22px; z-index: 2; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.pp-bill-chips span { font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; background: #3A3320; white-space: nowrap; color: #FFD27A; opacity: 0; transform: translateX(10px); }
+.is-seen .pp-bill-chips span { animation: pp-chip .4s cubic-bezier(.2,.9,.3,1.3) forwards; }
+.is-seen .pp-bill-chips span:nth-child(1) { animation-delay: 1.2s; }
+.is-seen .pp-bill-chips span:nth-child(2) { animation-delay: 1.45s; }
+.is-seen .pp-bill-chips span:nth-child(3) { animation-delay: 1.7s; }
+@keyframes pp-chip { to { opacity: 1; transform: none; } }
+
+/* A question and Digna's reply. */
+.pp-scene-chat { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 14px; }
+.pp-bubble { max-width: 86%; font-size: 12.5px; line-height: 1.45; padding: 8px 11px; border-radius: 14px; opacity: 0; transform: translateY(8px); }
+.pp-bubble-me { align-self: flex-end; background: #FFB020; color: #0E1726; border-bottom-right-radius: 4px; font-weight: 600; }
+.pp-bubble-digna { align-self: flex-start; background: rgba(255,255,255,.12); color: #FFFFFF; border-bottom-left-radius: 4px; }
+.is-seen .pp-bubble-me { animation: pp-chip .4s ease .3s forwards; }
+.is-seen .pp-bubble-digna { animation: pp-chip .4s ease 1.2s forwards; }
+
+/* "Declined" turns into the reason. */
+.pp-scene-no { display: grid; place-items: center; padding: 14px; text-align: center; }
+.pp-no-old, .pp-no-new { grid-area: 1 / 1; }
+.pp-no-old { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 22px; font-weight: 700; color: #F4B4AE; padding: 8px 18px; border: 2px solid rgba(244,180,174,.5); border-radius: 12px; }
+.is-seen .pp-no-old { animation: pp-no-out .5s ease 1.1s forwards; }
+@keyframes pp-no-out { to { opacity: 0; transform: scale(.85); filter: blur(3px); } }
+.pp-no-new { font-size: 13px; line-height: 1.5; color: #E9ECF3; opacity: 0; transform: scale(.95); }
+.pp-no-new b { color: #FFD27A; }
+.is-seen .pp-no-new { animation: pp-no-in .5s ease 1.45s forwards; }
+@keyframes pp-no-in { to { opacity: 1; transform: none; } }
+
+/* The Muse Image portraits fan out. */
+.pp-scene-faces { display: flex; align-items: center; justify-content: center; }
+.pp-fan { position: absolute; width: 78px; border-radius: 14px; box-shadow: 0 8px 18px rgba(0,0,0,.4); border: 2px solid rgba(255,255,255,.85); transform: rotate(0deg); transition: transform .7s cubic-bezier(.2,.9,.3,1.2) calc(var(--i) * 90ms + 200ms); }
+.is-seen .pp-fan { transform: translateX(calc((var(--i) - 1.5) * 46px)) rotate(calc((var(--i) - 1.5) * 9deg)); }
+.pp-smart-card:hover .pp-fan { transform: translateX(calc((var(--i) - 1.5) * 54px)) rotate(calc((var(--i) - 1.5) * 12deg)) translateY(-4px); }
+
+@media (max-width: 620px) { .pp-smart { margin: 0 12px 40px; padding: 44px 16px; } }
+@media (prefers-reduced-motion: reduce) {
+  .pp-compare-them, .pp-compare-us, .pp-compare-check, .pp-fan { transition: none !important; }
+  .pp-bill-scan, .pp-bill-chips span, .pp-bubble, .pp-no-old, .pp-no-new { animation: none !important; }
+  .pp-bill-chips span, .pp-bubble, .pp-no-new { opacity: 1; transform: none; }
+  .pp-no-old { display: none; }
+}
