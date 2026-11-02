@@ -136,7 +136,7 @@ function buildLocalReply(input: string, txn: { storeName: string; amountCents: n
     if (q.includes("balance") || q.includes("add money") || q.includes("wallet")) {
       return "That payment was likely declined because the practice money in the wallet was too low. Next step: add practice money from the dashboard, then pay again on Pay a bill.";
     }
-    return "I don't have enough detail yet to say why it was declined. Next step: pick one of the declined payments above, or tell me the place or business and the amount, then pay again on Pay a bill and I'll explain it in plain words.";
+    return "I don't have enough detail yet to say why it was declined. Next step: pick one of the declined payments above, or tell me the place or business and the amount, then pay again on Pay a bill and I'll tell you exactly why.";
   }
   const amount: string = cents(txn.amountCents);
   const reason: string = (txn.reason || "").toLowerCase();
@@ -188,7 +188,7 @@ export function AssistantScreen(props: { initialPrompt?: string; inPanel?: boole
   const [transcribing, setTranscribing] = useState(false);
   const recorder = useRef<Recorder | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>(function () {
-    const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your Digna helper. Pick a declined payment below or ask me why a payment did not go through. I will explain it in plain words.";
+    const first: string = props.initialPrompt && props.initialPrompt.trim().length > 0 ? props.initialPrompt.trim() : "Hi, I am your Digna helper. Pick a declined payment below or ask me why a payment did not go through. I'll tell you exactly why, and what to do next.";
     return [makeMsg("assistant", first)];
   });
   const [input, setInput] = useState<string>(function () {
@@ -413,7 +413,7 @@ export function AssistantScreen(props: { initialPrompt?: string; inPanel?: boole
         <RevealOnScroll>
           <div className="pp-card pp-lift" style={{ backgroundColor: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: spacing.lg }}>
             <h1 style={{ fontFamily: typography.heading, color: colors.ink, margin: 0, marginBottom: spacing.sm }}>Money assistant</h1>
-            <p style={{ color: colors.muted, margin: 0, fontFamily: typography.body }}>Explains why a payment declined and what to do next, in plain words.</p>
+            <p style={{ color: colors.muted, margin: 0, fontFamily: typography.body }}>Explains exactly why a payment was declined, and what to do next.</p>
             <p style={{ color: colors.muted, margin: 0, marginTop: spacing.sm, fontSize: 13 }}>Practice money for now: nothing real is charged.</p>
           </div>
         </RevealOnScroll>
@@ -520,7 +520,7 @@ export function AssistantScreen(props: { initialPrompt?: string; inPanel?: boole
                 ];
               })}
               {loading ? (
-                <li style={{ alignSelf: "flex-start", color: colors.muted, fontFamily: typography.body }}>Thinking in plain words…</li>
+                <li style={{ alignSelf: "flex-start", color: colors.muted, fontFamily: typography.body }}>Thinking it through…</li>
               ) : null}
             </ul>
             {error ? (

@@ -23,7 +23,7 @@ export function AssistantBubble(props: { open: boolean; question?: string; signe
           <div className="pp-ask-head">
             <div>
               <strong>Money assistant</strong>
-              <span>Why a card was declined, in plain words · Meta's Muse Spark</span>
+              <span>Why a card was declined, and what to do next · Meta's Muse Spark</span>
             </div>
             <button ref={close} type="button" className="pp-ask-close" onClick={onClose} aria-label="Close the money assistant">
               ×

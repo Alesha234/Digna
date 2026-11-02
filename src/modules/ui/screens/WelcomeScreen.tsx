@@ -85,7 +85,7 @@ const FLOW: { step: string; title: string; tech: string; text: string }[] = [
   { step: "02", title: "Cards issued on demand", tech: "Virtual cards · one number per place", text: "Each card is its own number, issued in seconds for one place, with its own limit and end date. Close one; the rest keep working." },
   { step: "03", title: "Built around the card's BIN", tech: "Card-type recognition at checkout", text: "Hotels and rental counters read a card's first digits (its BIN) to decide credit, debit or prepaid. Digna's cards are designed for that moment." },
   { step: "04", title: "Real-time authorization", tech: "Server-side rules · milliseconds", text: "Limit, end date, security code and wallet are checked at the moment you pay, inside the database, before a place gets its yes." },
-  { step: "05", title: "Declines, decoded", tech: "Response codes → plain words · Muse Spark", text: "The reason behind every no, translated from bank codes and each place's rules into plain words, with Meta's Muse Spark explaining what to do next." },
+  { step: "05", title: "Declines, decoded", tech: "Response codes → clear answers · Muse Spark", text: "The reason behind every no, translated from bank codes and each place's rules into a clear answer, with Meta's Muse Spark explaining what to do next." },
 ];
 
 /** How Digna differs from the money apps people already use (Nov 2, 2026): theirs, then Digna's. */
@@ -101,7 +101,7 @@ const FAQS = [
   { q: "Is this real money?", a: "Not yet. Your account, cards and history are real and saved, but for now every dollar is practice money, so you can try everything without risk. Real cards are on the way, and we'll say so clearly here when they arrive." },
   { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Pay a bill to pay sample businesses with an everyday card or a Digna card and see what each would say, and why." },
   { q: "Why do hotels, car rentals and cloud services turn down Cash App, Chime or prepaid cards?", a: "Usually it isn't about you or your money. Places that hold a deposit, or bill you after you use something, want a card that can't come up empty, so many only trust credit cards. The businesses on Pay a bill follow rules like these, so you can see exactly why a card gets turned down." },
-  { q: "What does the money assistant use?", a: "Meta's Muse Spark AI. It looks at your cards and recent payments and explains a decline in plain words, with what to do next. It also reads your bills on Pay a bill." },
+  { q: "What does the money assistant use?", a: "Meta's Muse Spark AI. It looks at your cards and recent payments and explains exactly why a payment was declined, and what to do next. It also reads your bills on Pay a bill." },
   { q: "Is Digna a bank?", a: "No. Digna is not a bank. When real cards arrive, they'll come through a licensed card partner." },
   { q: "Who drew the pictures on this page?", a: "Meta's Muse Image model. The people in them are invented." },
 ];
@@ -205,7 +205,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </div>
       </section>
 
-      {/* Why Digna (Nov 2, 2026): what makes it different from the money apps people already use, in plain words. */}
+      {/* Why Digna (Nov 2, 2026): what makes it different from the money apps people already use, clearly. */}
       <section aria-label="Why Digna" className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
           <div style={inner} ref={whyRef}>
@@ -267,7 +267,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               { t: "No credit check, no judgment", b: "Sign up with an email. Your history doesn't decide your access." },
               { t: "Your money, not a loan", b: "Every card spends only your own money. No debt, no interest, no traps." },
               { t: "Limits that protect you", b: "No place can take more than you allowed, so a surprise charge never costs you rent. Need more? Raise it, as far as your money covers." },
-              { t: "Plain words", b: "Banks speak in codes. Digna's assistant, built on Meta's Muse Spark, speaks like a person and tells you what to do next." },
+              { t: "Straight answers", b: "Banks speak in codes. Digna's assistant, built on Meta's Muse Spark, speaks like a person and tells you what to do next." },
               { t: "Private by default", b: "We keep only what's needed, never sell your data, and you can delete everything in one tap." },
             ].map((f) => (
               <article key={f.t} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: radii.card, padding: spacing.lg }}>
@@ -380,7 +380,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section aria-label="The smart parts" className="pp-section pp-smart" ref={smartRef}>
         <div style={inner}>
           <span className="pp-kicker" style={{ color: colors.mint }}>Under the hood</span>
-          <h2 style={{ ...h2, color: "#FFFFFF" }}>The smart parts, in plain words</h2>
+          <h2 style={{ ...h2, color: "#FFFFFF" }}>How the smart parts work</h2>
           <p style={{ ...lead, color: colors.midnightInk }}>Digna runs on Meta's AI, quietly doing the paperwork so you don't have to.</p>
           <div className={`pp-smart-grid${smartSeen ? " is-seen" : ""}`}>
             <article className="pp-smart-card">
@@ -410,7 +410,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
                 <span className="pp-no-new"><b>Here's why:</b> this hotel doesn't take prepaid cards for its check-in hold. Your Digna hotel card will work.</span>
               </div>
               <h3>It explains every no</h3>
-              <p>When a card is turned down, Digna says exactly why, in plain words, and what to do next.</p>
+              <p>When a card is turned down, Digna says exactly why, and what to do next.</p>
             </article>
             <article className="pp-smart-card">
               <div className="pp-scene pp-scene-faces" aria-hidden="true">

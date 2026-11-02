@@ -100,7 +100,7 @@ export function FormatScreen() {
       <section className="pp-section" aria-labelledby="declines-heading">
         <RevealOnScroll delayMs={0}>
           <h2 id="declines-heading">Explained declines</h2>
-          <p className="pp-section-sub">Every result uses plain words and a clear next step.</p>
+          <p className="pp-section-sub">Every result gives a clear reason and a next step.</p>
         </RevealOnScroll>
         <div className="pp-grid">
           <RevealOnScroll delayMs={0}>
