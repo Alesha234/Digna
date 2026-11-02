@@ -89,7 +89,7 @@ a {
 .pp-card {
   background: var(--pp-surface);
   border: 1px solid var(--pp-line);
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 0 8px 24px rgba(16, 32, 29, 0.08);
   padding: 20px;
 }
@@ -121,7 +121,7 @@ a {
 .pp-ledger-band {
   background: var(--pp-midnight);
   color: var(--pp-midnight-ink);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 24px 20px;
 }
 
@@ -359,6 +359,201 @@ a {
     left: 8px;
     bottom: -36px;
     scale: 0.85;
+  }
+}
+
+/* Centered friendly hero, pill toggle, overlapping tilted cards, blobs. Vars only. */
+.pp-hero-center {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+.pp-pill-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  color: var(--pp-mint-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+.pp-pill-toggle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pp-mint);
+}
+.pp-hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 48px;
+  margin-bottom: 48px;
+}
+.pp-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 12px 24px;
+  border: 1px solid var(--pp-line);
+  border-radius: 999px;
+  background: var(--pp-surface);
+  color: var(--pp-ink);
+  font-family: "Figtree", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.pp-micro {
+  color: var(--pp-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+  margin: 12px 0 0;
+}
+.pp-hero-cards {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 32px;
+  padding-bottom: 12px;
+}
+.pp-hero-card-a {
+  rotate: -6deg;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 8px 24px rgba(16, 32, 29, 0.08);
+}
+.pp-hero-card-b {
+  rotate: 5deg;
+  position: relative;
+  z-index: 2;
+  margin-left: -48px;
+  margin-top: 28px;
+  box-shadow: 0 8px 24px rgba(16, 32, 29, 0.08);
+}
+.pp-blob {
+  position: absolute;
+  border-radius: 999px;
+  background: var(--pp-mint);
+  opacity: 0.16;
+  pointer-events: none;
+}
+.pp-blob-left {
+  width: 180px;
+  height: 180px;
+  left: -70px;
+  top: -40px;
+}
+.pp-blob-right {
+  width: 140px;
+  height: 140px;
+  right: -50px;
+  bottom: -30px;
+  background: var(--pp-midnight);
+  opacity: 0.08;
+}
+.pp-dash-stack {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.pp-dash-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.pp-balance-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.pp-balance-actions > * {
+  flex: 1 1 160px;
+  min-height: 44px;
+}
+.pp-notice-amber {
+  background: var(--pp-surface);
+  border: 1px solid var(--pp-line);
+  border-left: 4px solid var(--pp-mint);
+  border-radius: 16px;
+  padding: 12px 16px;
+  color: var(--pp-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  margin-top: 16px;
+}
+.pp-meter-track {
+  background: var(--pp-line);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+.pp-meter-fill-amber {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pp-mint);
+}
+@media (max-width: 760px) {
+  .pp-grid,
+  .pp-grid-2,
+  .pp-dash-cards {
+    grid-template-columns: 1fr;
+  }
+  .pp-hero-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  .pp-hero-card-b {
+    margin-left: 0;
+    margin-top: -20px;
+  }
+  .pp-balance-actions {
+    flex-direction: column;
+  }
+  .pp-balance-actions > * {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+@media (max-width: 620px) {
+  .pp-grid,
+  .pp-grid-2,
+  .pp-dash-cards {
+    grid-template-columns: 1fr;
+  }
+  .pp-hero-cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pp-hero-cta-row > * {
+    width: 100%;
+  }
+  .pp-blob-left {
+    left: -90px;
+  }
+  .pp-blob-right {
+    right: -70px;
+  }
+}
+@media (max-width: 560px) {
+  .pp-dash-cards {
+    grid-template-columns: 1fr;
   }
 }
 

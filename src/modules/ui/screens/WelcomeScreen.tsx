@@ -69,44 +69,52 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
   const inner: React.CSSProperties = { maxWidth: 1080, margin: "0 auto" };
   const h2: React.CSSProperties = { fontFamily: typography.heading, color: colors.ink, fontSize: "clamp(26px, 3.4vw, 36px)", lineHeight: 1.15, margin: "0 0 12px" };
   const lead: React.CSSProperties = { color: colors.muted, fontSize: 17, lineHeight: 1.6, maxWidth: 640, margin: "0 0 28px" };
-  const primary: React.CSSProperties = { background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "14px 26px", fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: shadows.soft };
-  const secondary: React.CSSProperties = { background: colors.surface, color: colors.ink, border: "1px solid " + colors.line, borderRadius: radii.pill, padding: "14px 26px", fontFamily: typography.body, fontWeight: 600, fontSize: 16, cursor: "pointer" };
+  const primary: React.CSSProperties = { background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: shadows.soft };
+  const secondary: React.CSSProperties = { background: colors.surface, color: colors.ink, border: "1px solid " + colors.line, borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 600, fontSize: 16, cursor: "pointer" };
 
   return (
     <div style={{ background: colors.page, color: colors.ink, fontFamily: typography.body }}>
-      {/* Hero */}
+      {/* Hero: centered, playful yet calm */}
       <section className="pp-hero" style={section}>
         <RevealOnScroll delayMs={0}>
-          <div className="pp-hero-grid">
-            <div>
-              <p style={{ display: "inline-block", margin: "0 0 14px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Cards with limits you choose · Free to try</p>
-              <h1 className="pp-hero-title">Dignity at every checkout.</h1>
-              <p style={{ ...lead, fontSize: 18 }}>
-                Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
-              </p>
-              {isSignedIn ? (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
+          <div className="pp-hero-center">
+            <span className="pp-blob pp-blob-left" aria-hidden="true" />
+            <span className="pp-blob pp-blob-right" aria-hidden="true" />
+            <p className="pp-pill-toggle" style={{ margin: "0 0 14px", background: colors.primarySoft, color: colors.mintDark }}>
+              <span className="pp-pill-toggle-dot" aria-hidden="true" />
+              Cards with limits you choose · Free to try
+            </p>
+            <h1 className="pp-hero-title">Dignity at every checkout.</h1>
+            <p style={{ ...lead, fontSize: 18, maxWidth: 640, margin: "0 auto" }}>
+              Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
+            </p>
+            {isSignedIn ? (
+              <>
+                <div className="pp-hero-cta-row">
                   <button type="button" className="pp-btn-mint" onClick={onDashboard} style={primary}>Dashboard</button>
                   <button type="button" className="pp-btn-secondary" onClick={onPayBill} style={secondary}>Pay a bill</button>
                 </div>
-              ) : (
-                <>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: spacing.md, alignItems: "center" }}>
-                    <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
-                    <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
-                  </div>
-                  <p style={{ color: colors.muted, fontSize: 14, margin: spacing.md + " 0 0" }}>
-                    Already have an account?{" "}
-                    <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 14, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
-                    {" · "}Starts with $250 in practice money.
-                  </p>
-                </>
-              )}
-            </div>
-            <div style={{ position: "relative", maxWidth: 480, width: "100%", margin: "0 auto" }}>
-              <Picture name="hero" alt="A woman smiling at her phone after a payment went through" ratio="1 / 1" />
-              <div className="pp-hero-float">
+                <p className="pp-micro">Practice money for now: nothing real is charged.</p>
+              </>
+            ) : (
+              <>
+                <div className="pp-hero-cta-row">
+                  <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
+                  <button type="button" className="pp-btn-secondary" onClick={onTryDemo} style={secondary}>Look around first</button>
+                </div>
+                <p className="pp-micro">
+                  Already have an account?{" "}
+                  <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
+                  {" · "}Starts with $250 in practice money.
+                </p>
+              </>
+            )}
+            <div className="pp-hero-cards" aria-label="Example cards">
+              <div className="pp-hero-card-a">
                 <SampleCard name="Cloud hosting" spent={32} cap={50} last="4242" bg="linear-gradient(135deg, #0E1726, #17405C)" />
+              </div>
+              <div className="pp-hero-card-b">
+                <SampleCard name="Hotel check-in" spent={150} cap={200} last="1881" bg="linear-gradient(135deg, #17405C, #0E1726)" />
               </div>
             </div>
           </div>
@@ -130,11 +138,11 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       </section>
 
       {/* Dignity by design */}
-      <section aria-label="Dignity by design" className="pp-section" style={{ ...section, background: colors.midnight, color: "#FFFFFF" }}>
+      <section aria-label="Dignity by design" className="pp-section" style={{ ...section, background: colors.midnight, color: colors.surface, borderRadius: radii.card, margin: `0 ${spacing.lg} ${spacing.xxl}` }}>
         <div style={inner}>
-          <p style={{ margin: "0 0 10px", color: "#FFC94D", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: 13 }}>Dignity · Convenience · Efficiency</p>
-          <h2 style={{ ...h2, color: "#FFFFFF" }}>A declined card isn't just a failed payment.</h2>
-          <p style={{ ...lead, color: "#C9CFDB" }}>It's being told, in public, that your money doesn't count. Digna is built so that never happens to you, and every feature keeps that promise.</p>
+          <p style={{ margin: "0 0 10px", color: colors.mint, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: 13 }}>Dignity · Convenience · Efficiency</p>
+          <h2 style={{ ...h2, color: colors.surface }}>A declined card isn't just a failed payment.</h2>
+          <p style={{ ...lead, color: colors.midnightInk }}>It's being told, in public, that your money doesn't count. Digna is built so that never happens to you, and every feature keeps that promise.</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
             {[
               { t: "No public declines", b: "Know before you pay. Pay a bill and the money assistant show you whether a card will work, and why, so you're not caught out at the counter." },
@@ -145,8 +153,8 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               { t: "Private by default", b: "We keep only what's needed, never sell your data, and you can delete everything in one tap." },
             ].map((f) => (
               <article key={f.t} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: radii.card, padding: spacing.lg }}>
-                <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18, color: "#FFFFFF" }}>{f.t}</h3>
-                <p style={{ margin: 0, color: "#C9CFDB", lineHeight: 1.6 }}>{f.b}</p>
+                <h3 style={{ fontFamily: typography.heading, margin: "0 0 8px", fontSize: 18, color: colors.surface }}>{f.t}</h3>
+                <p style={{ margin: 0, color: colors.midnightInk, lineHeight: 1.6 }}>{f.b}</p>
               </article>
             ))}
           </div>
@@ -176,7 +184,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       <section aria-label="Coming soon" className="pp-section" style={section}>
         <RevealOnScroll delayMs={0}>
           <div style={inner}>
-            <p style={{ display: "inline-block", margin: "0 0 12px", padding: "6px 12px", borderRadius: 999, background: "#FFF3D6", color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Coming soon</p>
+            <p style={{ display: "inline-block", margin: "0 0 12px", padding: "6px 12px", borderRadius: 999, background: colors.primarySoft, color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Coming soon</p>
             <h2 style={h2}>Member deals, coming soon</h2>
             <p style={lead}>Digna is working on discounts for its members at the places that turn cards away most: hotels, resorts, airlines, car rentals and shops. These are examples of the kind of deals coming. None are live yet, Digna isn't partnered with these businesses, and today everything uses practice money.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
@@ -287,9 +295,9 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
       </section>
 
       {/* CTA */}
-      <section className="pp-ledger-band" style={{ background: colors.midnight, color: colors.midnightInk, padding: spacing.xxl + " " + spacing.lg, textAlign: "center" }}>
-        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: "#FFFFFF" }}>Your money's good here.</h2>
-        <p style={{ margin: "0 auto " + spacing.lg, maxWidth: 560, color: "#C9CFDB", lineHeight: 1.6 }}>Make a free account, get $250 in practice money, and see how it feels when a checkout finally says yes.</p>
+      <section className="pp-ledger-band" style={{ background: colors.midnight, color: colors.midnightInk, borderRadius: radii.card, padding: spacing.xxl + " " + spacing.lg, textAlign: "center", margin: `0 ${spacing.lg} ${spacing.xxl}` }}>
+        <h2 style={{ fontFamily: typography.heading, margin: "0 0 " + spacing.md, fontSize: 30, color: colors.surface }}>Your money's good here.</h2>
+        <p style={{ margin: "0 auto " + spacing.lg, maxWidth: 560, color: colors.midnightInk, lineHeight: 1.6 }}>Make a free account, get $250 in practice money, and see how it feels when a checkout finally says yes.</p>
         <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Create a free account</button>
       </section>
     </div>
