@@ -58,6 +58,18 @@ Digna uses Meta's models only, through Meta's Model API.
 - **Files in the browser.** PDFs and Word files are read in the browser with its own tools (no extra packages), then only their words are sent to Muse Spark. Uploaded bills are stored in each person's own private folder.
 - **Sound with no files.** The Digna chime is made by the browser itself, plays only after you press Pay, and can be turned off.
 
+## What makes it work
+
+How a payment moves through Digna:
+
+1. **Prefunded wallet.** Every card is backed by money already set aside: no credit pull, no interest, no debt.
+2. **Cards issued on demand.** Virtual cards, one number per place, each with its own limit and end date.
+3. **Built around the card's BIN.** Hotels and rental counters read a card's first digits to decide credit, debit or prepaid; Digna's cards are designed for that moment.
+4. **Real-time authorization.** Limit, end date, security code and wallet are checked server-side, inside the database, before a place gets its yes.
+5. **Declines, decoded.** Bank response codes and each place's rules become plain words, with Meta's Muse Spark explaining what to do next.
+
+Today every step runs on practice money, end to end. Real cards will be issued through a licensed card partner.
+
 ## Run it yourself
 
 1. `npm install`

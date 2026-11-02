@@ -1011,3 +1011,29 @@ a {
   .pp-bill-chips span, .pp-bubble, .pp-no-new { opacity: 1; transform: none; }
   .pp-no-old { display: none; }
 }
+
+/* What makes it work (Nov 2, 2026): five steps joined by a line, a dot travelling along it. Vertical on phones. */
+.pp-flow { position: relative; list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.pp-flow::before { content: ""; position: absolute; left: 22px; right: 22px; top: 22px; height: 2px; background: linear-gradient(90deg, #FFB020, #17405C 50%, #12B76A); opacity: .35; }
+.pp-flow-step { position: relative; display: flex; flex-direction: column; gap: 14px; opacity: 0; transform: translateY(12px); transition: opacity .5s ease calc(var(--i) * 150ms), transform .5s cubic-bezier(.2,.9,.3,1.2) calc(var(--i) * 150ms); }
+.pp-flow.is-seen .pp-flow-step { opacity: 1; transform: none; }
+.pp-flow-node { position: relative; z-index: 1; width: 46px; height: 46px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #0E1726; color: #FFB020; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 14px; box-shadow: 0 0 0 6px #F6F7F9, 0 8px 20px rgba(14,23,38,.18); }
+.pp-flow-body { background: #FFFFFF; border: 1px solid #E6E8EE; border-radius: 18px; padding: 16px; flex: 1; transition: transform .25s ease, box-shadow .25s ease; }
+.pp-flow-step:hover .pp-flow-body { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(14,23,38,.1); }
+.pp-flow-tech { display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; letter-spacing: .02em; color: #8A5300; background: #FFF3D6; border-radius: 6px; padding: 3px 7px; }
+.pp-flow-body h3 { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 17px; font-weight: 600; margin: 10px 0 6px; color: #0E1726; }
+.pp-flow-body p { margin: 0; font-size: 14px; line-height: 1.55; color: #5B6475; }
+.pp-flow-dot { position: absolute; left: 18px; top: 18px; width: 10px; height: 10px; border-radius: 50%; background: #FFB020; box-shadow: 0 0 0 4px rgba(255,176,32,.25), 0 0 14px #FFB020; opacity: 0; z-index: 2; pointer-events: none; }
+.pp-flow.is-seen .pp-flow-dot { animation: pp-flow-run 4.2s cubic-bezier(.6,0,.4,1) .9s infinite; }
+@keyframes pp-flow-run { 0% { left: 18px; opacity: 0; } 8% { opacity: 1; } 88% { opacity: 1; } 100% { left: calc(100% - 28px); opacity: 0; } }
+.pp-flow-note { margin: 18px 0 0; font-size: 13.5px; color: #5B6475; font-style: italic; }
+@media (max-width: 980px) {
+  .pp-flow { grid-template-columns: 1fr; gap: 14px; }
+  .pp-flow::before { left: 22px; right: auto; top: 22px; bottom: 22px; width: 2px; height: auto; background: linear-gradient(180deg, #FFB020, #17405C 50%, #12B76A); }
+  .pp-flow-step { flex-direction: row; align-items: flex-start; }
+  .pp-flow-dot { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-flow-step { transition: none; opacity: 1; transform: none; }
+  .pp-flow-dot { display: none; }
+}

@@ -76,6 +76,18 @@ const ICONS: Record<string, React.ReactNode> = {
   spark: <path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7L12 3Z" />,
 };
 
+/**
+ * What makes it work (Nov 2, 2026): how a payment moves through Digna, step by step, in the terms judges know, without
+ * saying how the card program itself will be set up.
+ */
+const FLOW: { step: string; title: string; tech: string; text: string }[] = [
+  { step: "01", title: "Prefunded wallet", tech: "Funds set aside · no credit pull", text: "Every card is backed by money already in your wallet. No credit check, no interest, no debt." },
+  { step: "02", title: "Cards issued on demand", tech: "Virtual cards · one number per place", text: "Each card is its own number, issued in seconds for one place, with its own limit and end date. Close one; the rest keep working." },
+  { step: "03", title: "Built around the card's BIN", tech: "Card-type recognition at checkout", text: "Hotels and rental counters read a card's first digits (its BIN) to decide credit, debit or prepaid. Digna's cards are designed for that moment." },
+  { step: "04", title: "Real-time authorization", tech: "Server-side rules · milliseconds", text: "Limit, end date, security code and wallet are checked at the moment you pay, inside the database, before a place gets its yes." },
+  { step: "05", title: "Declines, decoded", tech: "Response codes → plain words · Muse Spark", text: "The reason behind every no, translated from bank codes and each place's rules into plain words, with Meta's Muse Spark explaining what to do next." },
+];
+
 /** How Digna differs from the money apps people already use (Nov 2, 2026): theirs, then Digna's. */
 const COMPARE: [string, string][] = [
   ["One card for everything", "A card for each place, each with its own limit"],
@@ -103,6 +115,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
   const primary: React.CSSProperties = { background: colors.mint, color: colors.midnight, border: "none", borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: shadows.soft };
   const [whyRef, whySeen] = useSeen<HTMLDivElement>();
   const [smartRef, smartSeen] = useSeen<HTMLElement>();
+  const [flowRef, flowSeen] = useSeen<HTMLDivElement>();
   const secondary: React.CSSProperties = { background: colors.surface, color: colors.ink, border: "1px solid " + colors.line, borderRadius: radii.pill, padding: "14px 26px", minHeight: 44, fontFamily: typography.body, fontWeight: 600, fontSize: 16, cursor: "pointer" };
 
   return (
@@ -217,6 +230,29 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <p className="pp-compare-close">Built from one declined card at a hotel desk, for everyone who's ever felt that moment, and for a future where your money is welcome everywhere.</p>
           </div>
         </RevealOnScroll>
+      </section>
+
+      {/* What makes it work (Nov 2, 2026): the flow of a payment, with a dot travelling along it. */}
+      <section aria-label="What makes it work" className="pp-section" style={section}>
+        <div style={inner} ref={flowRef}>
+          <span className="pp-kicker">What makes it work</span>
+          <h2 style={h2}>From your wallet to a yes, in milliseconds</h2>
+          <p style={lead}>The technology under every Digna payment, step by step.</p>
+          <ol className={`pp-flow${flowSeen ? " is-seen" : ""}`}>
+            {FLOW.map((f, i) => (
+              <li key={f.step} className="pp-flow-step" style={{ "--i": i } as React.CSSProperties}>
+                <span className="pp-flow-node" aria-hidden="true">{f.step}</span>
+                <div className="pp-flow-body">
+                  <span className="pp-flow-tech">{f.tech}</span>
+                  <h3>{f.title}</h3>
+                  <p>{f.text}</p>
+                </div>
+              </li>
+            ))}
+            <span className="pp-flow-dot" aria-hidden="true" />
+          </ol>
+          <p className="pp-flow-note">Today every step runs on practice money, end to end. Real cards will be issued through a licensed card partner.</p>
+        </div>
       </section>
 
       {/* Dignity by design */}
