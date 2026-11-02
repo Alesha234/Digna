@@ -37,7 +37,7 @@ Everything below works on [digna.dev](https://digna.dev) with a free account (or
 - **Pay a bill.** Upload a bill or invoice (a screenshot, a photo, a PDF or a Word file). Meta's Muse Spark reads who it's from, the amount and the due date, and keeps it in Your bills. Make a card just for it, then pay it at its own checkout.
 - **See what a checkout really says.** Sample businesses follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards for its check-in hold. Pay with an everyday card, then with a Digna card, and see each answer and why.
 - **The Digna moment.** Every payment ends with its own short scene: an approval has a chime, a burst of light and "Your money's good here." A decline is soft and private: no buzzer, no red, just the reason.
-- **Ask Digna.** A money assistant one tap away on every screen, which explains any decline using your own cards and payments.
+- **Ask Digna.** A money assistant one tap away on every screen, which explains any decline using your own cards and payments. Type, or tap the mic and just say it. Ask it to "raise my hotel card to $180" and it sets that up for you to Confirm; nothing changes until you do.
 - **Receipts** for every approved payment, as PDFs.
 
 ## Meta's AI inside Digna
@@ -46,8 +46,10 @@ Digna uses Meta's models only, through Meta's Model API.
 
 | Model | What it does in Digna |
 | --- | --- |
-| **Muse Spark** | The money assistant, and reading bills and invoices (photos as pictures; PDFs and Word files as their words) |
+| **Muse Spark** | The money assistant, which can also change a card for you after you press Confirm; and reading bills and invoices (photos as pictures; PDFs and Word files as their words) |
 | **Muse Image** | Every picture on the site. The people in them are invented, drawn to show many backgrounds, ages and abilities |
+| **SAM 3.1** | Finding the bill in a messy photo before Muse Spark reads it: the photo is cut to the bill it outlines |
+| **Muse Voice Transcribe** | Talking to Digna: tap the mic in Ask Digna, and what you say is written into the message box for you to check |
 
 ## How it's built
 

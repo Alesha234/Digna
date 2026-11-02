@@ -394,15 +394,15 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
                 </div>
               </div>
               <h3>It reads your bills</h3>
-              <p>A photo, a screenshot, a PDF or a Word file: Meta's Muse Spark finds who it's from, how much and when it's due, then sets up a card just for it.</p>
+              <p>Even a crumpled bill on a messy table: Meta's SAM 3.1 finds it in the photo, then Muse Spark reads who it's from, how much and when it's due. PDFs and Word files work too.</p>
             </article>
             <article className="pp-smart-card">
               <div className="pp-scene pp-scene-chat" aria-hidden="true">
-                <span className="pp-bubble pp-bubble-me">Why did my hotel card get turned down?</span>
-                <span className="pp-bubble pp-bubble-digna">It's $30 over its limit. Raise it to $180 and you're set.</span>
+                <span className="pp-bubble pp-bubble-me">🎙 Raise my hotel card to $180</span>
+                <span className="pp-bubble pp-bubble-digna pp-bubble-action"><b>Digna can do this for you</b>Raise “Hotel” from $150 to $180<i>Confirm</i></span>
               </div>
               <h3>It understands you</h3>
-              <p>Ask in your own words. Meta's Muse Spark answers like a person, using your own cards and payments.</p>
+              <p>Type it, or tap the mic and just say it (Meta's Muse Voice Transcribe). Muse Spark answers like a person, and can change a card for you, but only after you press Confirm.</p>
             </article>
             <article className="pp-smart-card">
               <div className="pp-scene pp-scene-no" aria-hidden="true">

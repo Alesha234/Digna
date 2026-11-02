@@ -42,7 +42,8 @@ export async function POST(req: Request): Promise<Response> {
   const messages = (Array.isArray(body.messages) ? body.messages : [])
     .filter((m): m is Message => (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
     .slice(-MAX_MESSAGES);
-  const system = typeof body.system === "string" ? body.system.slice(0, 2000) : "";
+  // Room for the assistant's rules, the person's cards and the Confirm instructions (Nov 2, 2026).
+  const system = typeof body.system === "string" ? body.system.slice(0, 3500) : "";
   const pasted = typeof body.text === "string" ? body.text.slice(0, 6000) : "";
   const size = messages.reduce((n, m) => n + m.content.length, system.length) + pasted.length;
   if (messages.length === 0 || size > MAX_CHARS + 6000) return fail(400, `Send 1 to ${MAX_MESSAGES} messages, at most ${MAX_CHARS} characters in all.`);
