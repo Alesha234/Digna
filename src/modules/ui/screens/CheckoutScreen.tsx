@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import {
   MERCHANTS,
+  YOUR_BILL,
   PRACTICE_WALLET,
   brandOf,
   formProblem,
@@ -11,9 +12,9 @@ import {
   type CheckoutForm,
   type CheckoutOutcome,
 } from "@/modules/ui/lib/sandbox";
-import type { BillScanResult, PracticeReceipt, VirtualCard } from "@/modules/ui/types";
-import { practiceBills } from "@/modules/ui/data/demoData";
-import { fallbackPracticeBill, matchPastedBill, practiceScan, readBillViaAi, shrinkToDataUrl } from "@/modules/ui/screens/SnapBillScreen";
+import type { BillScanResult, PracticeReceipt, SavedBill, VirtualCard } from "@/modules/ui/types";
+import { readBillViaAi, shrinkToDataUrl } from "@/modules/ui/screens/SnapBillScreen";
+import { BILL_FILE_ACCEPT, BILL_FILE_MAX_BYTES, PRACTICE_DOCS, billFileKind, docxText, downloadPracticeDoc, pdfText } from "@/modules/ui/lib/billFiles";
 import { downloadPracticeReceipt } from "@/modules/ui/components/TransactionList";
 import { downloadPracticeReceiptPdf } from "@/modules/ui/lib/practicePdf";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
@@ -67,6 +68,27 @@ function copy(text: string): void {
   }
 }
 
+/** A part of the page that opens and folds away with a tap on its heading (Nov 2, 2026), to save room. */
+function Fold(props: { title: string; count?: number; open?: boolean; children: React.ReactNode; level?: 2 | 3 }) {
+  const [open, setOpen] = useState(props.open ?? true);
+  const big = props.level === 2;
+  return (
+    <div>
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
+        style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between", gap: 10, background: "transparent", border: 0, padding: big ? "2px 0" : "6px 0", cursor: "pointer", color: colors.ink, fontFamily: big ? typography.heading : typography.body, fontSize: big ? 18 : 14, fontWeight: 700, textAlign: "left", minHeight: 40 }}>
+        <span>
+          {props.title}
+          {props.count !== undefined && <span style={{ marginLeft: 8, fontSize: 12.5, fontWeight: 700, color: colors.muted, background: colors.page, border: `1px solid ${colors.line}`, borderRadius: 999, padding: "2px 9px" }}>{props.count}</span>}
+        </span>
+        <span aria-hidden="true" style={{ display: "inline-flex", width: 30, height: 30, alignItems: "center", justifyContent: "center", borderRadius: 999, background: colors.page, border: `1px solid ${colors.line}`, transform: open ? "rotate(180deg)" : "none", transition: "transform .2s ease", fontSize: 13 }}>▼</span>
+      </button>
+      {open && <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 10 }}>{props.children}</div>}
+    </div>
+  );
+}
+
+const FILE_LABEL: Record<SavedBill["fileKind"], string> = { photo: "Photo", pdf: "PDF", word: "Word", text: "Text" };
+
 /** One card in the practice wallet: its details to type in (or copy), and a button that fills them in. */
 function WalletCard(props: { title: string; sub: string; number: string; exp: string; cvc: string; dark?: boolean; hidden?: boolean; onUse: () => void }) {
   const [show, setShow] = useState(!props.hidden);
@@ -100,24 +122,24 @@ function WalletCard(props: { title: string; sub: string; number: string; exp: st
  * the business's rules, the card's limit and the wallet, then answers like a real checkout, with Digna's
  * plain-words reason and a fix when it says no.
  */
-export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void; onAddMoney?: () => void; onMakeCard?: (bill: BillScanResult) => void }) {
-  const { cards, payments, balance, mode, checkout, setCardLimit } = usePayProxy();
+export function CheckoutScreen(props: { onAskAssistant?: (question: string) => void; onCreateCard?: () => void; onAddMoney?: () => void; onMakeCard?: (bill: BillScanResult) => void; onMakeCardForBill?: (bill: SavedBill) => void; payBillId?: string | null }) {
+  const { cards, payments, balance, mode, checkout, setCardLimit, bills, addBill, removeBill, payBill, billFileUrl } = usePayProxy();
   const [merchantId, setMerchantId] = useState(MERCHANTS[0].id);
-  const merchant = MERCHANTS.find((m) => m.id === merchantId)!;
-  const shop = SHOP[merchantId];
+  // A bill you added can be where you pay (Nov 2, 2026): then the checkout is that bill's, for its amount.
+  const [billId, setBillId] = useState<string | null>(props.payBillId ?? null);
+  const payingBill = billId ? (bills.find((b) => b.id === billId) ?? null) : null;
+  const merchant = payingBill ? { ...YOUR_BILL, name: payingBill.business, kind: `Your ${FILE_LABEL[payingBill.fileKind] === "Photo" ? "bill" : "bill or invoice"}${payingBill.dueDate ? ` · due ${payingBill.dueDate}` : ""}` } : MERCHANTS.find((m) => m.id === merchantId)!;
+  const shop = payingBill ? { picture: "", button: "Pay", orders: [{ label: `Amount due${payingBill.dueDate ? `, due ${payingBill.dueDate}` : ""}`, cents: payingBill.amountCents }] } : SHOP[merchantId];
   const [orderIx, setOrderIx] = useState(0);
-  const amountCents = shop.orders[orderIx].cents;
+  const amountCents = shop.orders[Math.min(orderIx, shop.orders.length - 1)].cents;
   const [form, setForm] = useState<CheckoutForm>(EMPTY);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [last, setLast] = useState<(CheckoutOutcome & { merchant: string; amountCents: number; receipt: string; at: string; atIso: string }) | null>(null);
-  const [billImage, setBillImage] = useState<string | null>(null);
-  const [billText, setBillText] = useState("");
-  const [billSampleId, setBillSampleId] = useState<string | null>(null);
-  const [billBusy, setBillBusy] = useState(false);
+  const [billBusy, setBillBusy] = useState<string | null>(null);
   const [billError, setBillError] = useState<string | null>(null);
-  const [billScan, setBillScan] = useState<BillScanResult | null>(null);
-  const [billPractice, setBillPractice] = useState(false);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+  const checkoutRefEl = useRef<HTMLDivElement | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
   // The latest checkout, so a retry right after raising a limit uses the raised limit.
@@ -135,10 +157,22 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
 
   function pickMerchant(id: string): void {
     setMerchantId(id);
+    setBillId(null);
     setOrderIx(0);
     setLast(null);
     setError(null);
   }
+  function pickBill(id: string): void {
+    setBillId(id);
+    setOrderIx(0);
+    setLast(null);
+    setError(null);
+    setTimeout(() => checkoutRefEl.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  }
+  // Opened right after making a card for a bill: that bill is ready to pay.
+  useEffect(() => {
+    if (props.payBillId) setTimeout(() => checkoutRefEl.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  }, [props.payBillId]);
   function set<K extends keyof CheckoutForm>(k: K, v: string): void {
     setForm((f) => ({ ...f, [k]: v }));
     setError(null);
@@ -149,55 +183,53 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
     setLast(null);
   }
 
-  /** Filling the paste box with a practice bill's text, so Meta's Muse Spark reads it back exactly. */
-  function choosePracticeBill(id: string): void {
-    const found = practiceBills.find((b) => b.id === id);
-    if (!found) return;
-    setBillSampleId(id);
-    setBillText(found.billText);
-    setBillImage(null);
-    setBillScan(null);
-    setBillError(null);
-  }
-
+  /**
+   * One upload for every kind of bill (Nov 2, 2026): a screenshot or photo goes to Meta's Muse Spark as a picture; a
+   * PDF's or Word file's words are read in the browser and sent as text. What it reads is kept in Your bills, with
+   * the file itself, ready to get its own card and be paid.
+   */
   async function onBillFile(file: File | undefined): Promise<void> {
     if (!file) return;
-    const dataUrl = await shrinkToDataUrl(file);
-    if (!dataUrl) {
-      setBillError("Couldn't open that picture. Try a screenshot (PNG or JPEG), or paste the bill text.");
-      return;
-    }
-    if (dataUrl.length > 2000000) {
-      setBillError("That photo is too big. Try a smaller screenshot, or paste the bill text.");
-      return;
-    }
-    setBillImage(dataUrl);
-    setBillSampleId(null);
-    setBillScan(null);
     setBillError(null);
+    setJustAdded(null);
+    const kind = billFileKind(file);
+    if (typeof kind !== "string") return setBillError(kind.problem);
+    if (file.size > BILL_FILE_MAX_BYTES) return setBillError("That file is over 10 MB. Try a smaller one, or a screenshot of the bill.");
+    setBillBusy(`Reading ${file.name} with Meta's Muse Spark…`);
+    try {
+      let image: string | null = null;
+      let text = "";
+      if (kind === "photo") {
+        image = await shrinkToDataUrl(file);
+        if (!image) throw new Error("Couldn't open that picture. Try a PNG or JPEG screenshot.");
+        if (image.length > 2000000) throw new Error("That photo is too big. Try a smaller screenshot.");
+      } else {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        text = kind === "pdf" ? await pdfText(bytes) : await docxText(bytes);
+        if (text.trim().length < 10) throw new Error(kind === "pdf" ? "That PDF has no words to read (it may be a scan). Upload a screenshot or photo of it instead." : "That Word file has no words to read.");
+      }
+      const out = await readBillViaAi({ image, text });
+      let read = { business: out.scan.storeName, amountCents: out.scan.amountCents, dueDate: out.scan.dueDate };
+      if (out.practice) {
+        // Without an account Muse Spark isn't asked: Digna's own practice papers are still recognized, nothing else.
+        const doc = PRACTICE_DOCS.find((d) => text.includes(d.business));
+        if (!doc) throw new Error("Make a free account to have Meta's Muse Spark read any bill. The sample account reads Digna's practice bills and invoices only.");
+        read = { business: doc.business, amountCents: doc.amountCents, dueDate: doc.dueDate };
+      }
+      const saved = await addBill({ business: read.business, amountCents: read.amountCents, dueDate: /^\d{4}-\d{2}-\d{2}$/.test(read.dueDate) ? read.dueDate : null, fileName: file.name, fileKind: kind, file });
+      setJustAdded(saved.id);
+      if (out.scan.confidence === "low") setBillError(`It was hard to read. Please check ${money(saved.amountCents)} from ${saved.business} before paying.`);
+    } catch (e: unknown) {
+      setBillError(e instanceof Error && e.message ? e.message : "Muse Spark couldn't read that bill. Try again in a moment.");
+    } finally {
+      setBillBusy(null);
+    }
   }
 
-  /** Meta's Muse Spark reads the bill photo or pasted text; signed out, a practice example shows instead. */
-  async function onReadBill(): Promise<void> {
-    const pasted = billText.trim();
-    if (!billImage && pasted.length < 10) return;
-    setBillBusy(true);
-    setBillError(null);
-    try {
-      const out = await readBillViaAi({ image: billImage, text: pasted });
-      setBillScan(out.scan);
-      setBillPractice(out.practice);
-      if (out.practice) {
-        setBillError("Sign in to have Meta's Muse Spark read your bill. Showing a practice example instead: a practice bill with its amount as the limit.");
-      }
-    } catch (e: unknown) {
-      const matched = matchPastedBill(pasted) ?? fallbackPracticeBill();
-      setBillScan(practiceScan(matched));
-      setBillPractice(true);
-      setBillError(`${e instanceof Error && e.message ? e.message : "Muse Spark is busy — try again in a moment."} Showing a practice example instead.`);
-    } finally {
-      setBillBusy(false);
-    }
+  async function openBillFile(b: SavedBill): Promise<void> {
+    const url = await billFileUrl(b).catch(() => null);
+    if (url) window.open(url, "_blank", "noopener");
+    else setBillError("This bill's file wasn't kept, only what was read from it.");
   }
 
   async function run(f: CheckoutForm, cents: number): Promise<void> {
@@ -205,7 +237,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
     setError(null);
     const started = Date.now();
     try {
-      const out = await checkoutRef.current(merchantId, cents, f);
+      const out = payingBill ? await payBill(payingBill.id, f) : await checkoutRef.current(merchantId, cents, f);
       // A real card network takes a moment; so does this one, so the answer doesn't feel instant and fake.
       await new Promise((r) => setTimeout(r, Math.max(0, 1300 - (Date.now() - started))));
       const at = new Date();
@@ -270,89 +302,120 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
       <header>
         <h1 style={{ fontFamily: typography.heading, fontSize: 30, margin: "0 0 6px" }}>Pay a bill</h1>
         <p style={{ margin: 0, color: colors.muted, lineHeight: 1.6, maxWidth: 720 }}>
-          Have a practice bill? Upload a screenshot or photo of it, or paste its text below, and Meta&apos;s Muse Spark reads the amount, the place or business, and the due date. Then pick a place and pay at its checkout just like you would for real, with a card from your wallet on the right. It&apos;s all practice money, so nothing real is charged.
+          Add a bill or invoice (a screenshot, a photo, a PDF or a Word file) and Meta&apos;s Muse Spark reads who it&apos;s from, how much and when it&apos;s due. It&apos;s kept in Your bills, where you can make a card just for it and pay it. Or pick a sample business and pay at its checkout. It&apos;s all practice money, so nothing real is charged.
         </p>
       </header>
 
-      <section aria-label="Where you're paying" style={box}>
-        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>1. Where are you paying?</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-          {MERCHANTS.map((m) => (
-            <button key={m.id} type="button" aria-pressed={m.id === merchantId} onClick={() => pickMerchant(m.id)}
-              style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: typography.body, background: m.id === merchantId ? "#FFF3D6" : colors.surface, border: `2px solid ${m.id === merchantId ? colors.mint : colors.line}` }}>
-              <strong style={{ display: "block", fontSize: 16, color: colors.ink }}>{m.name}</strong>
-              <span style={{ fontSize: 13, color: colors.muted }}>{m.kind}</span>
-            </button>
-          ))}
+      {/* 1. Your bills (Nov 2, 2026): one upload for every kind of bill, the practice ones to try, and every bill kept. */}
+      <section aria-label="Your bills" style={box}>
+        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 6px" }}>1. Your bills</h2>
+        <p style={{ margin: "0 0 14px", fontSize: 14, color: colors.muted, lineHeight: 1.6 }}>
+          Upload a bill or invoice: a screenshot, a photo, a PDF or a Word file. Meta&apos;s Muse Spark reads it and keeps it here, ready for its own card.
+        </p>
+        <label style={{ ...pill(true), display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 22px", fontSize: 15, opacity: billBusy ? 0.6 : 1, pointerEvents: billBusy ? "none" : "auto" }}>
+          <span aria-hidden="true">⬆</span> {billBusy ? "Reading…" : "Upload a bill or invoice"}
+          <input type="file" accept={BILL_FILE_ACCEPT} hidden onChange={(e) => { void onBillFile(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: colors.muted }}>Screenshots or photos (PNG, JPEG), PDFs and Word files (.docx), up to 10 MB.</p>
+        {billBusy && <p role="status" style={{ margin: "10px 0 0", fontSize: 14, color: colors.muted }}>{billBusy}</p>}
+        {billError && <p role="alert" style={{ margin: "10px 0 0", fontSize: 14, color: "#B42318" }}>{billError}</p>}
+
+        <div style={{ marginTop: 18 }}>
+          <Fold title="Practice bills and invoices to try" count={PRACTICE_DOCS.length} open={bills.length === 0}>
+            <p style={{ margin: 0, fontSize: 13.5, color: colors.muted, lineHeight: 1.55 }}>Download one as a PDF, then upload it above to see Muse Spark read it. Practice papers only: nothing here is a real bill.</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 }}>
+              {PRACTICE_DOCS.map((d) => (
+                <div key={d.id} style={{ border: `1px solid ${colors.line}`, borderRadius: 12, padding: 12, background: colors.page, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: colors.muted }}>Practice {d.kind.toLowerCase()} · PDF</span>
+                  <strong style={{ fontSize: 15 }}>{d.business}</strong>
+                  <span style={{ fontSize: 13.5, color: colors.muted }}>{money(d.amountCents)} · due {d.dueDate}</span>
+                  <button type="button" onClick={() => downloadPracticeDoc(d)} style={{ ...pill(false), alignSelf: "flex-start", padding: "7px 14px", fontSize: 13 }}>Download PDF</button>
+                </div>
+              ))}
+            </div>
+          </Fold>
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <Fold title="Saved bills" count={bills.length}>
+            {bills.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 14, color: colors.muted }}>No bills yet. Upload one above, or try a practice invoice.</p>
+            ) : (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {[...bills].sort((a, b) => (a.status === b.status ? (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") : a.status === "unpaid" ? -1 : 1)).map((b) => {
+                  const card = b.cardId ? cards.find((c) => c.id === b.cardId) : undefined;
+                  const fresh = b.id === justAdded;
+                  return (
+                    <li key={b.id} style={{ border: `1px solid ${fresh ? colors.mint : colors.line}`, background: fresh ? "#FFF9EB" : colors.surface, borderRadius: 14, padding: 14, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ minWidth: 0, flex: "1 1 220px" }}>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                          <strong style={{ fontSize: 16 }}>{b.business}</strong>
+                          <span style={{ fontSize: 12, fontWeight: 700, borderRadius: 999, padding: "2px 9px", background: b.status === "paid" ? "#ECFDF3" : "#FFF3D6", color: b.status === "paid" ? "#067647" : colors.mintDark }}>{b.status === "paid" ? "Paid" : "To pay"}</span>
+                          {fresh && <span style={{ fontSize: 12, fontWeight: 700, color: colors.mintDark }}>Just read by Muse Spark</span>}
+                        </div>
+                        <div style={{ fontSize: 14, marginTop: 4 }}>
+                          <strong>{money(b.amountCents)}</strong>
+                          <span style={{ color: colors.muted }}>{b.dueDate ? ` · due ${b.dueDate}` : ""}{b.paidAt ? ` · paid ${new Date(b.paidAt).toLocaleDateString()}` : ""}</span>
+                        </div>
+                        <div style={{ fontSize: 12.5, color: colors.muted, marginTop: 4 }}>
+                          {FILE_LABEL[b.fileKind]}{b.fileName ? ` · ${b.fileName}` : ""}{card ? ` · Card: ${card.name}` : ""}
+                          {b.filePath && <button type="button" onClick={() => void openBillFile(b)} style={{ marginLeft: 8, background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 12.5, cursor: "pointer", textDecoration: "underline" }}>Open file</button>}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        {b.status === "unpaid" && !card && props.onMakeCardForBill && (
+                          <button type="button" onClick={() => props.onMakeCardForBill?.(b)} style={{ ...pill(true), padding: "9px 16px" }}>Make a card for it</button>
+                        )}
+                        {b.status === "unpaid" && (
+                          <button type="button" onClick={() => pickBill(b.id)} style={{ ...pill(!!card), padding: "9px 16px" }}>Pay this bill</button>
+                        )}
+                        {b.status === "paid" && (
+                          <button type="button" onClick={() => downloadPracticeReceiptPdf({ placeOrBusiness: b.business, amountCents: b.amountCents, date: b.paidAt ?? "", receiptId: "DGB-" + b.id.replace(/[^A-Za-z0-9]/g, "").slice(0, 8).toUpperCase() })} style={{ ...pill(false), padding: "9px 16px" }}>Receipt PDF</button>
+                        )}
+                        <button type="button" aria-label={`Remove the ${b.business} bill`} onClick={() => void removeBill(b.id).catch((e: unknown) => setBillError(e instanceof Error ? e.message : "That bill couldn't be removed."))} style={{ background: "transparent", border: 0, color: colors.muted, cursor: "pointer", fontSize: 13, padding: "8px 6px" }}>Remove</button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Fold>
         </div>
       </section>
 
-      <section aria-label="Your practice bill" style={box}>
-        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 6px" }}>Your practice bill</h2>
-        <p style={{ margin: "0 0 12px", fontSize: 14, color: colors.muted, lineHeight: 1.6 }}>
-          New here? Pick a practice bill to fill the paste box. Or upload a screenshot or photo of your own practice bill. Practice money only: no real money moves.
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
-          {practiceBills.map((bill) => {
-            const active = billSampleId === bill.id;
+      {/* 2. Where are you paying: a bill you added, or one of the sample businesses. Right above the checkout and wallet. */}
+      <section aria-label="Where you're paying" style={box}>
+        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>2. Where are you paying?</h2>
+        {bills.filter((b) => b.status === "unpaid").length > 0 && (
+          <>
+            <h3 style={{ fontSize: 13, margin: "0 0 8px", color: colors.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Your bills</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10, marginBottom: 14 }}>
+              {bills.filter((b) => b.status === "unpaid").map((b) => (
+                <button key={b.id} type="button" aria-pressed={b.id === billId} onClick={() => pickBill(b.id)}
+                  style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: typography.body, background: b.id === billId ? "#FFF3D6" : colors.surface, border: `2px solid ${b.id === billId ? colors.mint : colors.line}` }}>
+                  <strong style={{ display: "block", fontSize: 16, color: colors.ink }}>{b.business}</strong>
+                  <span style={{ fontSize: 13, color: colors.muted }}>{money(b.amountCents)}{b.dueDate ? ` · due ${b.dueDate}` : ""}</span>
+                </button>
+              ))}
+            </div>
+            <h3 style={{ fontSize: 13, margin: "0 0 8px", color: colors.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Sample businesses</h3>
+          </>
+        )}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+          {MERCHANTS.map((m) => {
+            const on = !payingBill && m.id === merchantId;
             return (
-              <button
-                key={bill.id}
-                type="button"
-                onClick={() => choosePracticeBill(bill.id)}
-                aria-pressed={active}
-                style={{ ...pill(!active), background: active ? colors.mint : colors.surface }}
-              >
-                {bill.title} · {money(bill.amountCents)}
+              <button key={m.id} type="button" aria-pressed={on} onClick={() => pickMerchant(m.id)}
+                style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: typography.body, background: on ? "#FFF3D6" : colors.surface, border: `2px solid ${on ? colors.mint : colors.line}` }}>
+                <strong style={{ display: "block", fontSize: 16, color: colors.ink }}>{m.name}</strong>
+                <span style={{ fontSize: 13, color: colors.muted }}>{m.kind}</span>
               </button>
             );
           })}
         </div>
-        <h3 style={{ fontFamily: typography.heading, fontSize: 15, margin: "0 0 8px" }}>A picture of the bill</h3>
-        <label style={{ ...pill(false), display: "inline-flex" }}>
-          Upload a screenshot or photo
-          <input type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={(e) => void onBillFile(e.target.files?.[0])} />
-        </label>
-        <p style={{ margin: "8px 0 0", fontSize: 13, color: colors.muted }}>On a computer, a screenshot of the bill or its email works best. Pictures are read once and not kept.</p>
-        {billImage && <img src={billImage} alt="The bill you added" style={{ marginTop: 12, maxWidth: "100%", maxHeight: 260, borderRadius: 12, border: `1px solid ${colors.line}` }} />}
-        <h3 style={{ fontFamily: typography.heading, fontSize: 15, margin: "16px 0 8px" }}>Or paste the bill&apos;s text</h3>
-        <textarea
-          value={billText}
-          onChange={(e) => { setBillText(e.target.value); setBillSampleId(null); setBillScan(null); }}
-          rows={5}
-          placeholder="Paste the bill or its email here instead of adding a photo"
-          aria-label="Paste the bill's text"
-          style={{ ...field, minHeight: 110, resize: "vertical" }}
-        />
-        <button type="button" disabled={billBusy || (!billImage && billText.trim().length < 10)} onClick={() => void onReadBill()} style={{ ...pill(true), marginTop: 10, opacity: billBusy || (!billImage && billText.trim().length < 10) ? 0.6 : 1 }}>
-          {billBusy ? "Reading…" : "Read bill"}
-        </button>
-        {billBusy && <p role="status" style={{ margin: "8px 0 0", fontSize: 14, color: colors.muted }}>Reading the bill…</p>}
-        {billError && <p role="alert" style={{ margin: "8px 0 0", fontSize: 14, color: "#B42318" }}>{billError}</p>}
-        {billScan && (
-          <div role="status" aria-label="What the bill reading found" style={{ marginTop: 14, borderRadius: 14, padding: 18, border: `1px solid ${colors.mint}`, background: "#FFF9EB" }}>
-            {billPractice && <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700, color: colors.muted }}>Practice example</p>}
-            <h3 style={{ fontFamily: typography.heading, fontSize: 20, margin: "0 0 8px" }}>{billScan.storeName}</h3>
-            <p style={{ margin: 0, lineHeight: 1.7 }}>
-              <strong>{money(billScan.amountCents)}</strong>
-              {billScan.dueDate ? ` · due ${billScan.dueDate}` : ""} · {billScan.confidence === "high" ? "read clearly" : billScan.confidence === "medium" ? "mostly clear, worth a check" : "hard to read, please check"}
-            </p>
-            <p style={{ margin: "8px 0 0", fontSize: 14, color: colors.muted, lineHeight: 1.6 }}>
-              The place or business is {billScan.storeName}, due{billScan.dueDate ? ` ${billScan.dueDate}` : ""}. A card just for this practice bill would use {money(billScan.amountCents)} as its limit.
-            </p>
-            {billScan.confidence === "low" && (
-              <p style={{ margin: "8px 0 0", fontSize: 14, lineHeight: 1.6 }}>Please check the amount and due date before making a card.</p>
-            )}
-            {props.onMakeCard && (
-              <button type="button" onClick={() => props.onMakeCard?.(billScan)} style={{ ...pill(true), marginTop: 14 }}>
-                Make a card with this limit
-              </button>
-            )}
-          </div>
-        )}
       </section>
 
-      <div className="pp-co-grid">
+      <div className="pp-co-grid" ref={checkoutRefEl} style={{ scrollMarginTop: 110 }}>
         {/* The business's checkout page */}
         <section aria-label={`${merchant.name} checkout`} style={{ ...box, padding: 0, overflow: "hidden" }}>
           <div style={{ padding: "8px 16px", fontSize: 12, color: colors.muted, background: colors.page, borderBottom: `1px solid ${colors.line}` }}>
@@ -360,7 +423,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
           </div>
           {/* Tall enough, and kept on the picture's upper part, that people's faces show whole (Nov 2, 2026). */}
           <div style={{ position: "relative", height: "clamp(200px, 26vw, 260px)" }}>
-            <BizPicture name={shop.picture} />
+            {shop.picture ? <BizPicture name={shop.picture} /> : <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #17405C, #0E1726 70%)" }} />}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(14,23,38,0) 55%, rgba(14,23,38,0.78))" }} />
             <div style={{ position: "absolute", left: 20, bottom: 14, color: "#FFFFFF" }}>
               <div style={{ fontFamily: typography.heading, fontSize: 24, fontWeight: 700 }}>{merchant.name}</div>
@@ -523,7 +586,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
               Type these into the checkout like a real card, or tap Fill in for me. Wallet: {money(balance.availableCents)} in practice money{mode === "demo" ? " (sample account)" : ""}.
             </p>
           </div>
-          <h3 style={{ fontSize: 14, margin: "6px 0 0" }}>Your Digna cards</h3>
+          <Fold title="Your Digna cards" count={usable.length}>
           {usable.length === 0 ? (
             <p style={{ margin: 0, fontSize: 14, color: colors.muted }}>
               You have no Digna cards yet.{" "}
@@ -536,16 +599,18 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                 number={c.cardNumber!} exp={c.exp ?? ""} cvc={c.cvc ?? ""} onUse={() => fill(c.cardNumber!, c.exp ?? "", c.cvc ?? "")} />
             ))
           )}
-          <h3 style={{ fontSize: 14, margin: "6px 0 0" }}>Everyday cards (examples)</h3>
+          </Fold>
+          <Fold title="Everyday cards (examples)" count={PRACTICE_WALLET.length}>
           {PRACTICE_WALLET.map((c) => (
             <WalletCard key={c.method} title={c.label.replace(" (sample)", "")} sub={c.kind} number={c.number} exp={c.exp} cvc={c.cvc} onUse={() => fill(c.number, c.exp, c.cvc)} />
           ))}
           <p style={{ margin: 0, fontSize: 12, color: colors.muted }}>Example cards stand in for the cards people already carry. They only work on Digna's practice checkouts.</p>
+          </Fold>
         </aside>
       </div>
 
       <section aria-label="Recent tries" style={box}>
-        <h2 style={{ fontFamily: typography.heading, fontSize: 18, margin: "0 0 12px" }}>Your recent payments</h2>
+        <Fold title="Your recent payments" count={Math.min(payments.length, 20)} open={false} level={2}>
         {payments.length === 0 ? (
           <p style={{ margin: 0, color: colors.muted }}>Nothing yet. Your payments show here, approved or declined.</p>
         ) : (
@@ -575,6 +640,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
             ))}
           </ul>
         )}
+        </Fold>
       </section>
 
       {toast && (

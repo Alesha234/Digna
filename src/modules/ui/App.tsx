@@ -17,13 +17,16 @@ import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
 import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
 import { CheckoutScreen } from "@/modules/ui/screens/CheckoutScreen";
 import { FeedbackScreen, PrivacyScreen, TermsScreen } from "@/modules/ui/screens/InfoScreens";
-import type { AppScreen, BillScanResult } from "@/modules/ui/types";
+import type { AppScreen, BillScanResult, SavedBill } from "@/modules/ui/types";
 
 /** The pages anyone can see; every other page needs an account or the demo. */
 const OPEN: AppScreen[] = ["welcome", "auth", "signup", "privacy", "terms", "feedback", "how-it-works"];
 
 function InnerApp() {
-  const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard } = usePayProxy();
+  const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard, bills, linkBillCard } = usePayProxy();
+  // A bill on Pay a bill that a new card is being made for (Nov 2, 2026): once made, the card is linked to it and Pay a
+  // bill opens with that bill ready to pay.
+  const [payBillId, setPayBillId] = useState<string | null>(null);
   const [question, setQuestion] = useState<string | undefined>(undefined);
   const [bill, setBill] = useState<BillScanResult | null>(null);
   // The money assistant opens over the page from its floating button (Nov 2, 2026), not as a page of its own.
@@ -48,6 +51,7 @@ function InnerApp() {
       return;
     }
     setAskOpen(false);
+    setPayBillId(null);
     clearNotice();
     setBill(null);
     setScreen(next as AppScreen);
@@ -60,8 +64,18 @@ function InnerApp() {
     if (dest && dest !== screen) go(dest as AppScreen);
   }
   function openCard(cardId: string): void {
+    const forBill = bill && bills.some((b) => b.id === bill.id) ? bill.id : null;
+    if (forBill) {
+      void linkBillCard(forBill, cardId).catch(() => undefined);
+      go("snap-bill");
+      setPayBillId(forBill);
+      return;
+    }
     selectCard(cardId);
     go("card-detail");
+  }
+  function makeCardForSaved(b: SavedBill): void {
+    makeCardFor({ id: b.id, storeName: b.business, amountCents: b.amountCents, dueDate: b.dueDate ?? "", confidence: "high" });
   }
   function makeCardFor(b: BillScanResult): void {
     go("create-card");
@@ -91,13 +105,13 @@ function InnerApp() {
         return <AddMoneyScreen onDone={() => go("dashboard")} onCancel={() => go("dashboard")} />;
       case "snap-bill":
         // The old bill route now opens Pay a bill: there is only one bill section.
-        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} onMakeCard={makeCardFor} />;
+        return <CheckoutScreen key={payBillId ?? "pay"} payBillId={payBillId} onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} onMakeCard={makeCardFor} onMakeCardForBill={makeCardForSaved} />;
       case "assistant":
         return <AssistantScreen key={question ?? "assistant"} initialPrompt={question} />;
       case "settings":
         return <SettingsScreen onSignOut={() => go("welcome")} onBack={() => go("dashboard")} />;
       case "checkout":
-        return <CheckoutScreen onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} onMakeCard={makeCardFor} />;
+        return <CheckoutScreen payBillId={payBillId} onAskAssistant={ask} onCreateCard={() => go("create-card")} onAddMoney={() => go("add-money")} onMakeCard={makeCardFor} onMakeCardForBill={makeCardForSaved} />;
       case "alerts":
         return <AlertsScreen />;
       case "demo-data":
