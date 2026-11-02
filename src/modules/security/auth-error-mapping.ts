@@ -37,7 +37,7 @@ export function mapAuthError(raw: unknown): string {
     return "Check your connection and try again.";
   }
   if (text.includes("weak password") || text.includes("password is too short")) {
-    return "Choose a password with at least 8 characters.";
+    return "Choose a password with at least 16 characters.";
   }
   return "Something went wrong. Please try again.";
 }

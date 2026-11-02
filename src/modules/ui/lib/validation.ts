@@ -7,10 +7,10 @@ export function validateEmail(value: string): string | null {
 }
 
 export function validatePassword(value: string): string | null {
-  if (value.length >= 8) {
+  if (value.length >= 16) {
     return null;
   }
-  return "Use at least 8 characters.";
+  return "Use at least 16 characters.";
 }
 
 export function validateCardName(value: string): string | null {
