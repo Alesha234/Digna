@@ -269,7 +269,8 @@ export function AppShell(props: {
           }}
         >
           <span>© Digna · Practice money for now · Not a bank · Not connected to Chime, Cash App or any business shown</span>
-          <span>Practice money</span>
+          {/* A small nod to the studio Digna was built in (Nov 2, 2026). */}
+          <span title="Digna was built in Ignesis, an AI studio where Meta's Muse Code builds the changes you approve.">Built with Ignesis · coming soon</span>
         </div>
       </footer>
     </div>
