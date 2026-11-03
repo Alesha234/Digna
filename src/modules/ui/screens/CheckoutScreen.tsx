@@ -138,7 +138,7 @@ function WalletCard(props: { title: string; sub: string; number: string; exp: st
   const [show, setShow] = useState(!props.hidden);
   const ink = props.dark ? "#FFFFFF" : colors.ink;
   const muted = props.dark ? "#C9CFDB" : colors.muted;
-  const small: React.CSSProperties = { background: "transparent", border: 0, padding: 0, color: props.dark ? "#FFC94D" : colors.mintDark, fontWeight: 700, fontSize: 12, cursor: "pointer" };
+  const small: React.CSSProperties = { background: "transparent", border: 0, padding: "10px 8px", margin: "-10px -8px", color: props.dark ? "#FFC94D" : colors.mintDark, fontWeight: 700, fontSize: 12, cursor: "pointer" };
   return (
     <div style={{ borderRadius: 14, padding: 14, background: props.dark ? "linear-gradient(135deg, #0E1726, #17405C)" : colors.page, border: props.dark ? 0 : `1px solid ${colors.line}`, color: ink }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
@@ -433,13 +433,13 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         <div style={{ marginTop: 18 }}>
           <Fold title="Practice bills and invoices to try" count={PRACTICE_DOCS.length} open={bills.length === 0}>
             <p style={{ margin: 0, fontSize: 13.5, color: colors.muted, lineHeight: 1.55 }}>Download one as a PDF, then upload it above to see Muse Spark read it. Practice papers only: nothing here is a real bill.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 210px), 1fr))", gap: 10 }}>
               {PRACTICE_DOCS.map((d) => (
                 <div key={d.id} style={{ border: `1px solid ${colors.line}`, borderRadius: 12, padding: 12, background: colors.page, display: "flex", flexDirection: "column", gap: 6 }}>
-                  <span style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: colors.muted }}>Practice {d.kind.toLowerCase()} · PDF</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: colors.muted }}>Practice {d.kind.toLowerCase()} · PDF</span>
                   <strong style={{ fontSize: 15 }}>{d.business}</strong>
                   <span style={{ fontSize: 13.5, color: colors.muted }}>{money(d.amountCents)} · due {d.dueDate}</span>
-                  <button type="button" onClick={() => downloadPracticeDoc(d)} style={{ ...pill(false), alignSelf: "flex-start", padding: "7px 14px", fontSize: 13 }}>Download PDF</button>
+                  <button type="button" onClick={() => downloadPracticeDoc(d)} style={{ ...pill(false), alignSelf: "flex-start", padding: "11px 16px", fontSize: 13.5 }}>Download PDF</button>
                 </div>
               ))}
             </div>
@@ -502,7 +502,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
         {bills.filter((b) => b.status === "unpaid").length > 0 && (
           <>
             <h3 style={{ fontSize: 13, margin: "0 0 8px", color: colors.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Your bills</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10, marginBottom: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: 10, marginBottom: 14 }}>
               {bills.filter((b) => b.status === "unpaid").map((b) => (
                 <button key={b.id} type="button" aria-pressed={b.id === billId} onClick={() => pickBill(b.id)}
                   style={{ textAlign: "left", padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: typography.body, background: b.id === billId ? "#FFF3D6" : colors.surface, border: `2px solid ${b.id === billId ? colors.mint : colors.line}` }}>
@@ -514,7 +514,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
             <h3 style={{ fontSize: 13, margin: "0 0 8px", color: colors.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Sample businesses</h3>
           </>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: 10 }}>
           {MERCHANTS.map((m) => {
             const on = !payingBill && m.id === merchantId;
             return (
