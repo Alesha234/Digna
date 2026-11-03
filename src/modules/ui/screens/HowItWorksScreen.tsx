@@ -5,8 +5,8 @@ const page: React.CSSProperties = { maxWidth: 880, margin: "0 auto", fontFamily:
 const box: React.CSSProperties = { background: colors.surface, border: `1px solid ${colors.line}`, borderRadius: radii.card, boxShadow: shadows.soft, padding: 24 };
 const h2: React.CSSProperties = { fontFamily: typography.heading, fontSize: 22, margin: "0 0 10px", lineHeight: 1.3 };
 const h3: React.CSSProperties = { fontFamily: typography.heading, fontSize: 17, margin: "0 0 4px" };
-const grid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 14 };
-const grid4: React.CSSProperties = { ...grid, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))" };
+const grid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 14 };
+const grid4: React.CSSProperties = { ...grid, gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 170px), 1fr))" };
 const tile: React.CSSProperties = { border: `1px solid ${colors.line}`, borderRadius: 14, padding: 16, background: colors.page };
 
 const REASONS: { title: string; body: string }[] = [

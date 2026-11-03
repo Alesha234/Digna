@@ -276,6 +276,7 @@ export function AddMoneyScreen(props: { onDone?: () => void; onCancel?: () => vo
                 style={{
                   width: "100%",
                   marginTop: spacing.sm,
+                  minHeight: 44,
                   background: "transparent",
                   border: "none",
                   cursor: "pointer",

@@ -440,7 +440,8 @@ export function AssistantScreen(props: { initialPrompt?: string; inPanel?: boole
                         border: "1px solid " + (active ? colors.mintDark : colors.line),
                         backgroundColor: active ? colors.mint : colors.surface,
                         color: active ? colors.surface : colors.ink,
-                        padding: "6px 12px",
+                        padding: "10px 14px",
+                        minHeight: 40,
                         fontFamily: typography.body,
                       }}
                     >
@@ -465,7 +466,8 @@ export function AssistantScreen(props: { initialPrompt?: string; inPanel?: boole
                       border: "1px solid " + colors.line,
                       backgroundColor: colors.page,
                       color: colors.ink,
-                      padding: "6px 12px",
+                      padding: "10px 14px",
+                      minHeight: 40,
                       fontFamily: typography.body,
                     }}
                   >

@@ -126,7 +126,7 @@ function InnerApp() {
       {mode === "demo" && screen !== "welcome" && (
         <p role="note" style={{ background: "#FFF6E5", border: "1px solid #F5D08A", borderRadius: 10, padding: "10px 14px", margin: "0 0 16px", fontSize: 14 }}>
           You're looking at a sample account: nothing is saved.{" "}
-          <button type="button" onClick={() => go("signup")} style={{ background: "transparent", border: 0, padding: 0, fontWeight: 700, textDecoration: "underline", cursor: "pointer", fontSize: 14 }}>
+          <button type="button" onClick={() => go("signup")} style={{ background: "transparent", border: 0, padding: "12px 4px", margin: "-12px -4px", fontWeight: 700, textDecoration: "underline", cursor: "pointer", fontSize: 14 }}>
             Create a free account
           </button>{" "}
           to keep your cards and ask the AI.

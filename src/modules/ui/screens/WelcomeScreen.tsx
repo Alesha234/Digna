@@ -150,7 +150,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
                   </div>
                   <p className="pp-micro pp-micro-left">
                     Already have an account?{" "}
-                    <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
+                    <button type="button" onClick={onSignIn} style={{ background: "transparent", border: 0, padding: "12px 6px", margin: "-12px -6px", color: colors.mintDark, fontWeight: 700, fontSize: 13, cursor: "pointer", textDecoration: "underline" }}>Sign in</button>
                     {" · "}Starts with $250 in practice money.
                   </p>
                 </>
@@ -186,9 +186,25 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
         </RevealOnScroll>
       </section>
 
+      {/* The 3-minute film (Nov 3, 2026): the ad, served from Digna's own server so the page's protections stay as they are. */}
+      <section aria-label="Watch the Digna film" className="pp-film" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
+        <div style={{ ...inner, maxWidth: 960 }}>
+          <span className="pp-kicker">Watch</span>
+          <h2 style={h2}>See Digna in 3 minutes</h2>
+          <p style={lead}>A declined card at a hotel desk, and what happens when it's your turn with Digna. Made with Meta's AI models.</p>
+          <div className="pp-film-frame">
+            <video className="pp-film-video" controls playsInline preload="none" poster="/video/digna-ad-poster.jpg" aria-label="Digna, a 3-minute film">
+              <source src="/video/digna-ad.mp4" type="video/mp4" />
+              Your browser can't play this video here. <a href="/video/digna-ad.mp4">Open the video</a>.
+            </video>
+          </div>
+          <p className="pp-film-note">The film uses practice money. Real cards come with a licensed partner.</p>
+        </div>
+      </section>
+
       {/* What it is */}
       <section aria-label="Digna in 30 seconds" style={{ padding: `0 ${spacing.lg} ${spacing.xxl}` }}>
-        <div style={{ ...inner, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: spacing.md }}>
+        <div style={{ ...inner, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: spacing.md }}>
           {[
             { t: "The problem", icon: "no", b: "Cash App, Chime, debit and prepaid cards get turned away by many hotels, car rentals and cloud services, and nobody explains why." },
             { t: "What Digna does", icon: "card", b: "Gives you a card for each of those places. It works like a credit card, pays from your Digna wallet, and can never spend past the limit you choose." },
@@ -261,7 +277,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
           <p style={{ margin: "0 0 10px", color: colors.mint, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: 13 }}>Dignity · Convenience · Efficiency</p>
           <h2 style={{ ...h2, color: colors.surface }}>A declined card isn't just a failed payment.</h2>
           <p style={{ ...lead, color: colors.midnightInk }}>It's being told, in public, that your money doesn't count. Digna is built so that never happens to you, and every feature keeps that promise.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
             {[
               { t: "No public declines", b: "Know before you pay. Pay a bill and the money assistant show you whether a card will work, and why, so you're not caught out at the counter." },
               { t: "No credit check, no judgment", b: "Sign up with an email. Your history doesn't decide your access." },
@@ -286,7 +302,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <span className="pp-kicker">Where Digna helps</span>
             <h2 style={h2}>Made for the moments your card gets turned away</h2>
             <p style={lead}>One card for each place, each with its own limit. Paid from your Digna wallet, and works like a credit card.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 24 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 24 }}>
               {STORIES.map((s) => (
                 <article key={s.title}>
                   <div className="pp-story-photo">
@@ -308,7 +324,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             <p style={{ display: "inline-block", margin: "0 0 12px", padding: "6px 12px", borderRadius: 999, background: colors.primarySoft, color: colors.mintDark, fontWeight: 700, fontSize: 13 }}>Coming soon</p>
             <h2 style={h2}>Member deals, coming soon</h2>
             <p style={lead}>Digna is working on discounts for its members at the places that turn cards away most: hotels, resorts, airlines, car rentals and shops. These are examples of the kind of deals coming. None are live yet, Digna isn't partnered with these businesses, and today everything uses practice money.</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: 16 }}>
               {comingSoonPlaces.map((place: ComingSoonPlace) => (
                 <div key={place.id} style={{ background: colors.surface, border: "1px solid " + colors.line, borderRadius: radii.card, boxShadow: shadows.soft, padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
@@ -331,7 +347,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
           <div style={inner}>
             <span className="pp-kicker">Three steps</span>
             <h2 style={h2}>How it works</h2>
-            <ol style={{ listStyle: "none", margin: "24px 0 0", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: spacing.md }}>
+            <ol style={{ listStyle: "none", margin: "24px 0 0", padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: spacing.md }}>
               {[
                 { t: "Create your account", b: "Email and a password. You start with $250 in practice money." },
                 { t: "Make a card", b: "One for each place: name it, choose its limit and the day it stops." },

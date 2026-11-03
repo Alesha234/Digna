@@ -26,7 +26,7 @@ const footerLinkStyle: React.CSSProperties = {
   display: "block",
   background: "transparent",
   border: "0",
-  padding: 0,
+  padding: "6px 0",
   margin: 0,
   color: colors.midnightInk,
   fontFamily: typography.body,
@@ -178,7 +178,7 @@ export function AppShell(props: {
             paddingLeft: spacing.lg,
             paddingRight: spacing.lg,
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
             gap: spacing.lg,
           }}
         >

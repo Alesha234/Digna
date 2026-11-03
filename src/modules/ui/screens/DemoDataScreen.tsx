@@ -66,14 +66,14 @@ export function DemoDataScreen() {
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
                       <button
                         type="button"
-                        style={{ background: colors.mint, color: "#0E1726", border: 0, borderRadius: 999, padding: "8px 14px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: typography.body }}
+                        style={{ background: colors.mint, color: "#0E1726", border: 0, borderRadius: 999, padding: "11px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: typography.body }}
                         onClick={() => openPracticeBillPdf({ business: bill.storeName, amountCents: bill.amountCents, date: bill.dueDate, receiptId: bill.id })}
                       >
                         Open preview
                       </button>
                       <button
                         type="button"
-                        style={{ background: "transparent", border: `1px solid ${colors.line}`, borderRadius: 999, padding: "8px 14px", fontWeight: 600, fontSize: 13, cursor: "pointer", color: colors.ink, fontFamily: typography.body }}
+                        style={{ background: "transparent", border: `1px solid ${colors.line}`, borderRadius: 999, padding: "11px 16px", fontWeight: 600, fontSize: 13, cursor: "pointer", color: colors.ink, fontFamily: typography.body }}
                         onClick={() => downloadPracticeBillPdf({ business: bill.storeName, amountCents: bill.amountCents, date: bill.dueDate, receiptId: bill.id })}
                       >
                         Download PDF
