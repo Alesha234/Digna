@@ -39,6 +39,14 @@ Most money apps stop at holding your money. Digna is built for the moment that m
 
 *Built from a billing page that kept saying no, for everyone who's ever felt that moment, and for a future where your money is welcome everywhere.*
 
+## What people tell us (live)
+
+Everyone trying Digna can answer a few quick questions: on the home page (has a card been declined when you had the money, and where), and right after a practice payment (how easy it was, whether the reason was clear, how it felt). This chart updates itself from those answers. It shows **counts only, never anyone's notes, names or emails**.
+
+[![Live results from Digna's quick survey](https://digna.dev/api/survey-chart)](https://digna.dev)
+
+*Anyone trying the practice version can answer, so this isn't a scientific sample, and early answers include the founder's own test runs. Answer yourself at [digna.dev](https://digna.dev).*
+
 ## What you can do today
 
 Everything below works on [digna.dev](https://digna.dev) with a free account (or a sample account, no sign-up needed). It all uses **practice money**: no real money moves, and the site says so on every page.
