@@ -25,13 +25,13 @@ function Picture({ name, alt, ratio, round = 18, position = "50% 30%", eager = f
   );
 }
 
-/** One Digna card, as the app shows them. Sample card. */
+/** One Digna Bill Card, as the app shows them. Sample card. */
 function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent: number; cap: number; last: string; bg: string; style?: React.CSSProperties }) {
   return (
     <div className="pp-vcard" style={{ background: bg, position: "relative", left: "auto", top: "auto", margin: 0, ...style }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontFamily: typography.heading, fontWeight: 700 }}>Digna</span>
-        <span style={{ fontSize: 12, opacity: 0.85 }}>Digna card · Example</span>
+        <span style={{ fontSize: 12, opacity: 0.85 }}>Digna Bill Card · Example</span>
       </div>
       <div className="pp-vcard-chip" />
       <div>
@@ -49,9 +49,9 @@ function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent
 }
 
 const STORIES = [
-  { picture: "cloud", alt: "A developer in a wheelchair setting up hosting on a laptop", title: "Cloud bills", text: "Cloud services bill you after you use them, so many take credit cards only. Make a Digna card just for that bill, with a limit, so it can never run over." },
+  { picture: "cloud", alt: "A developer in a wheelchair setting up hosting on a laptop", title: "Cloud bills", text: "Cloud services bill you after you use them, so many take credit cards only. Make a Digna Bill Card just for that bill, with a limit, so it can never run over." },
   { picture: "hotel", alt: "An older traveler checking in at a hotel desk with a friendly receptionist", title: "Hotel check-in", text: "Hotels set money aside at check-in for damage or extras, and many turn away prepaid cards for it. Give the hotel its own card, with a limit that covers the stay and nothing more." },
-  { picture: "rental", alt: "Two friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna card covers the deposit, and you can pause it in one tap when you bring the car back." },
+  { picture: "rental", alt: "Two friends picking up keys at a car rental counter", title: "Car rentals", text: "Rental counters hold a security deposit, and most only trust a credit card for it. A Digna Bill Card covers the deposit, and you can pause it in one tap when you bring the car back." },
 ];
 
 /** Turns true the first time the element scrolls into view, so a section plays its little scene once (Nov 2, 2026). */
@@ -99,7 +99,7 @@ const COMPARE: [string, string][] = [
 
 const FAQS = [
   { q: "Is this real money?", a: "Not yet. Your account, cards and history are real and saved, but for now every dollar is practice money, so you can try everything without risk. Real cards are on the way, and we'll say so clearly here when they arrive." },
-  { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Pay a bill to pay sample businesses with an everyday card or a Digna card and see what each would say, and why." },
+  { q: "What can I do today?", a: "Make a free account and you start with $250 in practice money. Make cards with limits, pause or close them, raise a limit when you need more, and use Pay a bill to pay sample businesses with an everyday card or a Digna Bill Card and see what each would say, and why." },
   { q: "Why do hotels, car rentals and cloud services turn down Cash App, Chime or prepaid cards?", a: "Usually it isn't about you or your money. Places that hold a deposit, or bill you after you use something, want a card that can't come up empty, so many only trust credit cards. The businesses on Pay a bill follow rules like these, so you can see exactly why a card gets turned down." },
   { q: "What does the money assistant use?", a: "Meta's Muse Spark AI. It looks at your cards and recent payments and explains exactly why a payment was declined, and what to do next. It also reads your bills on Pay a bill." },
   { q: "Is Digna a bank?", a: "No. Digna is not a bank. When real cards arrive, they'll come through a licensed card partner." },
@@ -128,11 +128,11 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               <span className="pp-blob pp-blob-left" aria-hidden="true" />
               <p className="pp-eyebrow">
                 <span className="pp-pill-toggle-dot" aria-hidden="true" />
-                Cards with limits you choose · Free to try
+                The Digna Bill Card · Free to try
               </p>
               <h1 className="pp-hero-title pp-hero-title-left">Dignity at every checkout.</h1>
               <p className="pp-hero-lead">
-                Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. Digna gives you a card for each one, paid from your own money, with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
+                Hotels, car rentals and cloud services often turn away Cash App, Chime and prepaid cards, and rarely say why. The Digna Bill Card is a card for one bill, like the hotel, the rental or the cloud service, paid from your own money with a limit you choose. No credit check, no debt. And if a place ever says no, you'll know exactly why.
               </p>
               {isSignedIn ? (
                 <>
@@ -208,7 +208,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
           {[
             { t: "The problem", icon: "no", b: "Cash App, Chime, debit and prepaid cards get turned away by many hotels, car rentals and cloud services, and nobody explains why." },
             { t: "What Digna does", icon: "card", b: "Gives you a card for each of those places. It works like a credit card, pays from your Digna wallet, and can never spend past the limit you choose." },
-            { t: "What you can do today", icon: "spark", b: "Make an account, get $250 in practice money, make cards, and see what real-world checkouts say to your everyday card versus a Digna card. Real cards are coming." },
+            { t: "What you can do today", icon: "spark", b: "Make an account, get $250 in practice money, make cards, and see what real-world checkouts say to your everyday card versus a Digna Bill Card. Real cards are coming." },
           ].map((f, i) => (
             <article key={f.t} className={`pp-feature pp-intro pp-intro-${i}`}>
               <span className="pp-intro-icon" aria-hidden="true">
@@ -372,7 +372,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               <span className="pp-kicker">Pay a bill</span>
               <h2 style={h2}>Try it before you need it</h2>
               <p style={lead}>
-                Pay a bill has sample businesses that follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards, a car rental counter and a streaming service. Pay with an example Chime debit card, Cash App Card or prepaid card, then with a Digna card, and see what each one says, and why.
+                Pay a bill has sample businesses that follow real-world rules: a cloud service that takes credit cards only, a hotel that turns away prepaid cards, a car rental counter and a streaming service. Pay with an example Chime debit card, Cash App Card or prepaid card, then with a Digna Bill Card, and see what each one says, and why.
               </p>
               <button type="button" className="pp-btn-mint" onClick={onGetStarted} style={primary}>Pay a bill</button>
             </div>
@@ -380,7 +380,7 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
               {[
                 { who: "Chime debit card (example)", at: "Nimbus Cloud · $32.00", out: "Declined: credit cards only", ok: false },
                 { who: "Prepaid card (example)", at: "Harborview Hotel · $150.00", out: "Declined: no prepaid cards", ok: false },
-                { who: "Digna card: Cloud hosting", at: "Nimbus Cloud · $32.00", out: "Approved · $18.00 left of its limit", ok: true },
+                { who: "Digna Bill Card: Cloud hosting", at: "Nimbus Cloud · $32.00", out: "Approved · $18.00 left of its limit", ok: true },
               ].map((r) => (
                 <div key={r.who} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "14px 16px", borderRadius: 12, background: r.ok ? "#F0FBF7" : "#FFF5F4", border: `1px solid ${r.ok ? "#12B76A" : "#F4B4AE"}` }}>
                   <span><strong>{r.who}</strong><span style={{ display: "block", fontSize: 13, color: colors.muted }}>{r.at}</span></span>
