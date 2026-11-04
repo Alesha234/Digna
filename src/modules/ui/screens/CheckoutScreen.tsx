@@ -19,6 +19,7 @@ import { downloadPracticeReceipt } from "@/modules/ui/components/TransactionList
 import { downloadPracticeReceiptPdf } from "@/modules/ui/lib/practicePdf";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
 import { PayMoment, type Moment } from "@/modules/ui/components/PayMoment";
+import { QuickSurvey } from "@/modules/ui/components/QuickSurvey";
 import { accessToken } from "@/modules/ui/lib/supabase";
 
 /** Where SAM 3.1 found the bill, as parts of the picture (0 to 1), for the outline and the crop. */
@@ -688,6 +689,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                 )}
               </div>
             )}
+            {last && <QuickSurvey where="after-pay" />}
           </div>
         </section>
 

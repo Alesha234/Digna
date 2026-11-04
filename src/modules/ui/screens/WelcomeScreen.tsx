@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
+import { QuickSurvey } from "@/modules/ui/components/QuickSurvey";
 import { colors, spacing, radii, shadows, typography } from "@/modules/ui/theme";
 import { comingSoonPlaces } from "@/modules/ui/data/demoData";
 import type { ComingSoonPlace } from "@/modules/ui/types";
@@ -462,6 +463,11 @@ export function WelcomeScreen(props: { onGetStarted?: () => void; onSignIn?: () 
             </p>
           )}
         </div>
+      </section>
+
+      {/* Quick survey (Nov 4, 2026): three taps, answers go privately to the Digna team. */}
+      <section aria-label="Quick survey" className="pp-section" style={section}>
+        <QuickSurvey where="home" />
       </section>
 
       {/* CTA */}
