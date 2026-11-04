@@ -3,6 +3,7 @@ import { colors, spacing, radii, shadows, typography, theme } from "@/modules/ui
 import type { AppScreen } from "@/modules/ui/types";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { Logo } from "@/modules/ui/components/Logo";
+import { NewBadge, useWhatsNewUnseen } from "@/modules/ui/components/WhatsNew";
 
 void theme;
 
@@ -20,6 +21,7 @@ const navEntries: NavEntry[] = [
   { value: "alerts", label: "Alerts" },
   { value: "settings", label: "Settings" },
   { value: "how-it-works", label: "How it works" },
+  { value: "whats-new", label: "What's new" },
 ];
 
 const footerLinkStyle: React.CSSProperties = {
@@ -46,6 +48,7 @@ export function AppShell(props: {
   const { current, onNavigate, children, ledger } = props;
   const [open, setOpen] = React.useState(false);
   const { mode, signOut } = usePayProxy();
+  const unseen = useWhatsNewUnseen();
 
   return (
     <div
@@ -85,11 +88,19 @@ export function AppShell(props: {
             </button>
             <span className="pp-test-pill" title="Everything here uses practice money, not real money.">Practice money</span>
           </div>
-          <button type="button" className="pp-menu-toggle" aria-expanded={open} aria-controls="pp-nav" onClick={(): void => setOpen(!open)}>
+          <button
+            type="button"
+            className="pp-menu-toggle"
+            aria-expanded={open}
+            aria-controls="pp-nav"
+            aria-label={unseen && !open ? "Menu, there's something new on Digna" : undefined}
+            onClick={(): void => setOpen(!open)}
+          >
             {open ? "Close" : "Menu"}
+            {unseen && !open && <span className="pp-menu-dot" aria-hidden="true" />}
           </button>
           <nav id="pp-nav" aria-label="Primary" className={open ? "pp-nav is-open" : "pp-nav"}>
-            {navEntries.filter((entry: NavEntry) => mode !== "guest" || entry.value === "snap-bill" || entry.value === "how-it-works").map((entry: NavEntry) => {
+            {navEntries.filter((entry: NavEntry) => mode !== "guest" || entry.value === "snap-bill" || entry.value === "how-it-works" || entry.value === "whats-new").map((entry: NavEntry) => {
               // "Try paying" is now part of Pay a bill: its old address lights up Pay a bill.
               const active: boolean = (current === "checkout" ? "snap-bill" : current) === entry.value;
               return (
@@ -104,6 +115,7 @@ export function AppShell(props: {
                   aria-current={active ? "page" : undefined}
                 >
                   {entry.label}
+                  {entry.value === "whats-new" && unseen && <NewBadge />}
                 </button>
               );
             })}
@@ -208,6 +220,9 @@ export function AppShell(props: {
             </button>
             <button type="button" onClick={(): void => onNavigate("how-it-works")} style={footerLinkStyle}>
               Why do cards get declined?
+            </button>
+            <button type="button" onClick={(): void => onNavigate("whats-new")} style={footerLinkStyle}>
+              What's new
             </button>
             <button type="button" onClick={(): void => onNavigate("assistant")} style={footerLinkStyle}>
               Money assistant
