@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/modules/ui/lib/supabase";
 import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { testModeMessage } from "@/modules/ui/data/demoData";
 import { RevealOnScroll } from "@/modules/ui/components/RevealOnScroll";
@@ -59,6 +60,13 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
   const signOut = proxy.signOut;
   const setScreen = proxy.setScreen;
   const [warnNearCap, setWarnNearCap] = useState<boolean>(true);
+  // The owner's private Feedback dashboard (migration 0021): the link shows only for the account listed in app_owners.
+  const [isOwner, setIsOwner] = useState(false);
+  useEffect(() => {
+    const sb = supabase();
+    if (!sb || proxy.mode !== "live") return;
+    void sb.rpc("am_i_owner").then((r) => setIsOwner(r.data === true));
+  }, [proxy.mode]);
   const [warnLowBalance, setWarnLowBalance] = useState<boolean>(true);
   const [warnExpiring, setWarnExpiring] = useState<boolean>(true);
 
@@ -242,6 +250,18 @@ export function SettingsScreen(props: { onSignOut?: () => void; onBack?: () => v
             </div>
           </section>
         </RevealOnScroll>
+
+        {isOwner && (
+          <section aria-label="Owner" className="pp-section">
+            <h2 style={h2}>For the Digna owner</h2>
+            <div style={card} className="pp-card pp-lift">
+              <p style={body}>Survey answers and feedback messages, in one private page that only you can open.</p>
+              <button type="button" onClick={() => setScreen("owner-feedback")} style={{ marginTop: spacing.md, minHeight: 44, background: colors.midnight, color: "#FFFFFF", border: 0, borderRadius: radii.pill, padding: "12px 22px", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>
+                Open the Feedback dashboard
+              </button>
+            </div>
+          </section>
+        )}
 
         <RevealOnScroll delayMs={240} className="pp-section-wrap">
           <section aria-label="About Digna" className="pp-section">

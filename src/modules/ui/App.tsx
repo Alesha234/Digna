@@ -18,6 +18,7 @@ import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
 import { CheckoutScreen } from "@/modules/ui/screens/CheckoutScreen";
 import { FeedbackScreen, PrivacyScreen, TermsScreen } from "@/modules/ui/screens/InfoScreens";
 import { WhatsNewScreen } from "@/modules/ui/components/WhatsNew";
+import { OwnerFeedbackScreen } from "@/modules/ui/screens/OwnerFeedbackScreen";
 import type { AppScreen, BillScanResult, SavedBill } from "@/modules/ui/types";
 
 /** The pages anyone can see; every other page needs an account or the demo. */
@@ -98,6 +99,7 @@ function InnerApp() {
     if (screen === "new-password") return <NewPasswordScreen />;
     if (screen === "auth" || screen === "signup") return <AuthScreen key={screen} startWith={screen === "signup" ? "signup" : "signin"} returnTo={pendingReturn} onSuccess={handleAuthSuccess} />;
     if (mode === "guest" && !OPEN.includes(screen)) return <AuthScreen startWith="signin" returnTo={pendingReturn ?? screen} onSuccess={handleAuthSuccess} />;
+    if (screen === "owner-feedback") return <OwnerFeedbackScreen />;
     switch (screen) {
       case "card-detail":
         return <CardDetailScreen cardId={selectedCardId ?? ""} onBack={() => go("dashboard")} onAddMoney={() => go("add-money")} />;
