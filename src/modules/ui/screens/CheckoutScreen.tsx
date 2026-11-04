@@ -607,7 +607,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                   `${shop.button} ${money(amountCents)}`
                 )}
               </button>
-              <p style={{ margin: 0, fontSize: 12, color: colors.muted, textAlign: "center" }}>Practice checkout: no real card is charged.</p>
+              <p style={{ margin: 0, fontSize: 12, color: colors.muted, textAlign: "center" }}>Practice checkout: no real card is charged. Use a card from your wallet, never a real one.</p>
             </form>
 
             {last && (
