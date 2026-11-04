@@ -30,7 +30,7 @@ export const OUTSIDE_METHODS: { id: Exclude<PayMethod, "payproxy">; label: strin
 export const kindOf = (method: PayMethod): CardKind => (method === "payproxy" ? "credit" : OUTSIDE_METHODS.find((m) => m.id === method)!.kind);
 
 export const methodLabel = (method: PayMethod, cardName?: string) =>
-  method === "payproxy" ? `Digna card${cardName ? `: ${cardName}` : ""}` : OUTSIDE_METHODS.find((m) => m.id === method)?.label ?? method;
+  method === "payproxy" ? `Digna Bill Card${cardName ? `: ${cardName}` : ""}` : OUTSIDE_METHODS.find((m) => m.id === method)?.label ?? method;
 
 export type SandboxPayment = {
   id: string;
@@ -55,7 +55,7 @@ export function decide(
   balanceCents: number,
 ): { result: "approved" | "declined"; reason: string | null; code: string | null } {
   if (method === "payproxy") {
-    if (!card) return { result: "declined", reason: "Pick one of your Digna cards.", code: "other" };
+    if (!card) return { result: "declined", reason: "Pick one of your Digna Bill Cards.", code: "other" };
     if (card.status === "frozen") return { result: "declined", reason: "This card is paused. Turn it back on to pay.", code: "frozen" };
     if (card.status === "closed") return { result: "declined", reason: "This card is closed, so it can't be used again. Make a new one.", code: "closed" };
     if (new Date(card.endDate).getTime() < Date.now() - 86_400_000) return { result: "declined", reason: "This card has passed the day you set for it to stop.", code: "expired" };

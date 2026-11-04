@@ -56,7 +56,7 @@ type PayProxyContextValue = {
   /** Changes a card's limit: down to what it has spent at the least, and up only as far as the wallet covers. */
   setCardLimit(id: string, capCents: number): Promise<void>;
   pay(merchantId: string, amountCents: number, method: PayMethod, cardId?: string | null): Promise<PayOutcome>;
-  /** Pays at a sample business's checkout with a typed card: one of your Digna cards or a practice wallet card. */
+  /** Pays at a sample business's checkout with a typed card: one of your Digna Bill Cards or a practice wallet card. */
   checkout(merchantId: string, amountCents: number, form: CheckoutForm): Promise<CheckoutOutcome>;
   /** Emails a link to set a new password (Supabase sends it; it reaches people once the project has an email service). */
   requestPasswordReset(email: string): Promise<void>;
@@ -328,7 +328,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         }
         // The sample account: the same rules, in memory, under the bill's own name.
         const match = matchCard(form, cards);
-        if (!match) throw new Error("This card number isn't one of your Digna cards or a practice wallet card. Copy one from your wallet and try again.");
+        if (!match) throw new Error("This card number isn't one of your Digna Bill Cards or a practice wallet card. Copy one from your wallet and try again.");
         const last4 = form.number.replace(/\D/g, "").slice(-4);
         const at = new Date().toISOString();
         if (!match.detailsOk) {
@@ -491,7 +491,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         const merchant = MERCHANTS.find((m) => m.id === merchantId);
         if (!merchant) throw new Error("Pick one of the places to pay.");
         const match = matchCard(form, cards);
-        if (!match) throw new Error("This card number isn't one of your Digna cards or a practice wallet card. Copy one from your wallet and try again.");
+        if (!match) throw new Error("This card number isn't one of your Digna Bill Cards or a practice wallet card. Copy one from your wallet and try again.");
         const last4 = form.number.replace(/\D/g, "").slice(-4);
         if (!match.detailsOk) {
           const at = new Date().toISOString();

@@ -161,7 +161,7 @@ function WalletCard(props: { title: string; sub: string; number: string; exp: st
 
 /**
  * "Pay a bill": read a practice bill, then pay at a sample business's own checkout page. People type a card in,
- * the way they would anywhere: one of their Digna cards (its details are on the card's page and in the wallet
+ * the way they would anywhere: one of their Digna Bill Cards (its details are on the card's page and in the wallet
  * here) or a sample everyday card from the practice wallet. The database checks the card, its expiry and code,
  * the business's rules, the card's limit and the wallet, then answers like a real checkout, with Digna's
  * plain-words reason and a fix when it says no.
@@ -316,14 +316,14 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
       // A real card network takes a moment; so does this one, so the answer doesn't feel instant and fake.
       await new Promise((r) => setTimeout(r, Math.max(0, 1300 - (Date.now() - started))));
       const at = new Date();
-      // What was left on the Digna card, read back after the payment, for the moment's countdown.
+      // What was left on the Digna Bill Card, read back after the payment, for the moment's countdown.
       const paidCard = out.method === "payproxy" ? cardsRef.current.find((c) => c.id === out.cardId) : undefined;
       const leftAfter = paidCard ? Math.max(0, paidCard.capCents - paidCard.spentCents) : null;
       setMoment({
         result: out.result,
         merchant: merchant.name,
         amountCents: cents,
-        cardName: out.method === "payproxy" ? `Digna card: ${out.cardName}` : out.cardName.replace(" (sample)", ""),
+        cardName: out.method === "payproxy" ? `Digna Bill Card: ${out.cardName}` : out.cardName.replace(" (sample)", ""),
         last4: out.last4,
         digna: out.method === "payproxy",
         leftAfter: out.result === "approved" ? leftAfter : null,
@@ -363,7 +363,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
     ? { id: last.receipt, placeOrBusiness: last.merchant, amountCents: last.amountCents, dueDate: last.atIso.slice(0, 10), paidAt: last.atIso, receiptId: last.receipt, status: "paid" }
     : null;
 
-  // A limit decline on a Digna card can be fixed on the spot, but only if the wallet really has the money.
+  // A limit decline on a Digna Bill Card can be fixed on the spot, but only if the wallet really has the money.
   const lastCard: VirtualCard | undefined = last?.cardId ? cards.find((c) => c.id === last.cardId) : undefined;
   const raiseTo = last && lastCard && last.code === "over_cap" ? lastCard.spentCents + last.amountCents : null;
   const canRaise = raiseTo !== null && last !== null && raiseTo <= 1_000_000 && last.amountCents <= balance.availableCents;
@@ -626,7 +626,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                     <dl style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 14px", margin: 0, fontSize: 14 }}>
                       <dt style={{ color: colors.muted }}>Paid to</dt><dd style={{ margin: 0 }}>{last.merchant}</dd>
                       <dt style={{ color: colors.muted }}>Amount</dt><dd style={{ margin: 0 }}>{money(last.amountCents)} in practice money</dd>
-                      <dt style={{ color: colors.muted }}>Card</dt><dd style={{ margin: 0 }}>{last.method === "payproxy" ? `Digna card: ${last.cardName}` : last.cardName} ···· {last.last4}</dd>
+                      <dt style={{ color: colors.muted }}>Card</dt><dd style={{ margin: 0 }}>{last.method === "payproxy" ? `Digna Bill Card: ${last.cardName}` : last.cardName} ···· {last.last4}</dd>
                       <dt style={{ color: colors.muted }}>Practice receipt</dt><dd style={{ margin: 0, fontFamily: "ui-monospace, Menlo, monospace" }}>{last.receipt}</dd>
                       <dt style={{ color: colors.muted }}>When</dt><dd style={{ margin: 0 }}>{last.at}</dd>
                     </dl>
@@ -655,7 +655,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                 ) : (
                   <>
                     <p style={{ margin: "0 0 4px", lineHeight: 1.6 }}>
-                      {money(last.amountCents)} at {last.merchant} with your {last.method === "payproxy" ? `Digna card: ${last.cardName}` : last.cardName} ···· {last.last4}.
+                      {money(last.amountCents)} at {last.merchant} with your {last.method === "payproxy" ? `Digna Bill Card: ${last.cardName}` : last.cardName} ···· {last.last4}.
                     </p>
                     <p style={{ margin: 0, lineHeight: 1.6 }}><strong>Why:</strong> {last.reason}</p>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 14 }}>
@@ -669,7 +669,7 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
                       )}
                       {last.code === "other" && last.method !== "payproxy" && usable.length > 0 && (
                         <button type="button" onClick={() => fill(usable[0].cardNumber!, usable[0].exp ?? "", usable[0].cvc ?? "")} style={pill(true)}>
-                          Try my Digna card instead
+                          Try my Digna Bill Card instead
                         </button>
                       )}
                       {props.onAskAssistant && (
@@ -699,10 +699,10 @@ export function CheckoutScreen(props: { onAskAssistant?: (question: string) => v
               Type these into the checkout like a real card, or tap Fill in for me. Wallet: {money(balance.availableCents)} in practice money{mode === "demo" ? " (sample account)" : ""}.
             </p>
           </div>
-          <Fold title="Your Digna cards" count={usable.length}>
+          <Fold title="Your Digna Bill Cards" count={usable.length}>
           {usable.length === 0 ? (
             <p style={{ margin: 0, fontSize: 14, color: colors.muted }}>
-              You have no Digna cards yet.{" "}
+              You have no Digna Bill Cards yet.{" "}
               <button type="button" onClick={props.onCreateCard} style={{ background: "transparent", border: 0, padding: 0, color: colors.mintDark, fontWeight: 700, cursor: "pointer", fontSize: 14 }}>Make one</button>
               , then come back.
             </p>

@@ -14,7 +14,7 @@ export type Moment = {
   cardName: string;
   last4: string;
   digna: boolean;
-  /** What was left on the Digna card before and after this payment, when it was one. */
+  /** What was left on the Digna Bill Card before and after this payment, when it was one. */
   leftBefore?: number | null;
   leftAfter?: number | null;
   reason?: string | null;
@@ -117,7 +117,7 @@ export function PayMoment(props: { moment: Moment; onClose: () => void }) {
         if (play) chime();
         navigator.vibrate?.([25, 40, 60]);
       });
-      // The amount left on the Digna card counts down, like a balance settling.
+      // The amount left on the Digna Bill Card counts down, like a balance settling.
       if (m.leftBefore != null && m.leftAfter != null) {
         const from = m.leftBefore;
         const to = m.leftAfter;
@@ -171,7 +171,7 @@ export function PayMoment(props: { moment: Moment; onClose: () => void }) {
         <div className={`pp-moment-card ${ok ? "is-ok" : "is-no"}`}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
             <b>{m.digna ? "Digna" : m.cardName.split(" ")[0]}</b>
-            <span style={{ fontSize: 12, opacity: 0.8 }}>{m.digna ? m.cardName.replace(/^Digna card:\s*/, "") : "Example card"}</span>
+            <span style={{ fontSize: 12, opacity: 0.8 }}>{m.digna ? m.cardName.replace(/^Digna Bill Card:\s*/, "") : "Example card"}</span>
           </div>
           <div className="pp-moment-chip" />
           <div style={{ letterSpacing: "0.16em", fontSize: 13, opacity: 0.9 }}>•••• {m.last4}</div>

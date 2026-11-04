@@ -20,7 +20,7 @@ const REASONS: { title: string; body: string }[] = [
   },
   {
     title: "There isn't enough on the card",
-    body: "The payment is bigger than what's left. On a Digna card, that's the limit you set; you can raise it on the spot, as far as your money covers.",
+    body: "The payment is bigger than what's left. On a Digna Bill Card, that's the limit you set; you can raise it on the spot, as far as your money covers.",
   },
   {
     title: "The card is paused, closed or past its date",
@@ -56,7 +56,7 @@ export function HowItWorksScreen() {
       </section>
 
       <section aria-labelledby="card" style={box}>
-        <h2 id="card" style={h2}>What a Digna card does</h2>
+        <h2 id="card" style={h2}>What a Digna Bill Card does</h2>
         <ul style={{ margin: 0, paddingLeft: 20 }}>
           <li><strong>One card, one job.</strong> Make a card just for the hotel, the car rental or your cloud bill. Each one has its own number.</li>
           <li><strong>A limit you choose.</strong> The card can never spend more than you set. Need more? Raise the limit, as long as the money is in your Digna wallet.</li>
@@ -98,7 +98,7 @@ export function HowItWorksScreen() {
           <div>
             <h3 style={h3}>Coming</h3>
             <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15 }}>
-              <li>Real Digna cards you can use at real stores, through a licensed card partner.</li>
+              <li>Real Digna Bill Cards you can use at real stores, through a licensed card partner.</li>
               <li>Adding real money from your bank, Cash App or Chime.</li>
               <li>We'll say so clearly, right here, the day that changes. Until then, nothing in Digna can pay a real bill.</li>
             </ul>
@@ -112,7 +112,7 @@ export function HowItWorksScreen() {
         <p style={{ marginTop: 0 }}>Not yet. Everything in Digna today is practice money, so you can try it all without risk.</p>
         <h3 style={h3}>Is Digna a bank?</h3>
         <p style={{ marginTop: 0 }}>No. Digna is not a bank, and real cards will come through a licensed partner.</p>
-        <h3 style={h3}>Will a Digna card always be accepted?</h3>
+        <h3 style={h3}>Will a Digna Bill Card always be accepted?</h3>
         <p style={{ marginTop: 0 }}>No card is accepted everywhere. Digna's goal is to work where debit and prepaid cards get turned away, and to always tell you why when something says no.</p>
         <h3 style={h3}>What happens to my information?</h3>
         <p style={{ margin: 0 }}>We keep only what Digna needs to work, never sell it, and you can delete your account any time in Settings. The Privacy page has the details.</p>

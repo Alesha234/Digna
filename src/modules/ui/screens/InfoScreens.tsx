@@ -25,7 +25,7 @@ export function PrivacyScreen() {
       <h2 style={h2}>Who processes it</h2>
       <ul>
         <li><strong>Supabase</strong> stores your account and your Digna activity.</li>
-        <li><strong>Meta's Model API</strong> answers the money assistant (Muse Spark) and reads bill photos. We send your question with your Digna cards and recent payments, nothing else.</li>
+        <li><strong>Meta's Model API</strong> answers the money assistant (Muse Spark) and reads bill photos. We send your question with your Digna Bill Cards and recent payments, nothing else.</li>
         <li><strong>Northflank</strong> hosts the website.</li>
       </ul>
       <h2 style={h2}>What we never do</h2>
@@ -43,7 +43,7 @@ export function TermsScreen() {
       <h1 style={h1}>Terms</h1>
       <p style={{ color: colors.muted, margin: 0 }}>Last updated {UPDATED}</p>
       <h2 style={h2}>Practice money, for now</h2>
-      <p>Today, every dollar in Digna is practice money, and the businesses on Pay a bill are samples. Nothing you do here moves real money, and Digna cards can't be used at real stores yet. We'll say clearly on the site when that changes.</p>
+      <p>Today, every dollar in Digna is practice money, and the businesses on Pay a bill are samples. Nothing you do here moves real money, and Digna Bill Cards can't be used at real stores yet. We'll say clearly on the site when that changes.</p>
       <h2 style={h2}>Not a bank, not affiliated</h2>
       <p>Digna is not a bank. Chime, Cash App and any card or business named here are examples only; Digna isn't connected to or endorsed by them. The sample businesses' rules show common real-world rules, but every real place sets its own.</p>
       <h2 style={h2}>AI answers</h2>
