@@ -17,10 +17,11 @@ import { DemoDataScreen } from "@/modules/ui/screens/DemoDataScreen";
 import { AlertsScreen } from "@/modules/ui/screens/AlertsScreen";
 import { CheckoutScreen } from "@/modules/ui/screens/CheckoutScreen";
 import { FeedbackScreen, PrivacyScreen, TermsScreen } from "@/modules/ui/screens/InfoScreens";
+import { WhatsNewScreen } from "@/modules/ui/components/WhatsNew";
 import type { AppScreen, BillScanResult, SavedBill } from "@/modules/ui/types";
 
 /** The pages anyone can see; every other page needs an account or the demo. */
-const OPEN: AppScreen[] = ["welcome", "auth", "signup", "privacy", "terms", "feedback", "how-it-works"];
+const OPEN: AppScreen[] = ["welcome", "auth", "signup", "privacy", "terms", "feedback", "how-it-works", "whats-new"];
 
 function InnerApp() {
   const { screen, setScreen, mode, ready, notice, clearNotice, signInDemo, selectedCardId, selectCard, bills, linkBillCard } = usePayProxy();
@@ -92,6 +93,7 @@ function InnerApp() {
     if (screen === "terms") return <TermsScreen />;
     if (screen === "feedback") return <FeedbackScreen />;
     if (screen === "how-it-works") return <HowItWorksScreen />;
+    if (screen === "whats-new") return <WhatsNewScreen />;
     if (!ready) return <p style={{ padding: 24 }}>Loading your account…</p>;
     if (screen === "new-password") return <NewPasswordScreen />;
     if (screen === "auth" || screen === "signup") return <AuthScreen key={screen} startWith={screen === "signup" ? "signup" : "signin"} returnTo={pendingReturn} onSuccess={handleAuthSuccess} />;
