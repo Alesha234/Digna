@@ -13,6 +13,9 @@ import { MERCHANTS, YOUR_BILL, DETAILS_MISMATCH, decide, matchCard, type Checkou
  */
 export type Mode = "guest" | "demo" | "live";
 
+/** Said when a typed card isn't a practice card. Digna never takes real card numbers. */
+const NOT_PRACTICE = "This isn't one of your Digna Bill Cards or a practice wallet card, so it wasn't sent anywhere. Digna only takes practice cards for now: copy one from your wallet, and never type a real card here.";
+
 /** What a payment try came to; code says which fix fits a decline (over_cap: raise the limit, insufficient_balance: add money). */
 export type PayOutcome = { result: "approved" | "declined"; reason: string | null; code: string | null };
 
@@ -315,6 +318,9 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         if (!bill) throw new Error("Pick one of your bills.");
         if (bill.status === "paid") throw new Error("This bill is already paid.");
         if (live) {
+          // Only practice cards ever leave the browser: a number that isn't one of the person's own Digna Bill Cards
+          // or a practice wallet card (a real card someone typed in) is refused here and never sent to the server.
+          if (!matchCard(form, cards)) throw new Error(NOT_PRACTICE);
           const out = await call("pay_bill", { p_bill_id: billId, p_number: form.number, p_exp: form.exp, p_cvc: form.cvc, p_name: form.name, p_zip: form.zip }, true);
           return {
             result: str(out.result) as "approved" | "declined",
@@ -328,7 +334,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         }
         // The sample account: the same rules, in memory, under the bill's own name.
         const match = matchCard(form, cards);
-        if (!match) throw new Error("This card number isn't one of your Digna Bill Cards or a practice wallet card. Copy one from your wallet and try again.");
+        if (!match) throw new Error(NOT_PRACTICE);
         const last4 = form.number.replace(/\D/g, "").slice(-4);
         const at = new Date().toISOString();
         if (!match.detailsOk) {
@@ -477,6 +483,9 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
       },
       async checkout(merchantId, amountCents, form) {
         if (live) {
+          // Only practice cards ever leave the browser: a number that isn't one of the person's own Digna Bill Cards
+          // or a practice wallet card (a real card someone typed in) is refused here and never sent to the server.
+          if (!matchCard(form, cards)) throw new Error(NOT_PRACTICE);
           const out = await call("checkout_pay", { p_merchant_id: merchantId, p_amount_cents: amountCents, p_number: form.number, p_exp: form.exp, p_cvc: form.cvc, p_name: form.name, p_zip: form.zip }, true);
           return {
             result: str(out.result) as "approved" | "declined",
@@ -491,7 +500,7 @@ export function PayProxyProvider(props: { children: React.ReactNode }) {
         const merchant = MERCHANTS.find((m) => m.id === merchantId);
         if (!merchant) throw new Error("Pick one of the places to pay.");
         const match = matchCard(form, cards);
-        if (!match) throw new Error("This card number isn't one of your Digna Bill Cards or a practice wallet card. Copy one from your wallet and try again.");
+        if (!match) throw new Error(NOT_PRACTICE);
         const last4 = form.number.replace(/\D/g, "").slice(-4);
         if (!match.detailsOk) {
           const at = new Date().toISOString();
