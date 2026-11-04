@@ -31,7 +31,7 @@ function SampleCard({ name, spent, cap, last, bg, style }: { name: string; spent
     <div className="pp-vcard" style={{ background: bg, position: "relative", left: "auto", top: "auto", margin: 0, ...style }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontFamily: typography.heading, fontWeight: 700 }}>Digna</span>
-        <span style={{ fontSize: 12, opacity: 0.85 }}>Digna Bill Card · Example</span>
+        <span style={{ fontSize: 12, opacity: 0.85 }}>Bill Card · Example</span>
       </div>
       <div className="pp-vcard-chip" />
       <div>
