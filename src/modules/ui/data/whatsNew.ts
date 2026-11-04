@@ -9,8 +9,8 @@ export const WHATS_NEW: WhatsNewEntry[] = [
   {
     id: "2026-11-04-survey",
     date: "Nov 4, 2026",
-    title: "A quick 3-tap survey",
-    body: "Tell us where cards get turned away, in three taps. It's at the bottom of the home page and after a practice payment, and your answers go privately to the Digna team.",
+    title: "A quick survey",
+    body: "Tell us where cards get turned away, and how using Digna felt, in a few taps. It's at the bottom of the home page and after a practice payment, and your answers go privately to the Digna team.",
   },
   {
     id: "2026-11-04-no-real-cards",

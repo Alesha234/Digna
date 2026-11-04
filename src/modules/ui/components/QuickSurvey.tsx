@@ -3,32 +3,43 @@ import { usePayProxy } from "@/modules/ui/state/PayProxyProvider";
 import { colors, radii, shadows, typography } from "@/modules/ui/theme";
 
 /**
- * A three-tap survey for the people trying Digna (Nov 4, 2026). The answers go to the owner through the same private
+ * A few-tap survey for the people trying Digna (Nov 4, 2026): on the home page, the problem they face and whether
+ * Digna makes sense; right after a practice payment, how using it actually felt. The answers go to the owner through the same private
  * feedback table as the Feedback page (send_feedback), so nobody else can read them and nothing new is stored. Shown
  * at the end of the home page and once after a practice payment; after someone answers, it thanks them and stays out
  * of their way on that device.
  */
-const DONE_KEY = "digna-survey-done";
+type Question = { id: string; q: string; options: readonly string[] };
 
-const QUESTIONS = [
+/** On the home page: the problem people face, and whether Digna makes sense to them. */
+const HOME: Question[] = [
   { id: "declined", q: "Has a card ever been declined when you had the money?", options: ["Yes", "No"] },
   { id: "where", q: "Where does it happen most?", options: ["Hotels", "Car rentals", "Online services", "Somewhere else"] },
+  { id: "clear", q: "How easy is Digna to understand?", options: ["Very easy", "Easy", "Okay", "Confusing"] },
   { id: "would_use", q: "Would you use a Bill Card for real?", options: ["Yes", "Maybe", "No"] },
-] as const;
+];
 
-type Answers = Partial<Record<(typeof QUESTIONS)[number]["id"], string>>;
+/** Right after a practice payment: how using Digna actually felt. */
+const AFTER_PAY: Question[] = [
+  { id: "ease", q: "How easy was that?", options: ["Very easy", "Easy", "Okay", "Hard"] },
+  { id: "why", q: "Did Digna make it clear why your card was approved or declined?", options: ["Yes, clearly", "Sort of", "No"] },
+  { id: "feel", q: "How did it feel to use?", options: ["Calm and in control", "Fine", "Stressful"] },
+  { id: "would_use", q: "Would you use a Bill Card for real?", options: ["Yes", "Maybe", "No"] },
+];
 
-function alreadyDone(): boolean {
+const doneKey = (where: string) => "digna-survey-done-" + where;
+
+function alreadyDone(where: string): boolean {
   try {
-    return window.localStorage.getItem(DONE_KEY) === "1";
+    return window.localStorage.getItem(doneKey(where)) === "1";
   } catch {
     return false;
   }
 }
 
-function markDone(): void {
+function markDone(where: string): void {
   try {
-    window.localStorage.setItem(DONE_KEY, "1");
+    window.localStorage.setItem(doneKey(where), "1");
   } catch {
     /* private window: the thank-you still shows */
   }
@@ -36,7 +47,8 @@ function markDone(): void {
 
 export function QuickSurvey(props: { where: "home" | "after-pay" }) {
   const { sendFeedback, user } = usePayProxy();
-  const [answers, setAnswers] = useState<Answers>({});
+  const QUESTIONS = props.where === "home" ? HOME : AFTER_PAY;
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [note, setNote] = useState("");
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
@@ -45,7 +57,7 @@ export function QuickSurvey(props: { where: "home" | "after-pay" }) {
 
   useEffect(() => {
     // On the home page someone who already answered sees a short thank-you; after a payment it simply stays away.
-    setState(alreadyDone() ? (props.where === "home" ? "sent" : "hidden") : "open");
+    setState(alreadyDone(props.where) ? (props.where === "home" ? "sent" : "hidden") : "open");
   }, [props.where]);
 
   if (state === "loading" || state === "hidden") return null;
@@ -60,10 +72,10 @@ export function QuickSurvey(props: { where: "home" | "after-pay" }) {
       const lines = [
         "QUICK SURVEY (" + props.where + ")",
         ...QUESTIONS.map((x) => `${x.q} ${answers[x.id]}`),
-        note.trim() ? `Anything else: ${note.trim().slice(0, 1200)}` : null,
+        note.trim() ? `${props.where === "home" ? "Anything else" : "What would make it better"}: ${note.trim().slice(0, 1200)}` : null,
       ].filter(Boolean);
       await sendFeedback(lines.join("\n"), email.trim() || undefined, "survey-" + props.where);
-      markDone();
+      markDone(props.where);
       setState("sent");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Couldn't send that. Try again.");
@@ -96,7 +108,7 @@ export function QuickSurvey(props: { where: "home" | "after-pay" }) {
   return (
     <div style={box} aria-label="Quick survey">
       <p style={{ margin: 0, fontFamily: typography.heading, fontWeight: 700, fontSize: compact ? 18 : 24, color: colors.ink }}>
-        {compact ? "Quick question: three taps" : "Help shape Digna: three taps"}
+        {compact ? "How was that? A few quick taps" : "Help shape Digna: a few quick taps"}
       </p>
       <p style={{ margin: "6px 0 18px", color: colors.muted, fontSize: 15 }}>Your answers go privately to the Digna team. No account needed.</p>
       {QUESTIONS.map((x) => (
@@ -132,7 +144,7 @@ export function QuickSurvey(props: { where: "home" | "after-pay" }) {
         </fieldset>
       ))}
       <label style={{ display: "flex", flexDirection: "column", gap: 6, fontWeight: 600, fontSize: 14, marginBottom: 12 }}>
-        Anything else? (optional)
+        {compact ? "What would make it better? (optional)" : "Anything else? (optional)"}
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={compact ? 2 : 3} maxLength={1200} style={{ padding: 12, borderRadius: 10, border: `1px solid ${colors.line}`, fontSize: 16, fontFamily: typography.body }} />
       </label>
       {!user && (
