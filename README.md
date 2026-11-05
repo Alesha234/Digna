@@ -123,10 +123,35 @@ Today every step runs on practice money, end to end. Real cards will be issued t
 
 ## How Digna was built
 
-Digna was built in **Ignesis**, an AI studio I'm building: you describe an app in your own words, a team of AI agents plans it, and Meta's Muse Code builds the changes you approve, with every change checked before you see it.
+Digna was built in **Ignesis**, my AI studio: you describe an app in plain words, a team of AI agents plans it, and Meta's models write the code, with every change checked before it reaches you. I decided every feature, reviewed every change and merged it.
 
-- **Oct 30:** Ignesis generated Digna's first version, one file per AI worker, on Meta's models (Muse Wonder plans, Muse Spark writes).
-- **Nov 2–3:** Digna's newest feature, the green **Paid** stamp on paid bills, was built by **Meta's Muse Code** inside the Ignesis Studio on a copy of this app, reviewed, and merged as [pull request #27](../../pull/27). Meta's models helped build the app that runs on Meta's models.
-- Everything else was built and reviewed by hand with AI coding help, in this repository, during the event.
+**Who wrote the code in Digna today** (every line of `src/` and `app/`, counted with `git blame` on Nov 5, 2026):
+
+```mermaid
+pie showData
+    title Digna's code by who wrote it
+    "Ignesis on Meta's models (first version)" : 49
+    "Meta's Muse Code (Ignesis Studio)" : 11
+    "Claude Code (coding assistant)" : 40
+```
+
+| Who | Share | What they built |
+|---|---|---|
+| **Ignesis on Meta's models** | **49%** | Oct 30: the whole first version (wallet, cards, limits, dashboard, sign-in, database, screens), one file per AI worker. Muse Wonder planned it; Muse Spark wrote it. |
+| **Meta's Muse Code** | **11%** | Nov 1–2: 12 changes from the Ignesis Studio, each planned and reviewed by the Lead, built by Muse Code, checked, then merged: [#4](../../pull/4) [#5](../../pull/5) [#6](../../pull/6) [#7](../../pull/7) [#8](../../pull/8) [#10](../../pull/10) [#11](../../pull/11) [#12](../../pull/12) [#13](../../pull/13) [#14](../../pull/14) [#16](../../pull/16) [#27](../../pull/27) (Muse Spark hookup, Pay a bill, receipts, the new look, the green Paid stamp and more). |
+| **Anthropic's Claude Code** | **40%** | My coding assistant for the rest: the real-feel checkout, the voice, Confirm and SAM 3.1 features, phone layout, security fixes, the survey and the owner dashboard. Its commits are marked "Co-Authored-By: Claude". |
+
+**Inside Digna, every AI feature runs only on Meta's models:** Muse Spark (the assistant, bill reading and Confirm actions), SAM 3.1 (finding the bill in a photo), Muse Voice Transcribe (the mic) and Muse Image (every picture on the site).
 
 **Disclosure:** Ignesis itself is a separate project I started before the hackathon (Oct 8, 2026). Its Meta model routing and the Studio that built the Paid stamp were built during the event. Ignesis isn't part of this repository. More on it soon.
+
+## Why it matters for partners
+
+**Digna** serves a large group card companies often turn away: people paid onto prepaid cards, Cash App, PayPal and everyday debit cards. They have the money, but hotels, car rentals and online services decline them at the counter.
+
+- **For card and payment partners:** a ready-made product and audience for prefunded virtual cards. Every card is backed by money already set aside, so there's no credit risk and no debt.
+- **For hotels, rentals and online services:** guests and customers they'd otherwise lose at checkout, paying with cards that can't overspend.
+- **For banks and fintechs:** a plain-words layer that explains every decline and fixes it in one step, with Meta's AI doing the explaining.
+
+**Ignesis** is the studio behind it: describe an app in plain words and Meta's models plan, build, check and ship it. Digna is its first real app, and the same studio can build for partners.
+
